@@ -104,6 +104,7 @@ When file is copycommand, the output is: copycommand: ASCII text
 ---
 
 Databases work on the principle of OLTP.
+Data Warehouses(HIVE) are OLAP.
 NoSQL Databases work on the principle of OLAP.
 Hive by Facebook is a Data Warehouse.
 In RDBMS, model is a table.
@@ -120,3 +121,34 @@ Forecasting -> Predictive Modeling
 RDBMS has operational data generally and not the historical data.
 
 In Data Warehouse, data is read-only and non-volatile.
+
+## What does a Data Warehouse do?
+
+## Data Warehouse - Practitioners viewpoint
+
+Schema in RDBMS is always a MetaData.
+
+## DataWarehouse vs OLTP
+
+## Data Warehouse - OLAP
+
+## Advantages
+
+## Lesson Review
+
+---
+
+# Introduction to Hadoop and its ecosystem
+
+## What makes data Big Data?
+## The Three V's of Big Data: Variety, Volume, Velocity
+
+Variety: Unstructured and semi-structured data is becoming as strategic as the traditional structured data.
+Volume: Data coming in from new sources as well as increased regulation in multiple areas means storing more data for longer periods of time.
+Velocity: Machine data, as well as data coming from new sources, is being ingested at speeds not even imagined a few years ago.
+
+## Variety
+## Volume:
+SAN (Storage As A Network)
+## Velocity
+
