@@ -960,3 +960,34 @@ your big data stored in Hadoop?
 
 7. What are the two main new components in Hadoop 2.x?
 Ans. First one is YARN.
+
+---
+
+Lab
+
+hdfs dfsadmin -report
+
+echo $HOSTNAME
+for hostname to show datanodes
+
+sudo jps
+jps
+
+sudo netstat -nputl | grep PID
+
+8088 is the http port.
+
+NameNode has http port: 50070
+
+hdfs dfs -ls /
+
+
+
+Categories of commands:
+User Commands: These focus on file system operations, allowing users to interact with HDFS (e.g., ls, put, get, etc.).
+
+Admin Commands: These are meant for cluster administration, handling tasks such as monitoring or managing the system (e.g., dfsadmin, balancer, etc.).
+
+File System Check (fsck): This specifically deals with checking the health of the file system, such as identifying missing or corrupt blocks.
+
+This classification highlights the different roles and functionalities of commands within HDFS.
