@@ -479,3 +479,484 @@ Languages like Python and Java know how to process the distributed data.
 But the actual work of distribution is carried out by HDFS.
 
 
+---------------
+
+## What is Apache Hadoop open source?
+
+► Hadoop is also open source
+► Hadoop development is a community effort governed
+under the licensing of the Apache Software Foundation
+► Anyone can help to improve Hadoop by adding features,
+fixing software bugs, or improving performance and
+scalability
+
+## What is Apache Hadoop distributed
+storage and processing?
+► Hadoop also uses distributed storage and processing
+► Large datasets are automatically split into smaller
+chunks, called blocks, and distributed across the
+cluster machines
+► Not only that, but each machine processes its local
+block of data. This means that processing is distributed
+too, potentially across hundreds of CPUs and hundreds
+of gigabytes of memory
+
+-----
+
+## Distributed Processing - MapReduce
+
+Java and Python are processing while Map Reduce is distributed processing.
+
+Processing (MapReduce):
+- Map
+- Reduce
+
+Above are not daemon processes but are per application processes.
+
+1. Suppose a file is the input to a
+MapReduce job. That file is broken down
+into blocks stored on DataNodes across the
+Hadoop cluster.
+
+2. During the Map phase, map tasks
+process the input of the MapReduce job,
+with a map task assigned to each Input
+Split. The map tasks are Java processes
+that ideally run on the DataNodes where
+the blocks are stored.
+
+- Process is a running instance of a program.
+- All the processes are run parallely.
+- In Hadoop, processes are always run on local, that is where the block resides.
+- Every node has its own RAM, harddisk, processor.
+
+3. Each map task processes its Input
+Split and outputs records of <key,
+value> pairs.
+- This framework is always going to generate the data in the form of key-value pair.
+4. The <key,value> pairs go through a shuffle/sort phase,
+where records with the same key end up at the same
+reducer. The specific pairs sent to a reducer are sorted
+by key, and the values are aggregated into a collection.
+5. Reduce tasks run on a NodeManager as a
+Java process. Each Reducer processes its input
+and outputs <key,value> pairs that are
+typically written to a file in HDFS.
+
+- Map Reduce is a ETL Framework.
+
+# What is Apache Hadoop uses commodity
+hardware?
+
+► All of this occurs on commodity hardware which
+reduces not only the original purchase price, but also
+potentially reduces support costs too
+
+## Six Key Hadoop DATA TYPES
+
+1. Sentiment
+How your customers feel
+2. Clickstream
+Website visitors’ data
+3. Sensor/Machine
+Data from remote sensors and machines
+4. Geographic
+Location-based data
+5. Server Logs
+6. Text
+Millions of web pages, emails, and documents
+
+## Sentiment Use Case
+
+• Analyze customer sentiment
+on the days leading up to
+and following the release of
+the movie Iron Man 3.
+
+• Questions to answer:
+o How did the public feel
+about the debut?
+o How might the
+sentiment data have
+been used to better
+promote the launch of
+the movie?
+
+## Getting Twitter Feeds into Hadoop
+
+Twitter -> Flume
+
+• Iron Man 3 was awesome. I want to go see it again!
+• Iron Man 3 = 7.7 stars
+• Tony Stark has 42 different Iron Man suits in Iron Man 3
+• Wow as good as or better than the first two
+• Thor was way better than Iron Man 3
+
+Flume fetches data from Twitter and pushes it to HDFS for further processing.
+
+Flume is a tool for streaming data into Hadoop.
+
+## Use HCatalog to Define a Schema
+
+CREATE EXTERNAL TABLE tweets_raw (
+id BIGINT,
+created_at STRING,
+source STRING,
+favorited BOOLEAN,
+retweet_count INT,
+text STRING
+)
+
+## View Spikes in Tweet Volume
+
+Plot a bar graph.
+
+Notice a large spike in tweets around the Thursday midnight
+opening and spikes around the Friday evening, Saturday afternoon,
+and Saturday evening showings.
+
+## View Sentiment by Country
+
+Plot a geolocation map
+
+Viewing the tweets on a map shows the sentiment of the movie by
+country. For example, Ireland had 50% positive tweets, while 67%
+of tweets from Mexico were neutral. Talentum Global Technologies
+
+## Geolocation Use Case:
+• A trucking company has over 100 trucks.
+• The geolocation data collected from the trucks contains events generated
+while the truck drivers are driving.
+• The company’s goal with Hadoop is to:
+o reduce fuel costs
+o improve driver safety
+
+## The Geolocation Data
+
+Here is what the collected data from the trucks’ sensors looks like:
+• truckid
+• driverid
+• event
+• latitude
+• longitude
+• city
+• state
+• velocity
+• event_indicator (0 or 1)
+• idling_indicator (0 or 1)
+For example:
+• A5 A5 unsafe following distance 41.526509 -124.038407 Klamath California 33 1 0 • A54 A54 normal 35.373292 -119.018712 Bakersfield California 19 0 0
+• A48 A48 overspeed 38.752124 -121.288006 Roseville California 77 1 0
+
+Hadoop can process the data if and only if the data is in HDFS.
+Now, Flume can help to capture the raw data and push it into Hadoop (HDFS).
+
+## Getting the Raw Data into Hadoop
+Flume is a tool for streaming
+data into Hadoop.
+
+## The Truck Data
+
+The truck data is stored in a database and looks like:
+• driverid
+• truckid
+• model
+• monthyear_miles
+• monthyear_gas
+• total_miles
+• total_gas
+• mileage
+The miles and gas figures go back to 2009.
+
+This is RDBMS Data.
+
+## Getting the Truck Data into Hadoop
+
+Sqoop helps to capture the RDBMS data and push it into HDFS.
+Sqoop is a tool for transferring
+data between an RDBMS and
+Hadoop.
+
+## HCatalog Stores a Shared Schema
+
+create table trucks (
+driverid string,
+truckid string,
+model string,
+monthyear_miles int,
+monthyear_gas int,
+total_miles int,
+total_gas double,
+mileage double
+);
+
+create table events (
+truckid string,
+driverid string,
+event string,
+latitude double,
+longitude double,
+city string,
+state string,
+velocity double
+event_indicator boolean,
+idling_indicator boolean
+);
+
+create table
+riskfactor (
+driverid string,
+riskfactor float
+);
+
+## Data Analysis
+
+We want to answer two questions:
+• Which trucks are wasting fuel through unnecessary idling?
+• Which drivers are most frequently involved in unsafe events
+on the road?
+
+## Use Hive to Compute Truck Mileage
+
+CREATE TABLE truck_mileage AS
+SELECT truckid, rdate, miles,
+gas,
+
+miles/gas mpg
+
+FROM trucks
+LATERAL VIEW stack(54,
+'jun13',jun13_miles,jun13_gas,'may1
+3',may13_miles,may13_gas,'apr13',ap
+r13_miles,apr13_gas,...
+) dummyalias AS rdate, miles, gas;
+
+## Use Pig to Compute a Risk Factor
+
+a = LOAD 'events'
+
+using org.apache.hive.hcatalog.pig.HCatLoader();
+
+b = filter a by event != 'Normal';
+c = foreach b
+
+generate driverid, event, (int) '1' as occurance;
+
+d = group c by driverid;
+e = foreach d generate group as driverid,
+
+SUM(c.occurance) as t_occ;
+
+f = LOAD 'trucks'
+
+using org.apache.hive.hcatalog.pig.HCatLoader();
+
+g = foreach f generate driverid,
+((int) apr09_miles + (int) apr10_miles) as t_miles;
+join_d = join e by (driverid), g by (driverid);
+final_data = foreach join_d generate
+
+$0 as driverid, (float) $1/$3*1000 as riskfactor;
+
+store final_data into 'riskfactor'
+
+using org.apache.hive.hcatalog.pig.HCatStorer();
+
+Above is a pig script
+
+---
+
+### Hadoop Ecosystem Project:
+Hadoop contains HDFS, Map Reduce, YARN.
+Sqoop, Flume, Hive, Pig, Spark works along with Hadoop. These tools come under Hadoop Ecosystem Project.
+
+---
+
+## Risk Factors are shown on Map
+
+## About Hadoop
+
+• Framework for solving data-intensive processes
+• Designed to scale massively
+• Very fast for very large jobs
+• Variety of processing engines
+• Designed for hardware and software failures: Concept of fault tolerance
+
+## Relational Databases vs. Hadoop
+
+Relational
+vs Hadoop
+
+Required on write
+schema
+Required on read
+
+Reads are fast
+speed
+Writes are fast
+
+Standards and structured
+governance
+Loosely structured
+
+Limited, no data processing
+processing
+Processing coupled with data
+
+Structured
+data types
+Multi- and unstructured
+
+Interactive OLAP Analytics
+Complex ACID Transactions
+Operational Data Store
+`best fit use`
+Data Discovery
+Processing unstructured data
+Massive Storage/Processing
+
+Hadoop can never replace RDBMS but it can work along with RDBMS.
+
+## About Hadoop 2.x
+
+The Apache Hadoop 2.x project consists of the following modules:
+• Hadoop Common: the utilities that provide support for the
+other Hadoop modules
+• HDFS: the Hadoop Distributed File System
+• YARN: a framework for job scheduling and cluster resource
+management
+• MapReduce: for processing large data sets in a scalable and
+parallel fashion
+
+## New in Hadoop 2.x
+
+YARN is a re-architecture of Hadoop that allows
+multiple applications to run on the same platform.
+
+HADOOP 1.x
+MapReduce
+(cluster resource management
+& data processing)
+HDFS
+(redundant, reliable storage)
+
+HADOOP 2.x
+MapReduce
+(data processing)
+Others
+(data processing)
+YARN
+(cluster resource management)
+HDFS
+(redundant, reliable storage)
+
+ResourceManager and NodeManager are daemons of YARN.
+NameNode and DataNode are daemons of HDFS.
+
+Sharing data between two clusters is difficult.
+In Hadoop 2.x, they removed cluster resource management part from MapReduce and transferred it to YARN.
+
+The Hadoop Ecosystem
+
+Hadoop = HDFS + MapReduce + YARN
+Then comes the PIG, then 👇🏻
+Hive > Apache HBase > accumulo > Apache Ambari > Sqoop > Apache Falcon > Oozie > Apache Solr > Storm > Flume > ZooKeeper > mahout(Machine Learning Library implemented in Java) > Spark
+
+Spark can implement Pig, Hive, Storm, mahout.
+That's the reason it is known as Unified Platform.
+
+## Enterprise ready Hadoop Platforms
+Cloudera is Enterprise level Hadoop Platform.
+BigDataVM Hadoop is completely open-source.
+Source – https://hortonworks.com/products/data-center/hdp/
+
+## Hadoop distros - HDP
+
+## Data Management and Operations
+Hadoop Distributed File System (HDFS): A Java-based, distributed file system that provides scalable, reliable, high-throughput access to application data stored across commodity servers
+
+Yet Another Resource Negotiator (YARN): A framework for cluster resource management and job scheduling
+
+
+Ambari A Web-based framework for provisioning, managing, and monitoring Hadoop clusters
+ZooKeeper A high-performance coordination service for distributed applications
+Cloudbreak A tool for provisioning and managing Hadoop clusters in the cloud
+Oozie A server-based workflow engine used to execute Hadoop jobs
+
+## The Path to ROI
+
+Raw Data -> (1. Put the data into HDFS in its raw format) -> Hadoop Distributed File System -> (2. Use Pig to explore and transform) -> Structured Data -> (3. Data analysts use Hive to query the data) -> Answers to questions = $$
+Structured Data -> (4. Data scientists use MapReduce, R, and Mahout to mine the data) -> Hidden gems = $$
+
+## Hadoop Deployment Options
+
+⬢ There are choices when deploying Hadoop:
+► Deploy on-premise in your own data center
+► Deploy in the cloud
+► Deploy on Microsoft Windows
+► Deploy on Linux
+
+Deployment Choices
+Linux <--> Windows
+
+Linux:
+- on-premise
+- cloud
+
+Windows:
+- on-premise
+- cloud
+
+## Hadoop Deployment Modes
+
+⬢ Hadoop may be deployed in three different modes:
+► Standalone mode
+► Pseudo-distributed mode
+► Distributed mode
+
+## Standalone Mode
+
+⬢ Single system installation
+⬢ All Hadoop service daemons run in a
+single Java virtual machine (JVM)
+⬢ Uses the file system on local disk
+⬢ Suitable for test and development,
+or introductory training
+
+## Pseudo-Distributed Mode
+
+⬢ Single system installation
+⬢ Each Hadoop service daemon runs in its own JVM
+⬢ Uses HDFS on local disk(s)
+⬢ Appropriate for quality assurance, test and development
+⬢ Format used for the Hortonworks Sandbox
+
+## Distributed Mode
+
+► Multi-system installation
+► Each Hadoop service daemon
+runs in its own JVM.
+    ► Multiple JVMs per system is
+common
+► Uses HDFS on local disk(s)
+    ► HDFS is distributed across systems
+► Best and typical for production
+environments
+
+## Lesson Review
+
+1. What are 1,024 petabytes known as?
+
+1. What are 1,024 exabytes known as?
+
+1. List the three Vs. of big data
+
+1. Sentiment is one of the six key types of big data. List the other five.
+
+1. What technology might you use to stream Twitter feeds into Hadoop?
+
+1. What technology might you use to define, store, and share the schemas of
+your big data stored in Hadoop?
+
+7. What are the two main new components in Hadoop 2.x?
+Ans. First one is YARN.
