@@ -1350,3 +1350,152 @@ Ecosystem Tools:
 - Detects **missing/corrupt blocks**
 
 ---
+
+sudo jps -lm
+sudo jps -lm | grep NameNode
+
+When we have data of kilobytes, then we need a processor of kilobytes size to process it.
+What if we have terabytes of data?
+In that case, dfs.blocksize() will help to split that data into small chunks for further processing.
+
+Hadoop is not meant for small datasets, it is designed to work with large datasets.
+One of the Reason: Process launching and delaunching is a heavy task in computer engineering.
+
+---
+
+localhost:19888
+
+Shows Job History
+
+sudo jps
+
+We are able to see JobHistoryServer, because after running localhost: 19888, JobHistoryServer comes into action, which shows Map reduce applications are running.
+Spark Application won't be displayed on 19888.
+
+Now, we will be running the same commands which we executed on Cloudera on the BigDataVM:
+
+`F:\BigData_staging`
+This is our staging area.
+
+`cp shared/Start-Hadoop-Hive.sh /home/talentum`
+`cp shared/Stop-Hadoop-Hive.sh /home/talentum`
+
+`jps`
+4221 Jps
+
+`./Start-Hadoop-Hive.sh`
+Output:
+-----Running YARN-----
+-----Running HADOOP-----
+-----Running Hive-----
+
+Hadoop, YARN, Hive has been started.
+
+`jps`
+Output:
+4627 DataNode
+5491 RunJar
+4454 NameNode
+5592 Jps
+4985 ResourceManager
+5131 NodeManager
+4830 SecondaryNameNode
+
+Cloudera has bootstrap service which BigDataVM don't have.
+We don't need to specify sudo here.
+
+talentum@talentum-virtual-machine:~$ hdfs dfsadmin -report
+Configured Capacity: 63088406528 (58.76 GB)
+Present Capacity: 30702915584 (28.59 GB)
+DFS Remaining: 30702891008 (28.59 GB)
+DFS Used: 24576 (24 KB)
+DFS Used%: 0.00%
+Under replicated blocks: 0
+Blocks with corrupt replicas: 0
+Missing blocks: 0
+Missing blocks (with replication factor 1): 0
+
+-------------------------------------------------
+Live datanodes (1):
+
+Name: 127.0.0.1:50010 (localhost)
+Hostname: talentum-virtual-machine
+Decommission Status : Normal
+Configured Capacity: 63088406528 (58.76 GB)
+DFS Used: 24576 (24 KB)
+Non DFS Used: 32385490944 (30.16 GB)
+DFS Remaining: 30702891008 (28.59 GB)
+DFS Used%: 0.00%
+DFS Remaining%: 48.67%
+Configured Cache Capacity: 0 (0 B)
+Cache Used: 0 (0 B)
+Cache Remaining: 0 (0 B)
+Cache Used%: 100.00%
+Cache Remaining%: 0.00%
+Xceivers: 1
+Last contact: Fri Apr 25 09:15:54 IST 2025
+
+
+talentum@talentum-virtual-machine:~$ jps
+4627 DataNode
+5651 Jps
+5491 RunJar
+4454 NameNode
+4985 ResourceManager
+5131 NodeManager
+4830 SecondaryNameNode
+
+talentum@talentum-virtual-machine:~$ hadoop version
+Hadoop 2.7.3
+Subversion https://git-wip-us.apache.org/repos/asf/hadoop.git -r baa91f7c6bc9cb92be5982de4719c1c8af91ccff
+Compiled by root on 2016-08-18T01:41Z
+Compiled with protoc 2.5.0
+From source with checksum 2e4ce5f957ea4db193bce3734ff29ff4
+This command was run using /home/talentum/hadoop/share/hadoop/common/hadoop-common-2.7.3.jar
+
+On Firefox, run:
+localhost:8088
+
+We went to Utilities
+Then Browse the File system
+
+In hdfs, our directory will be /user/homefolder
+Here, homefolder will be that folder through which we have logged-in in Linux.
+
+19888 is not working.
+
+talentum@talentum-virtual-machine:~$ bash Stop-Hadoop-Hive.sh 
+Found HiveMetastore PID-- 5491
+Initial kill failed, killing with -9 
+Hive metastore stopped successfully
+-----Hive Stopped-----
+stopping yarn daemons
+stopping resourcemanager
+localhost: stopping nodemanager
+no proxyserver to stop
+-----YARN Stopped-----
+Stopping namenodes on [localhost]
+localhost: stopping namenode
+localhost: stopping datanode
+Stopping secondary namenodes [0.0.0.0]
+0.0.0.0: stopping secondarynamenode
+-----HDFS Stopped-----
+-----HADOOP Stopped-----
+7149 Jps
+talentum@talentum-virtual-machine:~$ jps
+7159 Jps
+
+talentum@talentum-virtual-machine:~$ ls -lh *.sh
+-rwxr-xr-x 1 talentum talentum 1020 Nov  9  2020 run-hbase.sh
+-rwxrwxrwx 1 talentum talentum  824 Oct 31  2020 run-hdfs.sh
+-rwxrwxrwx 1 talentum talentum 1.5K May  5  2021 run-hivemetastore.sh
+-rwxrwxrwx 1 talentum talentum 1.5K May  5  2021 run-hiveserver2.sh
+-rwxr-xr-- 1 talentum talentum  868 Jan  6  2022 run-jobhistory.sh
+-rwxrwxrwx 1 talentum talentum  842 May 19  2021 run-kafka_server.sh
+-rwxrwxrwx 1 talentum talentum  817 May 19  2021 run-kafka_zookeeper_server.sh
+-rwxrwxrwx 1 talentum talentum  888 Nov  9  2020 run-yarn.sh
+-rwxrwxrwx 1 talentum talentum  781 Nov  9  2020 run-zeppelin.sh
+-rwxrwx--- 1 talentum talentum  952 Apr 25 09:08 Start-Hadoop-Hive.sh
+-rwxrwx--- 1 talentum talentum  463 Apr 25 09:08 Stop-Hadoop-Hive.sh
+
+
