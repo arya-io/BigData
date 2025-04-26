@@ -379,9 +379,81 @@ FSCK ended at Fri Apr 25 13:08:44 IST 2025 in 0 milliseconds
 
 The filesystem under path '/user/talentum/stocks.csv' is HEALTHY
 
+---
+
+If we want to see any datablock, we will have to connect through edge node:
+
+Copy the block name
+
+ssh {ipAddress}
+ssh resourcemanager
+---
+
+## Persisting File System Information on the NameNode
+
+► File system state
+is maintained and
+served from
+memory.
+► Memory is fast but
+volatile.
+► File system state
+is regularly
+persisted to disk.
+
+---
+
+## The NameNode Startup
+
+1. When the NameNode starts, it reads
+the fsimage_N and edits_N files.
+1. The transactions in edits_N are
+merged with fsimage_N. 1. A newly created fsimage_N+1 is
+written to disk, and a new, empty
+edits_N+1 is created.
+
+The NamdeNode will be in safemode, a read-only mode.
+
+4. Now a client application can
+create a new file in HDFS
+4. The NameNode journals that
+create transaction in the
+edits_N+1 file
+
+---
+We are running this on cloudera
+
+sudo find / -type f -name hdfs-site.xml
+specify name after `-name`
+specify filetype after `-type`, here we have used `f`
+`sudo` works as a root user
+`/` for root directory
 
 
+Open a new terminal
+Search for that file using that path
+dfs.namenode.name.dir
 
+hdfs -site
+
+There are configuration files for each component of Hadoop:
+HDFS
+YARN
+MapReduce
+
+These files (site.xml) are very sensitive.
+
+---
+
+hdfs dfsadmin
+hdfs dfsadmin -help safemode
+
+## NameNode StartUp - Detailed View
+
+1. NameNode starts in read-only mode (called safemode).
+2. NameNode enters read-write mode (exits safemode).
+
+## NameNode CheckPoint Operation:
 
 
 
