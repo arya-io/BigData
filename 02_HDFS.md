@@ -454,11 +454,54 @@ hdfs dfsadmin -help safemode
 2. NameNode enters read-write mode (exits safemode).
 
 ## NameNode CheckPoint Operation:
+• NameNodes must periodically perform a checkpoint
+operation or the edits file would continue to grow
+without bounds. • A checkpoint operation merges the changes recorded in
+the current edits file with the information in the current
+fsimage file, and then replaces the edits and fsimage
+files with a new files. • The new edits file will initially be empty
 
+1. Primary creates and uses
+new edits file
+1. Secondary/Standby
+retrieves edits and
+fsimage files
+1. The edits and fsimage
+files merged in memory
+1. New fsimage created
+1. New fsimage sent to
+Primary
+1. Primary saves new
+fsimage and continues
+using new edits file
 
+## Reading Data
 
+## The DataNode Block Reports
 
+## DataNode Block Reports - Detailed View
 
+## DataNode Failure
+
+## DataNode Failure - Detailed View
+
+## Failed DataNode Disks
+
+## HDFS Commands
+
+To see the help of any commandhd
+
+## Examples of HDFS Commands
+
+/mydata is the relative path to HOME
+
+## HDFS File Permissions
+
+## File and Directory Attributes
+
+## HDFS Permissions
+
+## HDFS Home Directories
 
 
 
