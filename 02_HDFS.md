@@ -1,6 +1,6 @@
-ls# HDFS
-
 ## About HDFS:
+
+![image](https://github.com/user-attachments/assets/683eca0c-d835-4c13-9e94-c079e59c7ea1)
 
 Conversation between Hadoop Client and HDFS
 Hadoop Client: “I have a 200 TB
@@ -70,6 +70,9 @@ the data multiple times. Linux is write-many and read-many.
 
 ## HDFS Components - NameNode and DataNodes Introduction
 
+![image](https://github.com/user-attachments/assets/7a24c394-a44f-4746-b73b-aaf252211a0e)
+
+
 ⬢ NameNode: Master node maintaining file system namespace and metadata including:
 ► File names
 ► Directory names
@@ -90,6 +93,9 @@ DataNode
 the chunks across other DataNodes
 
 ## HDFS Architecture
+
+
+![image](https://github.com/user-attachments/assets/04fc069c-4bd1-431b-be72-b33eedc3a1d2)
 
 The NameNode
 and DataNodes
@@ -130,7 +136,9 @@ state information
 DataNode:
 They actually hold the blocks.
 
+
 ---
+![image](https://github.com/user-attachments/assets/88f8b0d1-25b3-4b14-ae2a-762756a38487)
 
 1. Client sends a request
 to the NameNode to add a
@@ -151,6 +159,8 @@ chosen by the NameNode)
 ---
 
 ## Writing to HDFS Storage – Detailed view
+
+![image](https://github.com/user-attachments/assets/e72fcbf9-0ee9-45c4-936b-1c582fb8c3d4)
 
 1. Client requests to write file to HDFS
 2. NameNode provides a lease
@@ -175,6 +185,9 @@ What is Checksum?
 ---
 
 ## Replication and Block Placement
+
+![image](https://github.com/user-attachments/assets/58246c0f-3891-46b2-8b2d-f187bc77069a)
+
 
 While replicating and placing the blocks, follow two strategies:
 
@@ -391,6 +404,9 @@ ssh resourcemanager
 
 ## Persisting File System Information on the NameNode
 
+![image](https://github.com/user-attachments/assets/0a2e2c2c-f1b9-4187-b1d4-333a063942ac)
+
+
 ► File system state
 is maintained and
 served from
@@ -404,6 +420,9 @@ persisted to disk.
 ---
 
 ## The NameNode Startup
+
+![image](https://github.com/user-attachments/assets/8829b3f4-f5da-4665-83f3-0de3e93c2660)
+
 
 1. When the NameNode starts, it reads
 the fsimage_N and edits_N files.
@@ -450,10 +469,16 @@ hdfs dfsadmin -help safemode
 
 ## NameNode StartUp - Detailed View
 
+![image](https://github.com/user-attachments/assets/97bb47e9-e137-4436-b416-a20115b70297)
+
+
 1. NameNode starts in read-only mode (called safemode).
 2. NameNode enters read-write mode (exits safemode).
 
 ## NameNode CheckPoint Operation:
+
+![image](https://github.com/user-attachments/assets/8c3625d7-5ac7-429e-9c84-cad0718ca6e2)
+
 • NameNodes must periodically perform a checkpoint
 operation or the edits file would continue to grow
 without bounds. • A checkpoint operation merges the changes recorded in
@@ -476,41 +501,142 @@ fsimage and continues
 using new edits file
 
 ## Reading Data
+![image](https://github.com/user-attachments/assets/9adb3612-635c-4e96-b620-a5a9ebf26fcf)
+1. Client requests to read a NameNode
+file from HDFS
+2. NameNode provides a
+sorted list of DataNodes for
+each data block
+3. Client reads data block
+from closest DataNode and
+verifies the block’s
+checksums
 
 ## The DataNode Block Reports
+![image](https://github.com/user-attachments/assets/efd13284-aed8-427a-89a0-1766de3bc3c5)
 
 ## DataNode Block Reports - Detailed View
 
+![image](https://github.com/user-attachments/assets/4b8c129e-94bf-441c-82bf-f40b5fbec3b8)
+
+► At DataNode startup, a block report is sent
+to the NameNode after 3 minutes.
+► Determined by:
+► dfs.blockreport.initialDelay = 120
+
+► Updated block reports are set every 6 hours
+at part of a heartbeat:
+► Determined by:
+► dfs.blockreport.intervalMsec =
+21600000
+
+► If the number of blocks is large, the report
+is split across multiple heartbeats.
+► dfs.blockreport.split.threshold =
+1000000
+
 ## DataNode Failure
+
+![image](https://github.com/user-attachments/assets/168f6ba4-eb89-43f7-812f-a63462e17810)
 
 ## DataNode Failure - Detailed View
 
+![image](https://github.com/user-attachments/assets/4237b5e2-4a07-48ea-a6eb-de19647ac2a8)
+
+
+► A NameNode listens for DataNode heartbeats to
+determine availability.
+► A DataNode heartbeats every 3 seconds.
+► dfs.heartbeat.interval
+► If heartbeats are not received, a DataNode is:
+► Declared stale after 30 seconds and used last
+► dfs.namenode.stale.datanode.interval
+► Declared dead after 10.5 minutes and not used
+► dfs.namenode.heartbeat.recheck-interval
+and dfs.heartbeat.interval
+
+► A dead DataNode forces the NameNode to re-
+replicate the data blocks.
+
 ## Failed DataNode Disks
+
+![image](https://github.com/user-attachments/assets/cad580ba-f7d1-4e4c-9d76-dce1d8120b17)
+
+► A DataNode typically has multiple disks to:
+► Enhance I/O performance
+► Create more available HDFS storage space
+► More disks create more opportunity for
+failure.
+► By default, a failed disk will cause a
+DataNode to stop offering service.
+► Can modify
+dfs.datanode.failed.volumes.tolera
+ted to make a DataNode tolerant of one or
+more failed disks.
+► 0 by default
 
 ## HDFS Commands
 
-To see the help of any commandhd
+hdfs dfs –command [args]
+
+Here are a few (of the almost 30) HDFS commands:
+-cat: display file content (uncompressed)
+-text: just like cat but works on compressed files
+-chgrp,-chmod,-chown: changes file permissions
+-put,-get,-copyFromLocal,-copyToLocal: copies files
+from the local file system to the HDFS and vice versa.
+-ls, -ls -R: list files/directories
+-mv,-moveFromLocal,-moveToLocal: moves files
+-stat: statistical info for any given file (block size, number of blocks,
+file type, etc.)
+
+To see the help of any command:
 
 ## Examples of HDFS Commands
+
+hdfs dfs -mkdir mydata
+
+hdfs dfs -put numbers.txt
+mydata/
+
+hdfs dfs -ls mydata
 
 /mydata is the relative path to HOME
 
 ## HDFS File Permissions
 
+• Files and directories have owners and groups
+• r = read
+• w = write
+• x = permission to access the contents of a directory
+
+![image](https://github.com/user-attachments/assets/9df616b6-0920-41d1-9fd7-6beaf8154d03)
+
 ## File and Directory Attributes
+
+![image](https://github.com/user-attachments/assets/323ace1c-3c0c-445f-a24c-25403fdf003d)
 
 ## HDFS Permissions
 
+| Permission | Authorized Directory Actions | Authorized File Actions |
+Permission Authorized Directory Actions Authorized File Actions
+r = read | View (list) directory contents | View file contents
+w = write | Create or delete files or subdirectories | Write, or append to, file contents
+x = execute | Access a directory | Ignored for HDFS
+
+Permissions are
+applied according
+to the most
+specific user class
+applicable to a
+user.
+
+![image](https://github.com/user-attachments/assets/7d7f8154-aa29-45fd-9b96-21957565806d)
+
 ## HDFS Home Directories
 
+⬢ Users and applications might have a home directory.
+⬢ Home directories are used in concert with permissions to control data access.
 
-
-
-
-
-
-
-
-
-
+![image](https://github.com/user-attachments/assets/41f4c2bc-3b5d-4a12-9a88-952908105245)
 
