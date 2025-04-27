@@ -449,6 +449,9 @@ When you run a file in Linux, **bash** first checks:
 
 ## 🌍 The Shift: From Relational Empire to Big Data
 
+![image](https://github.com/user-attachments/assets/61b49fc4-116e-4b15-968f-ad1e8f166565)
+
+
 - **2008**: The birth of **NoSQL revolution**
   - Facebook open-sourced **Hive** (Data Warehouse)
   - Facebook also introduced **Cassandra** (NoSQL Database)
@@ -461,6 +464,9 @@ When you run a file in Linux, **bash** first checks:
 ---
 
 ## ⚔️ Operational Systems vs Data Warehousing
+
+![image](https://github.com/user-attachments/assets/0b5bd98c-fbdb-4cef-8763-9b17cd081292)
+![image](https://github.com/user-attachments/assets/4bbacd7b-3af2-46c8-84e9-4f8d4ce9c5e9)
 
 ### 🏭 Operational Systems (OLTP):
 - Built for **transactions** (insert, update, delete)
@@ -515,6 +521,9 @@ A **Data Warehouse (DW)** holds a **centralized repository of cleaned, integrate
 
 > Example: Data about student enrollments, alumni, financial reports — all stored in one place for analysis.
 
+![image](https://github.com/user-attachments/assets/ad6bf541-ee15-448e-906f-97bb23b4dfaa)
+
+
 ---
 
 ### 🔍 Compared to RDBMS (Traditional Database):
@@ -559,6 +568,7 @@ A Data Warehouse is not just storage — it's an **intelligent framework** that 
 In short:
 - It's not just about collecting data
 - It's about **making sense** of it and **acting** on it
+![image](https://github.com/user-attachments/assets/4ee190bc-e5c6-4bfa-9175-cff1cc9863a2)
 
 ---
 
@@ -567,6 +577,9 @@ In short:
 - In both **RDBMS and Data Warehouses**, schema defines the **structure** of the data
 - But in **RDBMS**, it's **application-bound and strictly normalized**
 - Schema = **Metadata**, i.e., *data about data* (like table structure, columns, data types)
+
+![image](https://github.com/user-attachments/assets/4bd82da2-4f37-46d4-a4dd-0ddd6b334fc7)
+
 
 ---
 
@@ -578,6 +591,9 @@ In short:
 - Multi-dimensional data views (slice and dice!)
 - Fast **aggregation** (sum, average, count, etc.)
 - “What-if” analysis for future planning (e.g., sales forecasts, budgets)
+
+
+![image](https://github.com/user-attachments/assets/65988953-ecab-4b19-9f56-1ff060c205fe)
 
 ---
 
@@ -708,6 +724,8 @@ Big Data isn’t just about having a lot of data — it’s about **how much**, 
 
 > Volume = **The amount of data being created and stored**
 
+![image](https://github.com/user-attachments/assets/72c70d68-41d7-4b64-9e7f-0a037247c963)
+
 ### 📊 Think:
 - **Gigabytes, Terabytes, Petabytes... Zettabytes!**
 - Coming from:
@@ -779,6 +797,9 @@ used for **distributed storage** and **processing of large datasets** on **commo
 ## **⚙️ Key Features of Hadoop**
 
 ### ✅ **1. Scalability**
+
+![image](https://github.com/user-attachments/assets/ece5ff1a-f17e-4a93-91e0-ce699aeec8aa)
+
 - Hadoop can scale **from 1 to thousands** of machines (nodes).
 - This is possible via **Hadoop Clusters**.
 - **Production Environment** = Cluster-based setup.
@@ -788,6 +809,8 @@ used for **distributed storage** and **processing of large datasets** on **commo
 ---
 
 ### ✅ **2. Fault Tolerance**
+![image](https://github.com/user-attachments/assets/a9c0546b-af21-4c62-be51-dd0347e9dec0)
+
 - Hadoop achieves fault tolerance via **replication**.
 - **Default replication factor**: 3 (can be configured).
 - Even if a **DataNode** fails, the data isn't lost due to replicas.
@@ -901,6 +924,10 @@ used for **distributed storage** and **processing of large datasets** on **commo
 ---
 
 ## **⚙️ MapReduce Processing Flow**
+![image](https://github.com/user-attachments/assets/e72e65b3-6df2-489e-81e8-94aec48e8c8d)
+![image](https://github.com/user-attachments/assets/a378066f-e7e3-42f8-a7c1-6862d1e04b5a)
+![image](https://github.com/user-attachments/assets/4c07fff4-426b-447d-998f-311ef9d9ca3e)
+
 
 | Phase       | Description |
 |-------------|-------------|
@@ -972,10 +999,12 @@ used for **distributed storage** and **processing of large datasets** on **commo
 ## **📥 Getting Twitter Data into Hadoop**
 ### **Tool: Apache Flume**
 - **Flume** captures real-time streaming data (like tweets) and pushes it into **HDFS**.
+![image](https://github.com/user-attachments/assets/19a9da07-2b87-4fc4-bd6e-5135b2b2e4d1)
 
 ---
 
 ## **Use HCatalog to Define Schema**
+![image](https://github.com/user-attachments/assets/f0f80ed7-f946-45c4-9fc0-ddb1bb3ac4b6)
 ```sql
 CREATE EXTERNAL TABLE tweets_raw (
   id BIGINT,
@@ -993,10 +1022,12 @@ CREATE EXTERNAL TABLE tweets_raw (
 
 - **Spikes in Tweet Volume**: Bar Graph  
   - Notable spikes on *Thursday midnight*, *Friday evening*, *Saturday showtimes*.
+![image](https://github.com/user-attachments/assets/dbfdb2da-15ac-43db-8e3f-361923bdcb5a)
 
 - **Sentiment by Country**: Geo-Map  
   - Ireland: 50% Positive  
   - Mexico: 67% Neutral
+![image](https://github.com/user-attachments/assets/e30d041b-6696-4e68-b3c0-40ed2caa6856)
 
 ---
 
@@ -1032,6 +1063,7 @@ CREATE EXTERNAL TABLE tweets_raw (
 ### **Tool: Apache Sqoop**
 - **Sqoop** is used to **import/export data between RDBMS and Hadoop**.
 - It transfers structured data into **HDFS** for further processing.
+![image](https://github.com/user-attachments/assets/5d24acdc-9064-4d63-907f-2acb9e1e4cdf)
 
 ---
 
@@ -1144,6 +1176,8 @@ STORE final_data INTO 'riskfactor'
 - **Risk Factor** = Number of Unsafe Events per 1000 Miles
 - Final output is stored in the `riskfactor` table in HCatalog
 - Risk factors can be visualized on a **geolocation map**
+![image](https://github.com/user-attachments/assets/1d77f270-d469-411b-af4c-9c8aa65afdd7)
+![image](https://github.com/user-attachments/assets/b0083e56-6874-4000-b583-5cacbd82511d)
 
 ---
 
@@ -1195,6 +1229,8 @@ Ecosystem Tools:
 | **Storage** | HDFS | HDFS |
 | **Scalability & Flexibility** | Limited | Greatly improved |
 
+![image](https://github.com/user-attachments/assets/e911939f-b3d3-4fe6-b5dc-9219f5bbaa2e)
+
 ### Key Change:
 - **YARN introduced** to separate **resource management** from **data processing**, enabling **multiple applications** to run concurrently on the same cluster.
 
@@ -1211,6 +1247,7 @@ Ecosystem Tools:
 ---
 
 # **The Hadoop Ecosystem**
+![image](https://github.com/user-attachments/assets/31d352da-6c3a-4d69-a719-e61df753a860)
 
 ### **Core:**
 - **HDFS** + **MapReduce** + **YARN**
@@ -1257,6 +1294,8 @@ Ecosystem Tools:
 # **Hadoop Deployment Modes**
 
 ## **1. Standalone Mode**
+![image](https://github.com/user-attachments/assets/2e5079b1-cfbe-4382-9b45-c8b8b50fbd7e)
+
 - **Single system installation**
 - All Hadoop daemons run in **one Java Virtual Machine (JVM)**
 - Uses the **local file system** (not HDFS)
@@ -1268,6 +1307,8 @@ Ecosystem Tools:
 ---
 
 ## **2. Pseudo-Distributed Mode**
+![image](https://github.com/user-attachments/assets/7581d5ca-decb-4496-86ca-55f5f451d6f4)
+
 - Still a **single system** installation
 - Each Hadoop daemon runs in its **own JVM**
 - Uses **HDFS** (but still on local disks)
@@ -1279,6 +1320,8 @@ Ecosystem Tools:
 ---
 
 ## **3. Distributed Mode**
+![image](https://github.com/user-attachments/assets/a2dbc812-71c6-4a88-a451-90f6a9040d00)
+
 - **Multi-system installation**
 - Each daemon runs in its **own JVM**, possibly multiple per machine
 - Uses **HDFS distributed across multiple systems**
