@@ -1,642 +1,695 @@
-## About HDFS:
+# 📚 Big Data - HDFS Concepts & Components
+
+---
+
+## 📂 About HDFS (Hadoop Distributed File System)
 
 ![image](https://github.com/user-attachments/assets/683eca0c-d835-4c13-9e94-c079e59c7ea1)
 
-Conversation between Hadoop Client and HDFS
-Hadoop Client: “I have a 200 TB
-file that I need to
-store.”
-HDFS: “Wow! That is big
-data! I will need to
-distribute that across
-a cluster.”
-Hadoop Client: “Sounds risky!
-What happens if a
-drive fails?”
-HDFS: “No need to worry! I
-am designed for
-failover.”
+### 🗣️ Conversation Between Hadoop Client and HDFS:
+
+- **Hadoop Client:**  
+  "I have a 200 TB file that I need to store."
+
+- **HDFS:**  
+  "Wow! That's **big data**! I'll distribute it across the cluster."
+
+- **Hadoop Client:**  
+  "Sounds risky! What happens if a drive fails?"
+
+- **HDFS:**  
+  "No worries! I’m **designed for failover** and handle drive failures automatically."
+
+✅ **Key Takeaway:**  
+HDFS **splits and distributes** big files across nodes while **keeping replicas** for reliability!
 
 ---
 
-## Hadoop RDBMS:
-• Assumes a task will require reading
-a significant amount of data off of
-a disk
-• Does not maintain any data
-structure
-• Simply reads the entire file
-• Scales well (increase the cluster
-size to decrease the read time of
-each task)
-  - 2,000 blocks of size 256MB
-  - 1.9 seconds of disk read
-for each block
-  - On a 40 node cluster with
-eight disks on each node,
-it would take about 14
-seconds to read the entire
-500 GB
-• Uses indexes to avoid reading an
-entire file (very fast lookups)
-• Maintains a data structure in order
-to provide a fast execution layer
-• Works well as long as the index fits
-in RAM
+## 🗃️ Hadoop vs RDBMS
 
-500 GB data file: 61 minutes to read this
-data off of a disk (assuming
-a transfer rate of 1,030
-Mbps)
-
-To check this data transfer speed, we can check this on the following website:
-https://www.calctool.org/other/data-transfer
-
-For 500 GB of data, it is saying the time required for data transfer will be 64 min 43 secs.
+| Feature | Hadoop | RDBMS |
+|:--------|:-------|:------|
+| Data Access | Reads entire file sequentially | Uses indexes for fast lookup |
+| Data Structure | No structure maintained | Structured with indexes |
+| Scaling | Easily scalable with more nodes | Limited by server capacity |
+| Performance | Great for big, sequential reads | Great for quick, small queries |
+| Failover | In-built replication | Depends on database setup |
 
 ---
 
-## HDFS Characterisitcs
+### 📈 Example Calculation:
 
-- Hierarchical: Directories containing files are arranged in a series of parent-child relationships.
-- Distributed: File system storage spans multiple drives and hosts.
-- Replicated: The file system automatically maintains multiple copies of data blocks.
-- Write-once, read-many optimized: The file system is designed to write data once but read
-the data multiple times. Linux is write-many and read-many.
-- Sequential access: The file system is designed for large sequential writes and reads.
-- Multiple readers: Multiple HDFS clients may read data at the same time.
-- Single writer: To protect file system integrity, only a single writer at a time is allowed.
-- Append-only: Files may be appended, but existing data not updated.
+- **500 GB** data file read sequentially:
+  - **Without Hadoop**:  
+    - ~61 minutes (assuming 1,030 Mbps transfer speed).
+  - **With Hadoop (example setup)**:
+    - 2,000 blocks (each 256 MB)
+    - 1.9 seconds to read each block
+    - 40-node cluster with 8 disks per node
+    - 🔥 Entire 500 GB read in about **14 seconds**!
 
-## HDFS Components - NameNode and DataNodes Introduction
+✅ Use [Data Transfer Calculator](https://www.calctool.org/other/data-transfer) to check time for different file sizes!
+
+---
+
+## 📑 HDFS Characteristics
+
+| Feature | Description |
+|:--------|:------------|
+| **Hierarchical** | Files organized in parent-child directories |
+| **Distributed** | Stored across multiple drives/nodes |
+| **Replicated** | Automatic multiple copies of data blocks |
+| **Write-once, read-many** | Optimized for one-time writing, multiple-time reading |
+| **Sequential Access** | Designed for large, continuous reads/writes |
+| **Multiple Readers** | Many clients can read at the same time |
+| **Single Writer** | Only one writer allowed at a time for file consistency |
+| **Append-only** | Can add data at end; cannot modify existing content |
+
+✅ **Designed for speed, reliability, and huge scale!**
+
+---
+
+## 🧩 HDFS Components: Introduction to NameNode and DataNodes
 
 ![image](https://github.com/user-attachments/assets/7a24c394-a44f-4746-b73b-aaf252211a0e)
 
+---
 
-⬢ NameNode: Master node maintaining file system namespace and metadata including:
-► File names
-► Directory names
-► File system hierarchy
-► Permissions and ownerships
-► Last modification times
-► ACLs (Access Control Lists)
-⬢ DataNode: Worker nodes containing only file data blocks.
+### 🧠 NameNode (Master Node)
 
-## HDFS Components
-NameNode
-• Is the “master” node of HDFS
-• Determines and maintains how the chunks of data are
-distributed across the DataNodes
+- Maintains the **file system metadata**:
+  - 📄 File Names
+  - 📁 Directory Names
+  - 🗂️ File System Hierarchy
+  - 🔐 Permissions and Ownerships
+  - 🕓 Last Modification Times
+  - 🛡️ ACLs (Access Control Lists)
+  
+✅ **Important:**  
+NameNode **does NOT store** the actual data blocks!
 
-DataNode
-• Stores the chunks of data, and is responsible for replicating
-the chunks across other DataNodes
+---
 
-## HDFS Architecture
+### 🖥️ DataNode (Worker Node)
 
+- **Stores actual data blocks**.
+- Responsible for:
+  - Saving file chunks.
+  - Replicating chunks across other DataNodes.
+  
+✅ **Important:**  
+DataNodes **only deal with data**, not metadata.
+
+---
+
+# 📋 Quick Flashcards: HDFS Revision 📚
+
+---
+
+### 📌 1. What is HDFS?
+
+➡️ Distributed storage system that stores large data across multiple nodes with automatic replication.
+
+---
+
+### 📌 2. What if a DataNode fails?
+
+➡️ No problem — HDFS has **replication** to recover automatically!
+
+---
+
+### 📌 3. How does Hadoop read large files faster?
+
+➡️ Splits files into **blocks**, distributes across nodes, and reads them in **parallel**.
+
+---
+
+### 📌 4. Who maintains file metadata in HDFS?
+
+➡️ **NameNode** (Master node).
+
+---
+
+### 📌 5. Who stores actual file data blocks?
+
+➡️ **DataNodes** (Worker nodes).
+
+---
+
+### 📌 6. Can multiple clients read from HDFS at the same time?
+
+➡️ **Yes!** HDFS supports multiple readers.
+
+---
+
+### 📌 7. Can multiple clients write to the same file simultaneously?
+
+➡️ **No!** Only **one writer** is allowed at a time.
+
+---
+
+# 🏗️ HDFS Architecture and Writing Process
+
+---
+
+## 🌐 HDFS Architecture Overview
 
 ![image](https://github.com/user-attachments/assets/04fc069c-4bd1-431b-be72-b33eedc3a1d2)
 
-The NameNode
-and DataNodes
-are daemons
-running in a Java
-virtual machine.
+### 🖥️ Daemons in HDFS:
 
-Primary NameNode
-Namespace
-• Hierarchy
-• Directory names
-• File names
-
-Metadata
-• Permissions and ownership
-• ACLs
-• Block size and replication level
-• Access and last modification
-times
-• User quotas
-
-memory-based service:
-Journaling
-• Safely records file system changes
-
-Block Map:
-- File names > block IDs
-
-This entire information is being stored in the memory.
-
-Secondary/Standby NameNode:
-Checkpointing
-• Merges the disk-based
-files used to persist
-in-memory file system
-state information
-
-DataNode:
-They actually hold the blocks.
-
+- **NameNode** and **DataNodes** run as **Java Virtual Machine (JVM)** processes.
 
 ---
+
+### 📂 Primary NameNode (Master)
+
+Manages **Namespace** and **Metadata**:
+
+| Category | Details |
+|:---------|:--------|
+| **Namespace** | 📂 Directory names, 📄 File names |
+| **Metadata** | 🔒 Permissions, 👤 Ownership, 🧩 Block size, ♻️ Replication level, 🕓 Access/modification times, 🧹 User quotas |
+
+✅ **Memory-Based Service**:
+- **Journaling**: Safely records changes (like edits) made to the file system.
+- **Block Map**: Maps **file names** ➔ **block IDs**.
+
+⏳ **Important:**  
+All of this is stored in **memory** (RAM) for super-fast performance!
+
+---
+
+### 🔄 Secondary NameNode (or Standby NameNode)
+
+- Performs **Checkpointing**:
+  - Merges disk-based edits + in-memory state.
+  - Helps in faster recovery if the Primary NameNode fails.
+
+✅ **Tip:** Secondary NameNode is **NOT** a backup NameNode, but helps in **snapshotting metadata**!
+
+---
+
+### 🏗️ DataNode (Worker)
+
+- **Actually stores** the **data blocks**.
+- Handles **block replication** as directed by the NameNode.
+
+---
+
+## 🔄 How HDFS Writes a File (Simple View)
+
 ![image](https://github.com/user-attachments/assets/88f8b0d1-25b3-4b14-ae2a-762756a38487)
 
-1. Client sends a request
-to the NameNode to add a
-file to HDFS
-Big Data -> NameNode
+**Step-by-step:**
 
-2. NameNode tells client
-how and where to
-distribute the blocks
-NameNode -> Big Data
+1. 📩 **Client** sends file **write request** to the **NameNode**.
+2. 📋 **NameNode** responds: tells how to split and where to store blocks.
+3. 📦 **Client** breaks file into **blocks** and sends each block to a **DataNode**.
+4. 🧬 **DataNode** **replicates** each block to two other DataNodes (as per replication policy).
 
-3. Client breaks the data into blocks
-and writes each block to a DataNode
-
-4. The DataNode replicates each block to two other DataNodes (as
-chosen by the NameNode)
+✅ **Result:**  
+File is safely distributed across multiple nodes with backups!
 
 ---
 
-## Writing to HDFS Storage – Detailed view
+## 📝 Detailed View: Writing to HDFS
 
 ![image](https://github.com/user-attachments/assets/e72fcbf9-0ee9-45c4-936b-1c582fb8c3d4)
 
-1. Client requests to write file to HDFS
-2. NameNode provides a lease
-to the file name
-3. Client requests, for every
-data block, block IDs and list
-of DataNodes
-4. NameNode sends block IDs,
-and list of DataNodes for
-each.
-5. For each block, write data and checksums
-to first DataNode in the list
-6 & 7. Each DataNode replicates to next
-DataNode, establishing a data pipeline
-8. Last DataNode re-
-computes and verify the checksums.
-9 and 10 are acknowledgments.
-11. Send ack back to client.
+### Detailed Steps:
 
-What is Checksum?
+| Step | Action |
+|:-----|:-------|
+| 1️⃣ | Client requests to **write** file to HDFS |
+| 2️⃣ | NameNode provides a **lease** (temporary lock) for the filename |
+| 3️⃣ | Client asks for **block IDs** and **DataNode list** |
+| 4️⃣ | NameNode sends **block IDs** + list of target **DataNodes** |
+| 5️⃣ | Client writes **data** and **checksums** to the **first DataNode** |
+| 6️⃣ & 7️⃣ | **Data pipeline** is created: first DataNode forwards to second, second to third |
+| 8️⃣ | Final DataNode verifies **checksums** to ensure data integrity |
+| 9️⃣ & 🔟 | **Acknowledgements** travel back through the pipeline |
+| 1️⃣1️⃣ | Final ack to **Client** confirming successful write! |
+
+✅ **Quick Tip:**  
+If any write fails, retries happen, ensuring data safety.
 
 ---
 
-## Replication and Block Placement
+## 🔍 What is a Checksum?
+
+✅ A **checksum** is a small-sized block of data derived from the actual file content.
+
+- Used to **verify** if the data has been **corrupted** during transfer.
+- Example:  
+  ➔ You calculate checksum of your file  
+  ➔ After transfer, recalculate checksum  
+  ➔ If both match, data is safe! 🔒
+
+➡️ In HDFS, checksums ensure **block data is correctly written** and **replicated** across nodes.
+
+---
+
+# 🎯 Quick Flashcards for Revision 📚
+
+---
+
+### 📌 1. Where is HDFS metadata stored?
+
+➡️ In **NameNode's memory** (RAM).
+
+---
+
+### 📌 2. What does Secondary NameNode do?
+
+➡️ Creates **checkpoints** (snapshot + merge edits).
+
+---
+
+### 📌 3. What is Journaling?
+
+➡️ Safely **recording changes** made to the HDFS namespace.
+
+---
+
+### 📌 4. What happens if a DataNode fails during write?
+
+➡️ **Replication** ensures there are **backup copies**.
+
+---
+
+### 📌 5. What is a data pipeline in HDFS write?
+
+➡️ Block travels from **first DataNode ➔ second ➔ third**, ensuring replication.
+
+---
+
+## 🛠 Replication and Block Placement in HDFS
 
 ![image](https://github.com/user-attachments/assets/58246c0f-3891-46b2-8b2d-f187bc77069a)
 
+### Goals during Block Placement:
+- **Minimize Write Cost**
+- **Maximize Availability and Read Performance**
 
-While replicating and placing the blocks, follow two strategies:
-
-i. Minimize write cost
-ii. Maximize availability and read performance
-Maximum Availability of Data means:
+**Maximum Availability** means:
+- Copies of blocks should be placed on different machines and preferably different racks.
 
 ---
 
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs$
-This is known as LABS_HOME
+## 💻 LABS_HOME Setup (Linux VM)
 
- 2001  cd /home/talentum
- 2002  pwd
- 2003  mkdir /home/talentum/hdp/pigandhive/labs
- 2004  mkdir hdp
- 2005  cd hdp
- 2006  mkdir pigandhive
- 2007  cd pigandhive
- 2008  mkdir labs
- 2009  cd labs
- 2010  ls
- 2011  cd
- 2012  ls
- 2013  cd shared
- 2014  ls
- 2015  cd
- 2016  cd /hdp/pigandhive/labs
- 2017  cd /home/talentum/hdp/pigandhive/labs
- 2018  pwd
- 2019  mkdir demos
- 2020  cd
- 2021  cp shared/data/stocks.csv /home/talentum/hdp/pigandhive/labs/demos
- 2022  ls
- 2023  cd /home/talentum/hdp/pigandhive/labs
- 2024  ls
- 2025  cd demos
- 2026  ls
- 2027  cat stocks.csv
+Commands:
+```bash
+mkdir /home/talentum/hdp/pigandhive/labs
+cp shared/data/stocks.csv /home/talentum/hdp/pigandhive/labs/demos
+cd /home/talentum/hdp/pigandhive/labs/demos
+head -10 stocks.csv
+wc -l stocks.csv
+ls -lh stocks.csv
+```
 
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ ls -lh
-total 3.5M
--rwxrwx--- 1 talentum talentum 3.5M Apr 25 11:36 stocks.csv
+---
 
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ head -10 stocks.csv
-exchange,stock_symbol,date,stock_price_open,stock_price_high,stock_price_low,stock_price_close,stock_volume,stock_price_adj_close
-NYSE,XL,2010-02-08,16.47,16.85,16.29,16.51,4793200,16.51
-NYSE,XL,2010-02-05,16.38,16.55,15.91,16.46,4760900,16.46
-NYSE,XL,2010-02-04,17.02,17.02,16.31,16.41,6716100,16.41
-NYSE,XL,2010-02-03,17.25,17.34,17.09,17.14,2657900,17.14
-NYSE,XL,2010-02-02,16.93,17.52,16.80,17.33,4282200,17.33
-NYSE,XL,2010-02-01,16.75,17.09,16.64,16.88,3258200,16.88
-NYSE,XL,2010-01-29,16.92,17.16,16.68,16.77,4546200,16.77
-NYSE,XL,2010-01-28,17.08,17.08,16.66,16.75,4069700,16.75
-NYSE,XL,2010-01-27,16.74,17.08,16.49,16.99,3339600,16.99
+## 🗂 Path Mapping
 
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ wc -l stocks.csv
-65021 stocks.csv
+| Sr. No. | HDP           | BigData (Host)           | Cloudera (VM)        |
+|--------|----------------|--------------------------|----------------------|
+| 1      | HDFS - Home     | /user/root                | /user/talentum        |
+| 2      | LABS_HOME       | /root/hdp/pigandhive/labs  | ~/hdp/pigandhive/labs |
+| 3      | STAGING_AREA    | Host mapped mount point   | Mount point on VM     |
 
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ ls -lh stocks.csv
--rwxrwx--- 1 talentum talentum 3.5M Apr 25 11:36 stocks.csv
+---
 
-## Path Mapping
+## ⚙️ Block Size Experiment
 
-| Sr. No. | HDP         | BigData                        | Cloudera                     |
-|---------|-------------|--------------------------------|------------------------------|
-| 1       | HDFS - Home | /user/root                    | /user/talentum              | /user/cloudera |
-| 2       | LABS_HOME   | /root/hdp/pigandhive/labs     | ~/hdp/pigandhive/labs        | ~/hdp/pigandhive/labs |
+- Trying to store `stocks.csv` (3.5 MB) with custom block size.
 
-3. STAGING_AREA: It is a folder on the Host machine which is mapped to mount point on Linux Virtual Machine.
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ less stocks.csv
-Press q to quit
+Commands:
+```bash
+# Check if Hadoop is running
+jps 
 
-b.Try putting the file into HDFS with a block size of 30 bytes: 
+# Start Hadoop if not running
+bash Start-Hadoop-Hive.sh
 
-to check if hadoop is in running state
-check through:
+# Set blocksize = 1 MB (1048576 bytes) and put file into HDFS
+hdfs dfs -D dfs.blocksize=1048576 -put stocks.csv
+```
 
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ jps
-13736 Jps
+- Default HDFS block size = **128 MB** if not specified.
+- If wrong block size given (e.g., 30 bytes), `put` operation **fails**.
 
-Start hadoop
-talentum@talentum-virtual-machine:~$ bash Start-Hadoop-Hive.sh 
-
-talentum@talentum-virtual-machine:~$ jps
-15123 Jps
-15030 RunJar
-13974 NameNode
-14503 ResourceManager
-14649 NodeManager
-14348 SecondaryNameNode
-14143 DataNode
-
-We have the csv file of 3.5 MB but as asked we have store it for 30 bytes
-
-hdfs dfs -D dfs.blocksize=30 -put stocks.csv
-
-if dfs.blocksize=30 is not mentioned, then it will consider it as default whose value is 128 MB
-
-The above command got failed. To check enter:
-
+Check result with:
+```bash
 echo $?
-It will give output as 1 which means the command has got failed.
+```
+- Output `0` → Success
+- Output `1` → Failure
 
 ---
 
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ hdfs dfs -D dfs.blocksize=2000000 -put stocks.csv 
--put: Invalid values: dfs.bytes-per-checksum (=512) must divide block size (=2000000).
-Usage: hadoop fs [generic options] -put [-f] [-p] [-l] <localsrc> ... <dst>
+## 🧩 What Happens Internally?
+
+- File is split into 4 blocks (each ~1MB, last block smaller).
+- 3 copies (replicas) needed normally, but only **1 machine** is available → replication factor = 1.
+
+Check file and blocks:
+```bash
+hdfs fsck /user/talentum/stocks.csv -files -blocks -locations
+```
+Shows:
+- Block IDs
+- Replication status
+- DataNode location
+- File system health
 
 ---
 
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ hdfs dfs -D dfs.blocksize=1048576 -put stocks.csv 
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ echo $?
-0
+## 📂 Deleting and Re-uploading to HDFS
 
-Namenode > namespace > metadata
-Journaling will contain information that the state has been changed.
-3 Blocks have been identified.
-1 MB each and a block less than 1 MB.
-Client will create 4 blocks and will create checksum for each.
-Replication factor is 3.
-Hardware requirements according to replication factor will be 1 because we have only one machine.
-
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ hdfs dfs -lsFound 1 items
--rw-r--r--   1 talentum supergroup    3613198 2025-04-25 12:23 stocks.csv
-
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ ls -lh ~/hdp/pigandhive/labs/demos/stocks.csv
--rwxrwx--- 1 talentum talentum 3.5M Apr 25 11:36 /home/talentum/hdp/pigandhive/labs/demos/stocks.csv
-
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ ls -lh stocks.csv
--rwxrwx--- 1 talentum talentum 3.5M Apr 25 11:36 stocks.csv
-
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ hdfs fsck /user/talentum/stocks.csv -files -blocks -locations
-Connecting to namenode via http://localhost:50070/fsck?ugi=talentum&files=1&blocks=1&locations=1&path=%2Fuser%2Ftalentum%2Fstocks.csv
-FSCK started by talentum (auth:SIMPLE) from /127.0.0.1 for path /user/talentum/stocks.csv at Fri Apr 25 12:36:53 IST 2025
-/user/talentum/stocks.csv 3613198 bytes, 4 block(s):  OK
-0. BP-387144675-127.0.1.1-1745562626299:blk_1073741825_1001 len=1048576 repl=1 [DatanodeInfoWithStorage[127.0.0.1:50010,DS-84a3eca0-8600-4e63-ac0f-fd37ca86c61e,DISK]]
-1. BP-387144675-127.0.1.1-1745562626299:blk_1073741826_1002 len=1048576 repl=1 [DatanodeInfoWithStorage[127.0.0.1:50010,DS-84a3eca0-8600-4e63-ac0f-fd37ca86c61e,DISK]]
-2. BP-387144675-127.0.1.1-1745562626299:blk_1073741827_1003 len=1048576 repl=1 [DatanodeInfoWithStorage[127.0.0.1:50010,DS-84a3eca0-8600-4e63-ac0f-fd37ca86c61e,DISK]]
-3. BP-387144675-127.0.1.1-1745562626299:blk_1073741828_1004 len=467470 repl=1 [DatanodeInfoWithStorage[127.0.0.1:50010,DS-84a3eca0-8600-4e63-ac0f-fd37ca86c61e,DISK]]
-
-Status: HEALTHY
- Total size:	3613198 B
- Total dirs:	0
- Total files:	1
- Total symlinks:		0
- Total blocks (validated):	4 (avg. block size 903299 B)
- Minimally replicated blocks:	4 (100.0 %)
- Over-replicated blocks:	0 (0.0 %)
- Under-replicated blocks:	0 (0.0 %)
- Mis-replicated blocks:		0 (0.0 %)
- Default replication factor:	1
- Average block replication:	1.0
- Corrupt blocks:		0
- Missing replicas:		0 (0.0 %)
- Number of data-nodes:		1
- Number of racks:		1
-FSCK ended at Fri Apr 25 12:36:53 IST 2025 in 18 milliseconds
-
-
-The filesystem under path '/user/talentum/stocks.csv' is HEALTHY
-
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ hdfs dfs -rm stocks.csv
-25/04/25 13:02:30 INFO fs.TrashPolicyDefault: Namenode trash configuration: Deletion interval = 0 minutes, Emptier interval = 0 minutes.
-Deleted stocks.csv
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ hdfs dfs -ls
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ hdfs dfs -put stocks.csv 
-25/04/25 13:03:57 WARN hdfs.DFSClient: Caught exception 
-java.lang.InterruptedException
-	at java.lang.Object.wait(Native Method)
-	at java.lang.Thread.join(Thread.java:1257)
-	at java.lang.Thread.join(Thread.java:1331)
-	at org.apache.hadoop.hdfs.DFSOutputStream$DataStreamer.closeResponder(DFSOutputStream.java:609)
-	at org.apache.hadoop.hdfs.DFSOutputStream$DataStreamer.closeInternal(DFSOutputStream.java:577)
-	at org.apache.hadoop.hdfs.DFSOutputStream$DataStreamer.run(DFSOutputStream.java:573)
-
-talentum@talentum-virtual-machine:~/hdp/pigandhive/labs/demos$ hdfs fsck /user/talentum/stocks.csv -files -blocks -locations
-Connecting to namenode via http://localhost:50070/fsck?ugi=talentum&files=1&blocks=1&locations=1&path=%2Fuser%2Ftalentum%2Fstocks.csv
-FSCK started by talentum (auth:SIMPLE) from /127.0.0.1 for path /user/talentum/stocks.csv at Fri Apr 25 13:08:44 IST 2025
-/user/talentum/stocks.csv 3613198 bytes, 1 block(s):  OK
-0. BP-387144675-127.0.1.1-1745562626299:blk_1073741829_1005 len=3613198 repl=1 [DatanodeInfoWithStorage[127.0.0.1:50010,DS-84a3eca0-8600-4e63-ac0f-fd37ca86c61e,DISK]]
-
-Status: HEALTHY
- Total size:	3613198 B
- Total dirs:	0
- Total files:	1
- Total symlinks:		0
- Total blocks (validated):	1 (avg. block size 3613198 B)
- Minimally replicated blocks:	1 (100.0 %)
- Over-replicated blocks:	0 (0.0 %)
- Under-replicated blocks:	0 (0.0 %)
- Mis-replicated blocks:		0 (0.0 %)
- Default replication factor:	1
- Average block replication:	1.0
- Corrupt blocks:		0
- Missing replicas:		0 (0.0 %)
- Number of data-nodes:		1
- Number of racks:		1
-FSCK ended at Fri Apr 25 13:08:44 IST 2025 in 0 milliseconds
-
-
-The filesystem under path '/user/talentum/stocks.csv' is HEALTHY
+```bash
+hdfs dfs -rm stocks.csv
+hdfs dfs -put stocks.csv
+```
+- After re-uploading, the whole file went into **one block** (since default settings used).
 
 ---
 
-If we want to see any datablock, we will have to connect through edge node:
+## 🔗 Connect to Data Blocks
 
-Copy the block name
-
-ssh {ipAddress}
-ssh resourcemanager
+- To inspect a data block manually:
+  1. Copy the **block ID**.
+  2. Connect to the node (usually through an edge node):
+     ```bash
+     ssh {ipAddress}
+     ssh resourcemanager
+     ```
 ---
 
-## Persisting File System Information on the NameNode
+**Quick Note**:  
+When you uploaded with a 1MB block size → 4 blocks were created.  
+When uploaded normally (no custom block size) → only **1 block** created for the 3.5MB file.
+
+---
+
+# 📂 Persisting File System Information on the NameNode
 
 ![image](https://github.com/user-attachments/assets/0a2e2c2c-f1b9-4187-b1d4-333a063942ac)
 
-
-► File system state
-is maintained and
-served from
-memory.
-► Memory is fast but
-volatile.
-► File system state
-is regularly
-persisted to disk.
+- 🧠 **File system state** is maintained and served from **memory**.
+- ⚡ Memory is **fast**, but it’s **volatile** (data is lost if power goes off).
+- 💾 To prevent data loss, **file system state is regularly saved (persisted)** to **disk**.
 
 ---
 
-## The NameNode Startup
+# 🚀 The NameNode Startup Process
 
 ![image](https://github.com/user-attachments/assets/8829b3f4-f5da-4665-83f3-0de3e93c2660)
 
-
-1. When the NameNode starts, it reads
-the fsimage_N and edits_N files.
-1. The transactions in edits_N are
-merged with fsimage_N. 1. A newly created fsimage_N+1 is
-written to disk, and a new, empty
-edits_N+1 is created.
-
-The NamdeNode will be in safemode, a read-only mode.
-
-4. Now a client application can
-create a new file in HDFS
-4. The NameNode journals that
-create transaction in the
-edits_N+1 file
+1. 📚 NameNode reads two important files: **fsimage_N** and **edits_N**.
+2. 🛠️ It **merges** transactions from **edits_N** into **fsimage_N**.
+3. 🆕 A new, updated **fsimage_N+1** is created and saved to disk. A **new empty edits_N+1** file is also created.
+4. 🚧 During this, **NameNode is in "Safemode"** (🔒 read-only mode).
+5. 📝 After safemode, clients (applications) can **create new files** in HDFS.
+6. 📄 New transactions (like creating a file) are **logged in edits_N+1**.
 
 ---
-We are running this on cloudera
+# 🛠️ Useful Cloudera Commands
 
+We are running this on **Cloudera**.
+
+- To **search for `hdfs-site.xml`** (an important configuration file):
+
+```bash
 sudo find / -type f -name hdfs-site.xml
-specify name after `-name`
-specify filetype after `-type`, here we have used `f`
-`sudo` works as a root user
-`/` for root directory
+```
+- `-type f` → search for files  
+- `-name` → specify file name  
+- `/` → start search from **root directory**  
+- `sudo` → run with **admin/root permissions**
 
+➡️ Once you find the path, **open a new terminal** and **navigate** to it.
 
-Open a new terminal
-Search for that file using that path
+In `hdfs-site.xml`, you can find properties like:
+
+```xml
 dfs.namenode.name.dir
+```
 
-hdfs -site
+🔵 **Important**:  
+There are **separate configuration files** for each Hadoop component:
+- **HDFS** → hdfs-site.xml
+- **YARN** → yarn-site.xml
+- **MapReduce** → mapred-site.xml
 
-There are configuration files for each component of Hadoop:
-HDFS
-YARN
-MapReduce
-
-These files (site.xml) are very sensitive.
+👉 These `.xml` config files are **very sensitive** — make sure you edit them carefully!
 
 ---
 
-hdfs dfsadmin
-hdfs dfsadmin -help safemode
+# 🧹 NameNode Safemode Commands
 
-## NameNode StartUp - Detailed View
+To check or work with NameNode safemode:
+
+```bash
+hdfs dfsadmin -help safemode
+```
+
+---
+
+# 🧠 NameNode Startup — Detailed View
 
 ![image](https://github.com/user-attachments/assets/97bb47e9-e137-4436-b416-a20115b70297)
 
+1. 🚧 NameNode **starts in Safemode** (read-only mode).
+2. 🔓 Once the namespace is verified, NameNode **exits Safemode** and enters normal **read-write** mode.
 
-1. NameNode starts in read-only mode (called safemode).
-2. NameNode enters read-write mode (exits safemode).
+---
 
-## NameNode CheckPoint Operation:
+# 🛡️ NameNode Checkpoint Operation
 
 ![image](https://github.com/user-attachments/assets/8c3625d7-5ac7-429e-9c84-cad0718ca6e2)
 
-• NameNodes must periodically perform a checkpoint
-operation or the edits file would continue to grow
-without bounds. • A checkpoint operation merges the changes recorded in
-the current edits file with the information in the current
-fsimage file, and then replaces the edits and fsimage
-files with a new files. • The new edits file will initially be empty
+✅ **Why checkpoints are important**:
+- If edits file grows endlessly, it will slow down startup and use lots of memory.
 
-1. Primary creates and uses
-new edits file
-1. Secondary/Standby
-retrieves edits and
-fsimage files
-1. The edits and fsimage
-files merged in memory
-1. New fsimage created
-1. New fsimage sent to
-Primary
-1. Primary saves new
-fsimage and continues
-using new edits file
+🔄 **Checkpoint process**:
+1. Primary NameNode **creates a new edits file**.
+2. Secondary/Standby NameNode **retrieves current edits and fsimage files**.
+3. 🔗 It **merges them in memory**.
+4. 🖼️ **New fsimage** is created.
+5. 📤 New fsimage is **sent back** to the Primary NameNode.
+6. 🧹 Primary NameNode saves the **new fsimage** and continues using the **new edits file**.
 
-## Reading Data
+---
+# 📖 Reading Data in HDFS
+
 ![image](https://github.com/user-attachments/assets/9adb3612-635c-4e96-b620-a5a9ebf26fcf)
-1. Client requests to read a NameNode
-file from HDFS
-2. NameNode provides a
-sorted list of DataNodes for
-each data block
-3. Client reads data block
-from closest DataNode and
-verifies the block’s
-checksums
 
-## The DataNode Block Reports
+1. 📬 Client **requests a file** from the NameNode.
+2. 🧭 NameNode **responds with a sorted list of DataNodes** that have the file’s blocks.
+3. 🏃 Client **reads data directly** from the **closest DataNode** (for faster access).
+4. 🔍 Client **verifies data** using **block checksums** to ensure data integrity.
+
+---
+
+# 🧱 The DataNode Block Reports
+
 ![image](https://github.com/user-attachments/assets/efd13284-aed8-427a-89a0-1766de3bc3c5)
 
-## DataNode Block Reports - Detailed View
+---
+
+# 🔎 DataNode Block Reports — Detailed View
 
 ![image](https://github.com/user-attachments/assets/4b8c129e-94bf-441c-82bf-f40b5fbec3b8)
 
-► At DataNode startup, a block report is sent
-to the NameNode after 3 minutes.
-► Determined by:
-► dfs.blockreport.initialDelay = 120
+✅ **Block Reports** are how DataNodes tell the NameNode what blocks they have.
 
-► Updated block reports are set every 6 hours
-at part of a heartbeat:
-► Determined by:
-► dfs.blockreport.intervalMsec =
-21600000
+**At Startup**:
+- After DataNode starts, it sends a **full block report** to NameNode after **3 minutes**.
+- Config setting:  
+  ```bash
+  dfs.blockreport.initialDelay = 120
+  ```
 
-► If the number of blocks is large, the report
-is split across multiple heartbeats.
-► dfs.blockreport.split.threshold =
-1000000
+**During Operation**:
+- DataNodes send **updated block reports** every **6 hours**.
+- Config setting:  
+  ```bash
+  dfs.blockreport.intervalMsec = 21600000
+  ```
 
-## DataNode Failure
+**Large number of blocks**:
+- If too many blocks (>1 million), the report is **split across multiple heartbeats**.
+- Config setting:
+  ```bash
+  dfs.blockreport.split.threshold = 1000000
+  ```
+
+---
+
+# ✅ Quick Summary
+
+- NameNode maintains **filesystem metadata** in memory, and persists it periodically.
+- **Startup** involves reading fsimage and edits, merging them, and starting in **Safemode**.
+- **Checkpointing** is necessary to prevent **edits file** from growing too large.
+- **Reading** happens directly from DataNodes after NameNode guidance.
+- **DataNode block reports** keep NameNode updated about where blocks are stored.
+
+---
+
+# ❌ DataNode Failure
 
 ![image](https://github.com/user-attachments/assets/168f6ba4-eb89-43f7-812f-a63462e17810)
 
-## DataNode Failure - Detailed View
+- 🛰️ **NameNode monitors** DataNodes using **heartbeats**.
+- 🫀 **Heartbeat Frequency**: Every **3 seconds**.
+- ⚙️ Config property:  
+  ```bash
+  dfs.heartbeat.interval
+  ```
+
+---
+
+# 🔎 DataNode Failure — Detailed View
 
 ![image](https://github.com/user-attachments/assets/4237b5e2-4a07-48ea-a6eb-de19647ac2a8)
 
+- 🔥 **If heartbeats stop**:
+  - 🕒 **After 30 seconds** ➔ DataNode declared **Stale** (used only if needed).
+    - Controlled by:
+      ```bash
+      dfs.namenode.stale.datanode.interval
+      ```
+  - ⏳ **After 10.5 minutes** ➔ DataNode declared **Dead** (no longer used).
+    - Controlled by:
+      ```bash
+      dfs.namenode.heartbeat.recheck-interval
+      ```
 
-► A NameNode listens for DataNode heartbeats to
-determine availability.
-► A DataNode heartbeats every 3 seconds.
-► dfs.heartbeat.interval
-► If heartbeats are not received, a DataNode is:
-► Declared stale after 30 seconds and used last
-► dfs.namenode.stale.datanode.interval
-► Declared dead after 10.5 minutes and not used
-► dfs.namenode.heartbeat.recheck-interval
-and dfs.heartbeat.interval
+- 🧬 When a DataNode **dies**, NameNode **re-replicates the data blocks** to maintain replication factor.
 
-► A dead DataNode forces the NameNode to re-
-replicate the data blocks.
+---
 
-## Failed DataNode Disks
+# 💿 Failed DataNode Disks
 
 ![image](https://github.com/user-attachments/assets/cad580ba-f7d1-4e4c-9d76-dce1d8120b17)
 
-► A DataNode typically has multiple disks to:
-► Enhance I/O performance
-► Create more available HDFS storage space
-► More disks create more opportunity for
-failure.
-► By default, a failed disk will cause a
-DataNode to stop offering service.
-► Can modify
-dfs.datanode.failed.volumes.tolera
-ted to make a DataNode tolerant of one or
-more failed disks.
-► 0 by default
+- 💥 A DataNode typically has **multiple disks** to:
+  - Boost **I/O performance** 📈
+  - Increase **storage space** 🗄️
+- ⚠️ More disks ➔ More chances of failure!
 
-## HDFS Commands
+- 🛑 By **default**, if even **one disk fails**, the **entire DataNode stops** offering service.
 
-hdfs dfs –command [args]
+- ⚙️ To allow tolerance for failed disks, use:  
+  ```bash
+  dfs.datanode.failed.volumes.tolerated
+  ```
+  - Default: **0** (no tolerance).
 
-Here are a few (of the almost 30) HDFS commands:
--cat: display file content (uncompressed)
--text: just like cat but works on compressed files
--chgrp,-chmod,-chown: changes file permissions
--put,-get,-copyFromLocal,-copyToLocal: copies files
-from the local file system to the HDFS and vice versa.
--ls, -ls -R: list files/directories
--mv,-moveFromLocal,-moveToLocal: moves files
--stat: statistical info for any given file (block size, number of blocks,
-file type, etc.)
+---
 
-To see the help of any command:
+# 🛠️ HDFS Commands
 
-## Examples of HDFS Commands
+Basic syntax:  
+```bash
+hdfs dfs -command [arguments]
+```
 
-hdfs dfs -mkdir mydata
+⚡ Here are some important commands:
 
-hdfs dfs -put numbers.txt
-mydata/
+| Command | Purpose |
+|:---|:---|
+| `-cat` | Display file content (uncompressed). |
+| `-text` | Display file content (works for compressed files too). |
+| `-chgrp`, `-chmod`, `-chown` | Change group/permissions/ownership. |
+| `-put`, `-get`, `-copyFromLocal`, `-copyToLocal` | Move files between local filesystem and HDFS. |
+| `-ls`, `-ls -R` | List files and directories (R = recursively). |
+| `-mv`, `-moveFromLocal`, `-moveToLocal` | Move files. |
+| `-stat` | Show file statistics (block size, blocks count, etc.). |
 
-hdfs dfs -ls mydata
+🛟 To see help for any command:  
+```bash
+hdfs dfs -help
+```
 
-/mydata is the relative path to HOME
+---
 
-## HDFS File Permissions
+# ✏️ Examples of HDFS Commands
 
-• Files and directories have owners and groups
-• r = read
-• w = write
-• x = permission to access the contents of a directory
+- 📁 **Create a directory**:
+  ```bash
+  hdfs dfs -mkdir mydata
+  ```
+
+- 📂 **Upload a file** to HDFS:
+  ```bash
+  hdfs dfs -put numbers.txt mydata/
+  ```
+
+- 📃 **List files** inside the directory:
+  ```bash
+  hdfs dfs -ls mydata
+  ```
+
+🧭 Here, `/mydata` is the **relative path to the HOME directory**.
+
+---
+
+# 🔐 HDFS File Permissions
+
+- 🧑‍💻 **Files and directories** have an **Owner** and a **Group**.
+- Permission symbols:
+  - `r` = read permission
+  - `w` = write permission
+  - `x` = execute/access permission (needed to access directories)
 
 ![image](https://github.com/user-attachments/assets/9df616b6-0920-41d1-9fd7-6beaf8154d03)
 
-## File and Directory Attributes
+---
+
+# 📑 File and Directory Attributes
 
 ![image](https://github.com/user-attachments/assets/323ace1c-3c0c-445f-a24c-25403fdf003d)
 
-## HDFS Permissions
+---
 
-| Permission | Authorized Directory Actions | Authorized File Actions |
-Permission Authorized Directory Actions Authorized File Actions
-r = read | View (list) directory contents | View file contents
-w = write | Create or delete files or subdirectories | Write, or append to, file contents
-x = execute | Access a directory | Ignored for HDFS
+# 🔒 HDFS Permissions (Detailed Table)
 
-Permissions are
-applied according
-to the most
-specific user class
-applicable to a
-user.
+| Permission | Directory Action | File Action |
+|:---|:---|:---|
+| r (read) | View (list) directory contents | View file contents |
+| w (write) | Create/delete files or subdirectories | Write or append to files |
+| x (execute) | Access a directory (needed for `cd`) | *Ignored* for files in HDFS |
+
+- 👨‍💻 **Most specific user class** permission (Owner > Group > Others) is applied to each user.
 
 ![image](https://github.com/user-attachments/assets/7d7f8154-aa29-45fd-9b96-21957565806d)
 
-## HDFS Home Directories
+---
 
-⬢ Users and applications might have a home directory.
-⬢ Home directories are used in concert with permissions to control data access.
+# 🏠 HDFS Home Directories
+
+⬢ Users and applications usually have a **home directory** in HDFS.
+
+- **Purpose**: Control and restrict access to files using **permissions**.
+- 📁 Typical Home Directory path:
+  ```bash
+  /user/username
+  ```
 
 ![image](https://github.com/user-attachments/assets/41f4c2bc-3b5d-4a12-9a88-952908105245)
 
+---
+
+# ✅ Quick Recap
+
+- **DataNode heartbeats** are vital for their health status.
+- **Stale** ➔ after 30s; **Dead** ➔ after 10.5 minutes.
+- **Disk failure** can stop a DataNode (unless tolerance is configured).
+- **HDFS commands** allow uploading, downloading, permissions handling, etc.
+- **Permissions** protect files and directories just like Linux/Unix systems.
+- **Home directories** act as a user’s private workspace.
+
+---
