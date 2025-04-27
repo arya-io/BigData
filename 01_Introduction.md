@@ -1394,151 +1394,293 @@ Ecosystem Tools:
 
 ---
 
-sudo jps -lm
-sudo jps -lm | grep NameNode
-
-When we have data of kilobytes, then we need a processor of kilobytes size to process it.
-What if we have terabytes of data?
-In that case, dfs.blocksize() will help to split that data into small chunks for further processing.
-
-Hadoop is not meant for small datasets, it is designed to work with large datasets.
-One of the Reason: Process launching and delaunching is a heavy task in computer engineering.
+# 📚 Big Data - Essential Commands & Concepts
 
 ---
 
+## 🛠️ Important Hadoop Commands
+
+```bash
+sudo jps -lm
+```
+- Lists all the running Hadoop daemons with main class information.
+
+```bash
+sudo jps -lm | grep NameNode
+```
+- Filters out only the NameNode process from the list.
+
+---
+
+## 🧠 Understanding Data Size and Processing
+
+- If the data is **in kilobytes**, we need a **small processor**.
+- **When the data is in terabytes**, we can't use a simple processor.
+  
+✅ **Solution:**  
+Hadoop uses **`dfs.blocksize()`** to **split** large files into **manageable chunks** for distributed processing!
+
+---
+
+## 🏗️ Why Hadoop is for Big Data?
+
+- Hadoop **is NOT for small datasets**.
+- **Reason:**  
+  - **Launching and shutting down processes** (called process management) is **computationally heavy**.
+  - It only makes sense when processing **huge datasets**.
+
+---
+
+## 🔎 Job History Server
+
+Access:  
+```text
 localhost:19888
+```
+- Displays **Job History** (Only for **MapReduce** applications).
+- **Spark applications won't appear here**.
 
-Shows Job History
-
+```bash
 sudo jps
+```
+- You will see **JobHistoryServer** active after opening `localhost:19888`.
 
-We are able to see JobHistoryServer, because after running localhost: 19888, JobHistoryServer comes into action, which shows Map reduce applications are running.
-Spark Application won't be displayed on 19888.
+---
 
-Now, we will be running the same commands which we executed on Cloudera on the BigDataVM:
+## 🖥️ Running Hadoop on BigDataVM
 
-`F:\BigData_staging`
-This is our staging area.
+- **Staging Area:**  
+```bash
+F:\BigData_staging
+```
 
-`cp shared/Start-Hadoop-Hive.sh /home/talentum`
-`cp shared/Stop-Hadoop-Hive.sh /home/talentum`
+### ✅ Commands:
+```bash
+cp shared/Start-Hadoop-Hive.sh /home/talentum
+cp shared/Stop-Hadoop-Hive.sh /home/talentum
+```
 
-`jps`
-4221 Jps
-
-`./Start-Hadoop-Hive.sh`
-Output:
+Start Hadoop + Hive:
+```bash
+./Start-Hadoop-Hive.sh
+```
+**Output:**
+```
 -----Running YARN-----
 -----Running HADOOP-----
 -----Running Hive-----
+```
+(Everything has been started successfully!)
 
-Hadoop, YARN, Hive has been started.
-
-`jps`
-Output:
+### 📄 Check Running Processes:
+```bash
+jps
+```
+**Output Example:**
+```
 4627 DataNode
 5491 RunJar
 4454 NameNode
+4985 ResourceManager
+5131 NodeManager
+4830 SecondaryNameNode
 5592 Jps
-4985 ResourceManager
-5131 NodeManager
-4830 SecondaryNameNode
+```
 
-Cloudera has bootstrap service which BigDataVM don't have.
-We don't need to specify sudo here.
+---
 
-talentum@talentum-virtual-machine:~$ hdfs dfsadmin -report
-Configured Capacity: 63088406528 (58.76 GB)
-Present Capacity: 30702915584 (28.59 GB)
-DFS Remaining: 30702891008 (28.59 GB)
-DFS Used: 24576 (24 KB)
-DFS Used%: 0.00%
-Under replicated blocks: 0
-Blocks with corrupt replicas: 0
-Missing blocks: 0
-Missing blocks (with replication factor 1): 0
+## 🛜 Cloudera vs BigDataVM
 
--------------------------------------------------
-Live datanodes (1):
+- **Cloudera** has a **bootstrap service** to auto-start services ✅
+- **BigDataVM** does **not have** it ❌ (manual start needed)
+- No need to use `sudo` for most commands in BigDataVM.
 
-Name: 127.0.0.1:50010 (localhost)
-Hostname: talentum-virtual-machine
-Decommission Status : Normal
-Configured Capacity: 63088406528 (58.76 GB)
-DFS Used: 24576 (24 KB)
-Non DFS Used: 32385490944 (30.16 GB)
-DFS Remaining: 30702891008 (28.59 GB)
-DFS Used%: 0.00%
-DFS Remaining%: 48.67%
-Configured Cache Capacity: 0 (0 B)
-Cache Used: 0 (0 B)
-Cache Remaining: 0 (0 B)
-Cache Used%: 100.00%
-Cache Remaining%: 0.00%
-Xceivers: 1
-Last contact: Fri Apr 25 09:15:54 IST 2025
+---
 
+## 📋 Checking HDFS Status
 
-talentum@talentum-virtual-machine:~$ jps
-4627 DataNode
-5651 Jps
-5491 RunJar
-4454 NameNode
-4985 ResourceManager
-5131 NodeManager
-4830 SecondaryNameNode
+Command:
+```bash
+hdfs dfsadmin -report
+```
+🔵 **Sample Output Overview:**
+- Configured Capacity: 58.76 GB
+- Present Capacity: 28.59 GB
+- DFS Used: 24 KB
+- DFS Remaining: 28.59 GB
+- Live Datanodes: 1 (localhost)
 
-talentum@talentum-virtual-machine:~$ hadoop version
+✅ Everything healthy:  
+- **No corrupt blocks!**
+- **No missing blocks!**
+
+---
+
+## 🧩 Hadoop Version
+
+Check version:
+```bash
+hadoop version
+```
+**Example Output:**
+```
 Hadoop 2.7.3
-Subversion https://git-wip-us.apache.org/repos/asf/hadoop.git -r baa91f7c6bc9cb92be5982de4719c1c8af91ccff
 Compiled by root on 2016-08-18T01:41Z
-Compiled with protoc 2.5.0
-From source with checksum 2e4ce5f957ea4db193bce3734ff29ff4
-This command was run using /home/talentum/hadoop/share/hadoop/common/hadoop-common-2.7.3.jar
+```
 
-On Firefox, run:
+---
+
+## 🌐 Web UIs
+
+| Service | URL | Purpose |
+|:--------|:----|:--------|
+| **Resource Manager** | `localhost:8088` | Monitor YARN Applications |
+| **HDFS Web UI** | Browse File System | View HDFS directories |
+
+🔸 In HDFS, your **directory path** is:
+```bash
+/user/<your-home-folder-name>
+```
+*(homefolder = Linux username)*
+
+---
+
+## 🛑 Stopping Hadoop & Hive Services
+
+Stop everything:
+```bash
+bash Stop-Hadoop-Hive.sh
+```
+**Output:**
+- Stops Hive Metastore.
+- Stops YARN (ResourceManager, NodeManager).
+- Stops HDFS (NameNode, DataNode, SecondaryNameNode).
+
+---
+
+## 📂 Checking Shell Scripts (.sh files)
+
+Command:
+```bash
+ls -lh *.sh
+```
+**Sample Output:**
+```
+run-hbase.sh
+run-hdfs.sh
+run-hivemetastore.sh
+run-hiveserver2.sh
+run-jobhistory.sh
+run-kafka_server.sh
+run-kafka_zookeeper_server.sh
+run-yarn.sh
+run-zeppelin.sh
+Start-Hadoop-Hive.sh
+Stop-Hadoop-Hive.sh
+```
+(Shows all available shell scripts for managing services.)
+
+---
+
+# 🔥 Quick Summary
+
+- Hadoop splits large data into chunks for easy processing.
+- Hadoop is ideal for massive datasets (not small ones).
+- JobHistoryServer only shows MapReduce jobs.
+- BigDataVM requires manual service start/stop.
+- Always verify processes with `jps` and monitor with web UIs like `localhost:8088`.
+
+---
+
+# 🧠 Big Data Quick Flashcards 📚✨
+
+---
+
+### 📌 1. Command to list running Hadoop processes?
+
+```bash
+sudo jps -lm
+```
+
+---
+
+### 📌 2. How to find only the NameNode process?
+
+```bash
+sudo jps -lm | grep NameNode
+```
+
+---
+
+### 📌 3. Why is Hadoop not meant for small datasets?
+
+➡️ **Because launching and killing processes is heavy on resources.**  
+➡️ Hadoop shines when handling **huge datasets**.
+
+---
+
+### 📌 4. What does `dfs.blocksize()` do?
+
+➡️ **Splits large files into smaller blocks** for parallel processing.
+
+---
+
+### 📌 5. URL to check Job History?
+
+```text
+localhost:19888
+```
+*(Only shows **MapReduce jobs**, not Spark.)*
+
+---
+
+### 📌 6. How to start Hadoop, YARN, Hive manually on BigDataVM?
+
+```bash
+./Start-Hadoop-Hive.sh
+```
+
+---
+
+### 📌 7. Command to check HDFS Health?
+
+```bash
+hdfs dfsadmin -report
+```
+
+---
+
+### 📌 8. Where will your files be located in HDFS?
+
+➡️ `/user/<homefolder>`  
+*(Homefolder = your Linux username)*
+
+---
+
+### 📌 9. How to monitor YARN Applications?
+
+```text
 localhost:8088
+```
 
-We went to Utilities
-Then Browse the File system
+---
 
-In hdfs, our directory will be /user/homefolder
-Here, homefolder will be that folder through which we have logged-in in Linux.
+### 📌 10. How to stop all services?
 
-19888 is not working.
+```bash
+bash Stop-Hadoop-Hive.sh
+```
 
-talentum@talentum-virtual-machine:~$ bash Stop-Hadoop-Hive.sh 
-Found HiveMetastore PID-- 5491
-Initial kill failed, killing with -9 
-Hive metastore stopped successfully
------Hive Stopped-----
-stopping yarn daemons
-stopping resourcemanager
-localhost: stopping nodemanager
-no proxyserver to stop
------YARN Stopped-----
-Stopping namenodes on [localhost]
-localhost: stopping namenode
-localhost: stopping datanode
-Stopping secondary namenodes [0.0.0.0]
-0.0.0.0: stopping secondarynamenode
------HDFS Stopped-----
------HADOOP Stopped-----
-7149 Jps
-talentum@talentum-virtual-machine:~$ jps
-7159 Jps
+---
 
-talentum@talentum-virtual-machine:~$ ls -lh *.sh
--rwxr-xr-x 1 talentum talentum 1020 Nov  9  2020 run-hbase.sh
--rwxrwxrwx 1 talentum talentum  824 Oct 31  2020 run-hdfs.sh
--rwxrwxrwx 1 talentum talentum 1.5K May  5  2021 run-hivemetastore.sh
--rwxrwxrwx 1 talentum talentum 1.5K May  5  2021 run-hiveserver2.sh
--rwxr-xr-- 1 talentum talentum  868 Jan  6  2022 run-jobhistory.sh
--rwxrwxrwx 1 talentum talentum  842 May 19  2021 run-kafka_server.sh
--rwxrwxrwx 1 talentum talentum  817 May 19  2021 run-kafka_zookeeper_server.sh
--rwxrwxrwx 1 talentum talentum  888 Nov  9  2020 run-yarn.sh
--rwxrwxrwx 1 talentum talentum  781 Nov  9  2020 run-zeppelin.sh
--rwxrwx--- 1 talentum talentum  952 Apr 25 09:08 Start-Hadoop-Hive.sh
--rwxrwx--- 1 talentum talentum  463 Apr 25 09:08 Stop-Hadoop-Hive.sh
+# 🌟 Bonus Memory Tip:
+✅ Always remember:  
+- **19888** = MapReduce Job History  
+- **8088** = YARN Resource Manager  
 
+✅ Check processes anytime using:  
+```bash
+jps
+```
 
+---
