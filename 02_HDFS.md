@@ -1255,10 +1255,51 @@ Now, running the second command:
 
 curl -i -L "http://talentum-virtual-machine:50070/webhdfs/v1/user/talentum/shared/stocks.csv?op=OPEN"
 
+The above query was giving error: File not found
+It was because the file wasn't present in HDFS system.
+Then we executed this command and added that file into hdfs system:
+
+hdfs dfs -put /home/talentum/stocks.csv /user/talentum
+
+Again, while adding the file, we were encountering an issue due to some problem with Datanode. So we stopped Hadoop cluster and started it again and it resolved the issue.
+
+hdfs dfs -put /home/talentum/stocks.csv /user/talentum
+
+Now, the file was added in the HDFS. Then we executed our Step 2 command:
+
+curl -i -L "http://talentum-virtual-machine:50070/webhdfs/v1/user/talentum/shared/stocks.csv?op=OPEN"
+
+![image](https://github.com/user-attachments/assets/2afdd416-0828-4063-aed7-d547205abd8b)
+
+The above command is used to open a specified file present in HDFS using webhdfs client.
+
+Then we wanted to add small_blocks.txt into hdfs using webhdfs client.
+
+Before doing that we ran this command in order to check if the file is present in the correct directory or not. If it wasn't present, then we just copied it to the target directory:
+
+cp /home/talentum/small_blocks.txt /home/talentum
+
+And this is the final command:
+curl -i -X PUT -T small_blocks.txt "http://talentum-virtual-machine:50075/webhdfs/v1/user/talentum/small_blocks.txt?op=CREATE&user.name=talentum&namenoderpcaddress=localhost:9000&overwrite=false"
+
+![image](https://github.com/user-attachments/assets/630fc08d-1ca5-4b8a-b138-279b096203ec)
+
+
+We added small_blocks.txt into hdfs using webhdfs client.
+
+Final Output:
+![image](https://github.com/user-attachments/assets/bdc69c46-eeca-4806-a823-39c2782f5a91)
+
+
+---
 
 
 
-There is a project going on. Multiple teams are working. one tema making request. they ewill be providning data ot next tema. that team is going to use thier own programming language. first tema needs to give the data. collect the output of first command in a file. and that file willb e given as input to the second team. use vim editor.
+
+
+---
+
+There is a project going on. Multiple teams are working. one team making request. they ewill be providning data ot next tema. that team is going to use thier own programming language. first tema needs to give the data. collect the output of first command in a file. and that file willb e given as input to the second team. use vim editor.
 
 vim automatelist.sh
 ![image](https://github.com/user-attachments/assets/c25c72f8-18d9-4e69-889d-4983c8a6330d)
@@ -1329,6 +1370,9 @@ To extract the rar file
 Follow Steps:
 Create Project: File > New > Project > Project Name > HDFS_API
 
+![image](https://github.com/user-attachments/assets/4faa3eeb-eb26-4bfd-ae16-a2fc11c5a92b)
+
+
 
 ### JRE vs JDK
 We want to build and then run the application. Therefore, we will be choosing the `Use default jre (currently 'jdk1.7.0_67-cloudera') in jre section while creating project.
@@ -1350,6 +1394,10 @@ src will contain .java files.
 
 We are now creating package with name 'hdfs'.
 
+![image](https://github.com/user-attachments/assets/c621691e-ccb7-4b17-9235-3ef191076e4e)
+
+![image](https://github.com/user-attachments/assets/6f2f6941-f702-4f4a-a256-13124064168c)
+
 Right click on project name.
 Then create the package.
 This hdfs package will help us to work with HDFS.
@@ -1357,13 +1405,35 @@ This hdfs package will help us to work with HDFS.
 
 ![image](https://github.com/user-attachments/assets/d898291e-4acf-4f92-a983-4c358a7a5316)
 
+Step 6: To remove erros present in the code file
+
+Right click on Project > Build Path > Configure Build Path > Libraries > Add external jars > File System > usr > lib > hadoop > client 
+Then select all jar files
+Then press ok two times
+
+Error will be removed from the code file.
+
+Autosave helps in compiling automatically.
 Saving the code automatically compiles it on Eclipse.
+
+Step 8: Creating a jar file
+
+Right click on project > Export > Java > Jar Files > Next
+Browse jar files > File system > home > cloudera > shared > data > HDFS_API
+
+Rename jar file: inputcounties.jar
+Click on ok > next (*2) > Finish
 
 Step 9: Verify the jar file:
 
-jar -tf inputcounties.jar 
+Checking if the jar file has been created:
+
+![image](https://github.com/user-attachments/assets/2fb0acbc-6008-4ec9-aa3b-4a0e7caff367)
+
 
 Step 10: To run on Hadoop cluster, use
+
+Go to the Folder where jar is present i.e., give the absolute path
 
 yarn jar inputcounties.jar
 
@@ -1375,9 +1445,13 @@ The above command is giving error.
 
 yarn jar inputcounties.jar hdfs.InputCounties
 
+here, inputcounties.jar is the jar file and InputCounties is the class Name present in the Java code
 
+![image](https://github.com/user-attachments/assets/cc65a643-3c26-444b-8d27-0814a04217db)
 
+![image](https://github.com/user-attachments/assets/be98ebd5-626e-42e7-ae8e-1d9051a6d425)
 
+![image](https://github.com/user-attachments/assets/dedb7b56-3f0a-48ac-beeb-db28b24d74de)
 
 
 
