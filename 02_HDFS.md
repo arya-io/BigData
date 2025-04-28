@@ -1193,9 +1193,187 @@ REST API for accessing all of the HDFS file system interfaces:
 
 LAB: Using WebHDFS Commands
 
+1) Following HTTP GET request List a Directory /user/cloudera
+curl -i "http://quickstart.cloudera:50070/webhdfs/v1/user/cloudera?op=LISTSTATUS"
+
+![image](https://github.com/user-attachments/assets/88f64846-8317-4a2a-9736-34bc18c201cf)
+
+Till Transfer-Encoding part, it is known as Header
+From FileStatuses part, it is known as Payload
+Important Header parameter: Content-Type: application/json
+This means payload is of json type
+
+2) Following HTTP GET request Open and Read a File /user/cloudera/stocks.csv
+
+curl -i -L "http://quickstart.cloudera:50070/webhdfs/v1/user/cloudera/stocks.csv?op=OPEN"
+
+![image](https://github.com/user-attachments/assets/cd898be0-ddef-4ee7-aa62-e886203b9576)
+![image](https://github.com/user-attachments/assets/dcf02792-080e-4999-b8d4-0da2d8730d33)
+![image](https://github.com/user-attachments/assets/c3dd595b-a7d6-4b54-91b3-b0fe59288bb3)
+
+3) The following PUT request makes a new directory in HDFS named /user/cloudera/data:
+
+curl -i -X PUT "http://quickstart.cloudera:50070/webhdfs/v1/user/cloudera/data?user.name=cloudera&op=MKDIRS"
+
+![image](https://github.com/user-attachments/assets/f419691d-7ba5-45f8-ac8e-7fe48d66a829)
+
+Verify if the folder is created or not using the hadoop client command:
+
+hdfs dfs -ls
+
+![image](https://github.com/user-attachments/assets/f0f1c3af-3685-4d3c-818d-077ff7fc64d8)
+
+4) Below is a command to write the file on hdfs using single curl command instead of 2 commands
+   
+cd /home/cloudera/labs/demos //Assuming that there is small_blocks.txt
+
+curl -i -X PUT -T small_blocks.txt  "http://quickstart.cloudera:50075/webhdfs/v1/user/cloudera/small_blocks.txt?op=CREATE&user.name=cloudera&namenoderpcaddress=quickstart.cloudera:8020&overwrite=false"
+
+![image](https://github.com/user-attachments/assets/0b7f0a28-ef31-46c7-95fd-bf1b2306a453)
+
+DELETE A SPECIFIC FILE:
+
+![image](https://github.com/user-attachments/assets/3614dd54-c493-459d-bad8-dbe293fcb1c4)
+
+![image](https://github.com/user-attachments/assets/f6c8a584-9dc5-4e33-b0cc-790da6b11eb7)
+
 ---
 
+## NOW We will be working on Big Data VM, for that we have to start the Hadoop first.
 
+bash Start-Hadoop-Hive.sh
+
+![image](https://github.com/user-attachments/assets/5b1c881f-f074-497e-a69c-6083c4e6f341)
+
+Now, run the first command:
+
+curl -i "http://talentum-virtual-machine:50070/webhdfs/v1/user/talentum?op=LISTSTATUS"
+
+![image](https://github.com/user-attachments/assets/b63375a2-d71a-4358-a770-4b19ccf34118)
+
+Now, running the second command:
+
+curl -i -L "http://talentum-virtual-machine:50070/webhdfs/v1/user/talentum/shared/stocks.csv?op=OPEN"
+
+
+
+
+There is a project going on. Multiple teams are working. one tema making request. they ewill be providning data ot next tema. that team is going to use thier own programming language. first tema needs to give the data. collect the output of first command in a file. and that file willb e given as input to the second team. use vim editor.
+
+vim automatelist.sh
+![image](https://github.com/user-attachments/assets/c25c72f8-18d9-4e69-889d-4983c8a6330d)
+
+Content of shell file:
+
+#!/bin/bash
+
+curl -i "http://talentum-virtual-machine:50070/webhdfs/v1/user/talentum?op=LISTSTATUS" > automateoutput.txt
+
+bash automatelist.sh
+![image](https://github.com/user-attachments/assets/5ba09b76-f794-4158-85df-199cb926bb29)
+
+cat automateoutput.txt
+![image](https://github.com/user-attachments/assets/26eb2b2d-0212-4bfc-97d0-159d41d8d135)
+
+
+SUSPENDED MODE:
+Switch off the Virtual Machine by keeping the state intact.
+Also known as HIBERNATION.
+
+We can use script shell for running LISTSTATUS from bigdatavm into cloudera vm. 
+Just copy-paste the file from Windows File Explorer and make necessary changes.
+
+curl -i "http://$1:50070/webhdfs/v1/user/cloudera?op=LISTSTATUS" > automateoutput.txt
+
+./automatelist.sh quickstart.cloudera
+
+---------
+
+![image](https://github.com/user-attachments/assets/6066b605-08ee-449c-a0e8-f8ddd290441e)
+
+---
+
+## Demo: Putting Files in HDFS with Java
+
+How to build a java MR application to ingest data into Hadoop cluster (HDFS)
+Question: What is the meaning of build a java application?
+Creating a source file (.java)
+Compiling the source file (.class)
+Create a library of this application (.jar)
+
+Steps for building a Java MR application using Eclipse as an IDE
+1) Create an Eclipse Java Project
+2) Create a package(s) in that project based on source code (Look at the package statements)
+3) Import the source files (.java) in the respective project and package.
+4) Compile the code
+5) Compilation errors related to class path issues
+6) Solution to above issue is to add the respective libraries in the classpath of the project.
+7) Compile it again, if no error indicate that compilation is successful
+8) Create a jar file (library)
+9) Verify the contents of the jar file
+10) If everything is fine then run the jar on Hadoop Cluster.
+
+---
+
+Eclipse is a location on the file system where your code will work.
+Project in Eclipse is a folder in worksspace.
+
+Go to files, workspace > switch workspace > others > OK
+
+![image](https://github.com/user-attachments/assets/af78585f-412a-4ec3-b1bd-e89c6beec0b5)
+
+We are going to create our new project.
+
+To extract the rar file
+
+Follow Steps:
+Create Project: File > New > Project > Project Name > HDFS_API
+
+
+### JRE vs JDK
+We want to build and then run the application. Therefore, we will be choosing the `Use default jre (currently 'jdk1.7.0_67-cloudera') in jre section while creating project.
+Eclipse does not have its own JDK.
+
+Now click Next
+
+bin files in Java means .class files.
+
+Click Finish.
+
+Project has been created.
+
+![image](https://github.com/user-attachments/assets/3f80c255-a11e-4533-a83b-20c42105fcf5)
+
+src will contain .java files.
+
+![image](https://github.com/user-attachments/assets/4f88660b-332b-4a33-8f34-3ad042994a3b)
+
+We are now creating package with name 'hdfs'.
+
+Right click on project name.
+Then create the package.
+This hdfs package will help us to work with HDFS.
+
+
+![image](https://github.com/user-attachments/assets/d898291e-4acf-4f92-a983-4c358a7a5316)
+
+Saving the code automatically compiles it on Eclipse.
+
+Step 9: Verify the jar file:
+
+jar -tf inputcounties.jar 
+
+Step 10: To run on Hadoop cluster, use
+
+yarn jar inputcounties.jar
+
+To run java application on Hadoop, we have to use YARN
+
+echo $?
+
+The above command is giving error.
+
+yarn jar inputcounties.jar hdfs.InputCounties
 
 
 
