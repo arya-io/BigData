@@ -693,3 +693,533 @@ hdfs dfs -help
 - **Home directories** act as a user’s private workspace.
 
 ---
+
+## HDFS Management Options
+
+There are several options for managing HDFS:
+
+Ambari Web UI: Browser-based, HDFS configuration and service management interface. IT is used by Hadoop administrators and not the developers.
+
+NameNode UI: Browser-based interface for basic status monitoring and directory browsing
+
+DataNode UI: Browser-based interface, most commonly used to get block scanner reports (a scanner report is shown later)
+
+HDFS command-line tools: Various command-line tools to interact with the HDFS service and its files, directories, and metadata (described later). Most preferred tool because it provides automation. World is going behind automation.
+
+Manual configuration: Manually editing configuration files (not compatible with Ambari administration)
+
+There are two aspects:
+Either You will work as administrator: create production level cluster 
+Or Hadoop Developer: solve business problems related to big data
+
+---
+
+## Command-Line Management
+
+⬢ Introduction to command-line management tools:
+
+hdfs dfs: HDFS Shell to manage files, directories, and their metadata (Executed by Hadoop Developers)
+hdfs fsck: Checks and reports on file system inconsistencies (does not repair) (Executed by Hadoop Administrator)
+hdfs dfsadmin: Reports basic file system information and statistics and performs various file system administration tasks (Executed by Hadoop Administrator)
+
+---
+
+## Determining Storage Space Consumed
+► The HDFS Shell du command reports the number of bytes consumed by a file or directory. (Does not
+account for replication)
+► Syntax: hdfs dfs –du [-s] [-h] [path]
+
+-s: summary
+-h: human readable form
+-l: list the contents and the file size in bytes
+We can't read bytes so we use human readable form
+
+Examples:
+![image](https://github.com/user-attachments/assets/6c8687a3-82f8-460c-abb7-c699ee8c5ac2)
+
+---
+
+## Monitoring File System Space
+► The HDFS Shell df command reports the file system’s total capacity, along
+with the current amount of free and used storage space.
+► Syntax: hdfs dfs –df [-h]
+► Examples:
+![image](https://github.com/user-attachments/assets/48825ddf-aa9b-4ae3-9f10-40e695153921)
+
+---
+
+## Checking File System Consistency
+
+⬢ The HDFS fsck command checks file system consistency.
+⬢ Run fsck when:
+► There is concern about possible file (data block) corruption
+►After an HDFS or hardware malfunction 
+► Prior to upgrading HDFS to a newer version
+⬢ fsck does not repair data blocks.
+► It only reports, unlike Linux fsck (Linux fsck show inconsistencies and can be used to repair)
+⬢ An fsck reads block and metadata information from only the NameNode.
+
+hdfs dfs fsck [absolute path of stocks.csv on hdfs] -file -blocks -locations
+We will be using:
+hdfs fsck /user/cloudera/soccer_scores.csv -files -blocks -locations
+
+![image](https://github.com/user-attachments/assets/215dc8ab-9eb1-4bfb-85f9-0e596e7ea907)
+
+To see the path, use:
+hdfs dfs -ls /
+
+► DataNodes are never contacted by fsck. ⬢ Must have access permissions to the directories and files being checked
+► The HDFS superuser has access to all files and directories.
+
+---
+
+## fsck Syntax
+► Syntax:
+► hdfs fsck [path] [options] [> <output_file>]
+
+-files: Reports a list of file and directories checked
+-blocks: Reports block ID numbers checked (requires `–files –blocks` syntax)
+-locations: Reports a list of DataNodes locations for each block ID number (requires – 
+`files –blocks –locations` syntax)
+
+-racks: Prepends the rack name on each reported DataNode location (requires at least – 
+`files –blocks –racks` syntax). Really only useful if HDFS rack awareness has been configured (described in another lesson).
+
+-move: Moves files with corrupted data blocks to the `/lost+found` directory
+-delete: Deletes files with corrupted data blocks
+-openforwrite: List files open for write during fsck (open files are not checked)
+
+---
+
+## Understanding fsck Output:
+
+fsck reports:
+⬢ Minimally replicated blocks:
+► Blocks having at least one good replica
+⬢ Over-replicated blocks:
+► Blocks that exceed the file’s replication factor (NameNode will delete)
+⬢ Under-replicated blocks:
+► Blocks that do not meet the file’s replication factor (NameNode will replicate)
+⬢ Mis-replicated blocks:
+► Blocks replicated more than once on the same DataNode (NameNode will move)
+⬢ Corrupt blocks:
+► Blocks where all replicas report checksums errors (NameNode will not repair)
+► User action required!
+
+---
+
+## The Primary Output
+
+► hdfs fsck /user/root
+
+![image](https://github.com/user-attachments/assets/dc46cd92-23ca-4978-836d-f645d1499556)
+
+---
+
+## The –files Option
+► hdfs fsck /user/root -files
+
+![image](https://github.com/user-attachments/assets/6fa24ff2-d38f-4412-9901-23ad6bcd3d35)
+
+---
+
+## The –blocks Option
+► hdfs fsck /user/root –files –blocks
+► The file big1 has three blocks, each with a unique block ID.
+  ► HFDS generated block pool ID: BP-1472918407-172.17.0.2-1431707688874
+    ► The same block pool across all DataNodes
+  ► Data block ID: blk_1073742266_1442, and two others
+    ► The same ID for all of a block’s replicas
+
+![image](https://github.com/user-attachments/assets/176b26f7-6475-45f0-aafa-1121e5667492)
+
+---
+
+The –locations Option
+
+► hdfs fsck /user/root –files –blocks -locations
+
+![image](https://github.com/user-attachments/assets/14329217-ea8c-4d52-8114-e97d00c1ff95)
+
+---
+
+## The –racks Option
+► hdfs fsck /user/root –files –blocks –locations –racks
+► Rack name is /default-rack if rack awareness is not configured.
+  ► Rack awareness and rack naming are described in another lesson.
+
+/default-rack/ is the rack here
+fsck command gives file, blocks, locations, location in which cluster
+
+![image](https://github.com/user-attachments/assets/4ee50cb6-7b38-42ac-8ba8-a6747365376f)
+
+---
+
+## Distributed File System Administration Command
+
+⬢ dfsadmin is a set of HDFS administration tools.
+  ► Ambari is gaining more and more of dfsadmin functionality.
+⬢ Syntax: hdfs dfsadmin [options]
+  ► Over 30 options, only a few options are shown here.
+  ► Getting more information and help: hdfs dfsadmin –help
+⬢ You must be the HDFS superuser.
+
+You are never a superuser in production.
+
+---
+
+## dfsadmin Examples
+
+When and why to use?
+
+⬢ Transition a NameNode into safe mode:
+  ► hdfs dfsadmin –safemode enter
+⬢ Force a NameNode checkpoint (generates new fsimage and edits files)
+  ► hdfs dfsadmin –saveNamespace
+⬢ Or create only a new edits file:
+  ► hdfs dfsadmin -rollEdits
+Gives output: Log not rolled. Name node is in safe mode.
+⬢ Exit NameNode safe mode:
+  ► hdfs dfsadmin –safemode leave
+⬢ Download the latest fsimage file (useful for doing remote backups):
+  ► hdfs dfsadmin -fetchImage
+
+Some of these commands are required when configuring NameNode HA.
+
+![image](https://github.com/user-attachments/assets/b2591161-661c-4c5b-ae33-d46d348af36f)
+
+---
+
+## Heath, Status, and Usage Reports
+► hdfs dfsadmin –report can
+display status and usage information
+similar to the NameNode UI.
+
+![image](https://github.com/user-attachments/assets/36fa9b72-3a76-48be-ab02-22a22adff6b8)
+
+---
+
+## Core Hadoop Configuration Files
+
+⬢ Ambari installs the core Hadoop configuration files in /etc/hadoop/conf.
+
+Here's the information converted into a Markdown table:
+
+| File Name        | File Format              | File Purpose                                                                 |
+|------------------|--------------------------|-------------------------------------------------------------------------------|
+| core-site.xml    | Hadoop configuration XML | Hadoop core configuration settings that can be used by HDFS, YARN, MapReduce, and others |
+| hdfs-site.xml    | Hadoop configuration XML | HDFS configuration settings (NameNode and DataNode)                          |
+| yarn-site.xml    | Hadoop configuration XML | YARN configuration settings                                                  |
+| mapred-site.xml  | Hadoop configuration XML | MapReduce configuration settings                                             |
+| hadoop-env.sh    | Bash script              | Environment variables used by various Hadoop scripts and programs            |
+| log4j.properties | Java properties          | System log file configuration settings                                       |
+
+logs are used for debugging
+
+
+To find the file hdfs-default.xml:
+`sudo find / -type f -name hdfs-default.xml`
+![image](https://github.com/user-attachments/assets/4e058def-a9da-4267-9d17-cd7cf3654a3d)
+
+To get the size of that particular file:
+
+To find the core-site.xml file:
+![image](https://github.com/user-attachments/assets/6fffa45a-8dcf-4898-a010-f14940728212)
+
+---
+
+## Configuration Precedence
+
+► A running job’s actual configuration is a combination of the default, per-site, possibly per-
+node, and per-job configuration.
+
+Default Configuration inherits from extends, overrides from Per-Cluster* Configuration inherits from extends, overrides from Per-Job Configuration
+
+*Cluster nodes with different hardware configurations commonly need different *-site.xml files.
+
+![image](https://github.com/user-attachments/assets/d52af6a4-aa05-4510-8c09-c3367e174878)
+
+---
+
+## Final Properties
+
+► Final properties cannot be overridden by user applications.
+► For example, no 
+–D
+prop=value
+
+![image](https://github.com/user-attachments/assets/5c6f647d-5f92-4b67-9f72-a3ffa8423b82)
+
+## Other Framework Configuration Files
+
+⬢ Other Hadoop frameworks often use configuration files with similar formats
+and naming conventions.
+  ► Examples: *-default.xml, *-site.xml, *-env.sh, *-log4j.properties
+⬢ Other frameworks use their own dedicated configuration directories:
+  ► /etc/ambari-server/conf
+  ► /etc/ambari-agent/conf
+  ► /etc/hive/conf
+  ► /etc/pig/conf
+  ► /etc/zookeeper/conf
+  ► and so on...
+
+Find a file hive-site.xml:
+
+sudo find / type f -name hive-site.xml
+![image](https://github.com/user-attachments/assets/0140f6f9-3183-4c0e-bf96-0e58cbfbfbee)
+
+---
+
+## Configuration Management Options
+
+⬢ Hadoop includes several options for configuration management:
+
+Here's your information converted into a Markdown table:
+
+| Option                  | Description                                     | Benefit                                                                 |
+|-------------------------|-------------------------------------------------|-------------------------------------------------------------------------|
+| Ambari Web UI           | Browser-based graphic user management interface | Ease of use, pre-built and ready to go                                 |
+| REST APIs: Ambari, WebHDFS, YARN, etc. | HTTP verb (GET, PUT, POST, DELETE) management interface | Integration with other web-based management interfaces, can be used for testing and troubleshooting cluster |
+| Manual editing          | Manually edit and distribute configuration files, manually restart services | No reliance on graphic user interface, no need to install Ambari, not compatible with Ambari management |
+| Command-line            | Per-framework command-line management utilities | Scriptable, no reliance on a graphic user interface                    |
+
+---
+
+## Lesson Review
+
+1. Which component of HDFS is responsible for maintaining the namespace of the
+distributed filesystem?
+1. What is the default file replication factor in HDFS?
+1. True or False: To input a file into HDFS, the client application passes the data to the
+NameNode, which then divides the data into blocks and passes the blocks to the
+DataNodes.
+1. Which property is used to specify the block size of a file stored in HDFS?
+1. The NameNode maintains the namespace of the filesystem using which two sets of files?
+1. What does the following command do? hdfs dfs -ls -R /user/thomas/
+1. What does the following command do? hdfs dfs -ls /user/thomas/
+
+---
+
+# Ingesting Data into HDFS
+
+## Topics to be covered:
+Topics Covered
+• Options for Data Input • The Hadoop Client • WebHDFS
+• Overview of Sqoop
+• Importing a Data
+• The Sqoop Export Tool • Exporting to a Table
+• Labs: HDFS Importing/Exporting from/to RDBMS using Sqoop
+• Lab: Importing Log Data into HDFS using Flume
+
+---
+
+## What is Ingestion in Big Data?
+
+Big Data Ingestion involves connecting to various data sources, extracting the data, and detecting the changed data.
+
+---
+
+## Options for Data Input
+
+![image](https://github.com/user-attachments/assets/1906c7cf-9e14-44c1-8b77-c88b49740cc9)
+
+At the center, we have Hadoop.
+
+Hadoop client command, to be given from edgenode: hdfs dfs -put
+Edgenode is the hardware machine where hadoop client side library is installed.
+We can ingest the data into Hadoop using Connectors to RDBMS.
+Sqoop is used to import the data RDBMS into HDFS.
+Flume is used to capture streaming data and push it to HDFS.
+Storm is also used to process the data.
+nifi is developed by hotnworks. nifi is the name of the company (niagara files)
+Spark Streaming
+MapReduce
+WebHDFS
+
+---
+
+## The Hadoop Client
+The put Command
+  • Same as copyFromLocal
+Perfect for inputting local files into HDFS
+  • Useful in batch scripts
+Usage:
+  hdfs dfs -put <localsrc> ... <dst>
+
+---
+
+## Java Native API Versus WebHDFS Access
+
+hdfs dfs: 
+• Requires installation and client HDFS configuration files
+• Uses RPC to communicate 
+• Useful for users and administrators in scripts and the command line
+
+WebHDFS REST API commands:
+• Requires no installation or client configuration files 
+• Uses HTTP to communicate 
+• Useful for programmers writing Web apps
+
+![image](https://github.com/user-attachments/assets/deba3137-5890-4e58-b7a7-618a1aa13f92)
+
+We need to transfer data from one machne to another. In order to do that we need IP address for both because we have to specify it in port. But we don't have any. Then how, do they know where the namenode is?
+
+It is done through this command:
+sudo find / -type f -name core-site.xml
+
+![image](https://github.com/user-attachments/assets/0bbabbfa-0d5b-4691-b2cf-74a683c9b91f)
+
+cat /etc/hadoop/conf.pseudo/core-site.xml
+
+![image](https://github.com/user-attachments/assets/da904864-9ae9-4d33-a0f4-bc17bdd63227)
+![image](https://github.com/user-attachments/assets/0bce61b7-d129-47a4-bf85-500d593db9f7)
+
+Client machine is edge node. This information must be with the client machine.
+Anything inside /etc will automatically inside class path of java application.
+Web Client knows HTTP. It uses the prot 50070. And it understands only HTTP protocol. It has to use RESTAPI to interact with Hadoop.
+RPC information resides in core-site.xml
+Java application uses this information.
+
+What is REST API?
+Suppose We are creating a application using Python's Flask framework.
+it should communicate with hadoop, extract or load into hadoop.
+problem is that it is not a java based application but a python. Then how to make a connectivity. Then use web based api to interact with hadoop.
+
+---
+
+## WebHDFS Features
+
+⬢ Supports all HDFS file administration operations
+⬢ Enables access to HDFS from programming languages other than Java
+  ► API access is through Java only.
+⬢ Enables faster access than hdfs dfs when the client is remote to the cluster
+⬢ Requires no additional servers
+  ► WebHDFS is built into the NameNode and DataNode
+⬢ Uses the full bandwidth of the Hadoop cluster for moving data
+  ► Read and write operations are redirected to the appropriate DataNodes.
+⬢ Is compatible with Kerberos authentication
+  ► Uses Simple and Protected GSSAPI Negotiation Mechanism (SPNEGO), which extends Kerberos to Web
+applications
+⬢ Is completely open source
+
+---
+
+## WebHDFS Enabled by Default
+
+► To verify that WebHDFS is enabled, check either the hdfs-site.xml file or Ambari.
+
+![image](https://github.com/user-attachments/assets/5cb1a866-7f5e-4e24-b227-dce115c69e5c)
+
+![image](https://github.com/user-attachments/assets/0f351bb1-6f09-459d-a920-db430b84ba53)
+
+---
+
+## WebHDFS Operations
+
+⬢ The following WebHDFS operations, formatted using the proper URIs, enable
+HDFS file access and administration.
+
+There is a method known as HOST, GET, POST, PUT, DELETE and other things. These are methods of HTTP. These are web based operations under HTTP.
+
+Here's the information converted into a Markdown table:
+
+| HTTP GET            | HTTP PUT            | HTTP POST          | HTTP DELETE         |
+|---------------------|---------------------|--------------------|---------------------|
+| OPEN                | CREATE              | APPEND             | DELETE              |
+| GETFILESTATUS       | MKDIRS              |                    |                     |
+| LISTSTATUS          | RENAME              |                    |                     |
+| GETCONTENTSUMMARY   | SETREPLICATION      |                    |                     |
+| GETFILECHECKSUM     | SETOWNER            |                    |                     |
+| GETHOMEDIRECTORY    | SETPERMISSION       |                    |                     |
+| GETDELEGATIONTOKEN  | SETTIMES            |                    |                     |
+|                     | RENEWDELEGATIONTOKEN |                    |                     |
+|                     | CANCELDELEGATIONTOKEN|                    |                     |
+
+If we don't specify, the defult command is GET.
+---
+
+## WebHDFS Examples (1)
+
+curl stands for c url
+
+⬢ All programs and applications performing WebHDFS operations use the URI syntax:
+  ► http://<NameNode>:50070/webhdfs/v1/<path>?op=<operation_and_arguments>
+http://<NameNode>:50070/webhdfs/v1/<path>: This is known as WebHDFS API prefix
+⬢ The curl command can be used to test WebHDFS operations.
+⬢ Creating a directory named mydata:
+  ► curl -i -X PUT "http://<NameNode>:50070/webhdfs/v1/web/mydata?op=MKDIRS&user.name=jason”
+  This means we are creating a new folder `mydata` and the operation to create is `op=MKDIRS` and the owner of this directory is `jason`
+⬢ Listing a directory named mydata:
+  ► curl -i "http://<NameNode>:50070/webhdfs/v1/web/mydata?op=LISTSTATUS&user.name=jason”
+  The name of the operation is LISTSTATUS. It comes under HTTP method GET. The default method is GET if we do not specify any method.
+⬢ Reading a file named webdata:
+  ► curl -i -L
+"http://<NameNode>:50070/webhdfs/v1/web/mydata/webdata?op=OPEN&user.name=jason”
+
+---
+
+## WebHDFS Examples (2)
+
+⬢ Writing a file is a two-step process.
+1. Create a file name on the NameNode.
+2. Write the file contents to a DataNode.
+►WebHDFS ensures that files larger than an HDFS block are written across multiple
+DataNodes.
+
+⬢ Create a file by creating a file name on the NameNode:
+► curl -i -X PUT "http://<NameNode>:50070/webhdfs/v1/web/mydata/largefile.json?op=CREATE"
+► The output from this command includes the URI used to write data to the file.
+⬢ Write to the file by sending data to the DataNodes:
+► curl –i –X PUT –T largefile.json
+“http://<DataNode>:50075/webhdfs/v1/web/mydata/largefile.json?op=CREATE&user.name=root&n
+amenoderpcaddress=node1:8020&overwrite=false”
+⬢ Curl can perform a write operation using a single command that performs both steps:
+► curl –i –X PUT largefile.json –L
+“http://<NameNode>:50070/webhdfs/v1/web/mydata/largefile.json?op=CREATE&user.name=root"
+
+---
+
+## WebHDFS
+
+REST API for accessing all of the HDFS file system interfaces:
+
+• http://host:port/webhdfs/v1/test/mydata.txt?op=OPEN
+
+• http://host:port/webhdfs/v1/user/root/data?op=MKDIRS
+
+• http://host:port/webhdfs/v1/test/mydata.txt?op=APPEND
+
+---
+
+LAB: Using WebHDFS Commands
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
