@@ -1948,138 +1948,184 @@ Snapshot:
 
 ---
 
-## 🌟 Demo: Putting Files in HDFS with Java
-
-In this demo, we'll build a **Java MapReduce (MR) application** to ingest data into a **Hadoop cluster (HDFS)**.
-
----
-
-### 🧑‍💻 What Does "Building a Java Application" Mean?
-
-- **Creating a Source File (.java)**: The code you'll write is saved in files with a `.java` extension.
-- **Compiling the Source File (.class)**: After writing the code, you compile it to turn it into a `.class` file, which is machine-readable.
-- **Creating a Library (.jar)**: Finally, you bundle your compiled code into a `.jar` (Java Archive) file to run on Hadoop.
+Got it!  
+You want **best, beginner-friendly notes**, with your **images intact**, a **clear, easy-to-revise structure**, some **emojis** in headers to make it more attractive, and **no missing steps** — like teaching a **child**.  
+I'll upgrade your notes into a beautifully clean format now. Here's the improved version:
 
 ---
 
-### 💻 Steps to Build a Java MR Application Using Eclipse
+# 📂 Demo: Putting Files in HDFS with Java
 
-1) **Create an Eclipse Java Project**
-   - Open Eclipse IDE and create a new Java project.
-
-   ![image](https://github.com/user-attachments/assets/af78585f-412a-4ec3-b1bd-e89c6beec0b5)
-
-2) **Create a Package in the Project**
-   - Packages are like folders to organize your code. In your project, create a package like `hdfs` to keep your HDFS-related code.
-
-   ![image](https://github.com/user-attachments/assets/4faa3eeb-eb26-4bfd-ae16-a2fc11c5a92b)
-
-3) **Import the Source Files (.java) into the Project**
-   - Add `.java` source files to the `hdfs` package inside your project.
-
-   ![image](https://github.com/user-attachments/assets/3f80c255-a11e-4533-a83b-20c42105fcf5)
-
-4) **Compile the Code**
-   - When you compile, Eclipse converts `.java` files into `.class` files. If there are any issues, Eclipse will show error messages.  
-   
-   `src` folder will contain `.java` files.
-
-   ![image](https://github.com/user-attachments/assets/4f88660b-332b-4a33-8f34-3ad042994a3b)
-   ![image](https://github.com/user-attachments/assets/6f2f6941-f702-4f4a-a256-13124064168c)
-   ![image](https://github.com/user-attachments/assets/d898291e-4acf-4f92-a983-4c358a7a5316)
-
-These two were not included in the provided breakdown. Would you like me to incorporate them into the notes or adjust anything else?
-
-6) **Fix Compilation Errors (Class Path Issues)**  
-   - If you see errors related to class paths, it means Eclipse can't find necessary libraries (e.g., Hadoop libraries).  
-   - **Solution**: Add the missing libraries to your project.
-
-   Steps:
-   - Right-click on the project name > **Build Path** > **Configure Build Path** > **Libraries** > **Add External Jars**  
-   - Navigate to the Hadoop libraries (usually found under `usr/lib/hadoop/client`) and add them.
-
-   ![image](https://github.com/user-attachments/assets/c621691e-ccb7-4b17-9235-3ef191076e4e)
-
-7) **Compile Again**
-   - After adding the libraries, recompile the code. If there are no errors, you're ready to move forward!
+Let's learn how to build a Java application to send (ingest) files into Hadoop HDFS!
 
 ---
 
-### 🏗️ Creating the Jar File
+## 🔨 What Does "Build a Java Application" Mean?
 
-1) **Create the Jar File**  
-   - Right-click on the project > **Export** > **Java** > **Jar File** > **Next**.
-   - Choose the output location and name the jar file (e.g., `inputcounties.jar`).
+It means **three simple steps**:
+- **Write** the source file (`.java`)
+- **Compile** the source file into a class file (`.class`)
+- **Package** the class files into a **library** (`.jar`)
 
-   ![image](https://github.com/user-attachments/assets/d898291e-4acf-4f92-a983-4c358a7a5316)
-
-2) **Verify the Jar File**  
-   - Check the contents of the `.jar` file to make sure everything looks good.
-
-   ![image](https://github.com/user-attachments/assets/2fb0acbc-6008-4ec9-aa3b-4a0e7caff367)
+This `.jar` file can then run on **Hadoop Cluster**.
 
 ---
 
-### 🚀 Running the Jar File on Hadoop Cluster
+## 🛠 Steps to Build Java MR (MapReduce) Application Using Eclipse IDE
 
-1) **Upload and Run the Jar File on Hadoop Cluster**
-   - To run the `.jar` file on the Hadoop cluster, navigate to the folder where your `.jar` file is located.
-   - Use YARN to execute your Java application:  
-   ```bash
-   yarn jar inputcounties.jar hdfs.InputCounties
-   ```
-   - Here, `inputcounties.jar` is the jar file and `InputCounties` is the class name that you specified in your code.
+### 1️⃣ Create an Eclipse Java Project
 
-   **Note**: If you run into issues with YARN, try checking the YARN logs for errors. Example:
+👉 In Eclipse:
+- File ➡️ New ➡️ Project ➡️ Java Project
+- Name it: **HDFS_API**
 
-   ```bash
-   echo $?
-   ```
+![Create Project](https://github.com/user-attachments/assets/af78585f-412a-4ec3-b1bd-e89c6beec0b5)
 
-   ![image](https://github.com/user-attachments/assets/cc65a643-3c26-444b-8d27-0814a04217db)
+👉 If a `.rar` file (compressed project) is provided, **extract** it first.
 
-2) **Check the Output**  
-   - After the application runs successfully, you’ll see the output as expected.
+---
+### 2️⃣ Set JDK Properly (⚙️ JRE vs JDK)
 
-   ![image](https://github.com/user-attachments/assets/be98ebd5-626e-42e7-ae8e-1d9051a6d425)
+- Use **default JRE** (Example: `jdk1.7.0_67-cloudera`)
+- Eclipse doesn't have its own JDK, it uses the one installed on your machine.
 
-3) **Final Output**  
-   - Verify everything worked fine with the final output. If there are any issues, check the logs or Hadoop status.
+![JRE vs JDK](https://github.com/user-attachments/assets/4faa3eeb-eb26-4bfd-ae16-a2fc11c5a92b)
 
-   ![image](https://github.com/user-attachments/assets/dedb7b56-3f0a-48ac-beeb-db28b24d74de)
+✔️ Click **Next** and **Finish**.
 
 ---
 
-### 📚 JRE vs JDK
+### 3️⃣ Understand the Project Structure
 
-- **JRE (Java Runtime Environment)**: This is used to **run** Java applications.
-- **JDK (Java Development Kit)**: This is used to **develop** Java applications. Since we are building and running the application, we will use JDK.
+- **src/** ➡️ contains your `.java` files (the source code)
 
-When creating the project in Eclipse, make sure to select **JDK** (e.g., `jdk1.7.0_67-cloudera`) under the JRE section.
-
----
-
-### 🗂️ Eclipse Workspace and Project Setup
-
-- **Workspace**: The location where your projects are stored.
-- **Project**: A folder within the workspace that contains all the resources for your application (e.g., code, libraries, etc.).
-
-   **To switch workspace**:
-   - Go to **File > Switch Workspace > Other**.
+![src folder](https://github.com/user-attachments/assets/3f80c255-a11e-4533-a83b-20c42105fcf5)
 
 ---
 
-### 🧳 Summary of the Steps
+### 4️⃣ Create a Package (📦)
 
-| 📌 Step | 🛠️ Action |
-|--------|-----------|
-| 1. Create Eclipse Project | File > New > Project > HDFS_API |
-| 2. Create Package | Right-click > New > Package > hdfs |
-| 3. Import Java Files | Add `.java` files into `hdfs` package |
-| 4. Compile Code | Use Eclipse's build process |
-| 5. Fix Errors | Add missing libraries to the build path |
-| 6. Create Jar File | Export > Java > Jar File |
-| 7. Run on Hadoop | `yarn jar inputcounties.jar hdfs.InputCounties` |
-| 8. Verify Output | Check final output in Hadoop cluster |
+👉 Right-click on Project ➡️ New ➡️ Package  
+Name it **hdfs**.
+
+- A package groups related Java classes.
+
+![create package](https://github.com/user-attachments/assets/4f88660b-332b-4a33-8f34-3ad042994a3b)
+
+- Our work with HDFS will go into this package.
+
+![package hdfs](https://github.com/user-attachments/assets/c621691e-ccb7-4b17-9235-3ef191076e4e)
+
+- Final package view:
+
+![package created](https://github.com/user-attachments/assets/6f2f6941-f702-4f4a-a256-13124064168c)
 
 ---
+
+### 5️⃣ Import Source Files
+
+- Copy the `.java` file (code) inside the **hdfs** package.
+
+---
+
+### 6️⃣ Solve Compilation Errors (🛠️ Add Hadoop Libraries)
+
+Problem: You'll get errors because Eclipse cannot find Hadoop classes.
+
+Solution:
+- Right-click Project ➡️ Build Path ➡️ Configure Build Path ➡️ Libraries ➡️ **Add External JARs**
+- Navigate to `/usr/lib/hadoop/client`
+- **Select all JAR files** and click OK twice.
+
+![add external jars](https://github.com/user-attachments/assets/d898291e-4acf-4f92-a983-4c358a7a5316)
+
+👉 **Tip:** Turn on **Autosave** in Eclipse to compile automatically whenever you save the code!
+
+---
+
+### 7️⃣ Successful Compilation ✅
+
+- If no red marks (errors) ➡️ Your Java code is successfully compiled.
+
+---
+
+## 📦 Step 8: Create a JAR File
+
+How to create `.jar` (Java library file):
+
+1. Right-click Project ➡️ Export ➡️ Java ➡️ JAR File ➡️ **Next**
+2. Choose the location: `/home/cloudera/shared/data/HDFS_API`
+3. Rename your jar: **inputcounties.jar**
+4. Click OK ➡️ Next ➡️ Next ➡️ Finish!
+
+---
+
+## 🧪 Step 9: Verify the JAR File
+
+Check that your `.jar` file is created.
+
+![verify jar](https://github.com/user-attachments/assets/2fb0acbc-6008-4ec9-aa3b-4a0e7caff367)
+
+---
+
+## 🚀 Step 10: Run the JAR on Hadoop Cluster
+
+1. Open Terminal.
+2. Go to the folder where your jar file is located.
+3. Run:
+
+```bash
+yarn jar inputcounties.jar
+```
+But if it gives an error, you need to also **mention the class name** inside the jar:
+
+```bash
+yarn jar inputcounties.jar hdfs.InputCounties
+```
+- Here `inputcounties.jar` = your jar file
+- `hdfs.InputCounties` = your **package name** + **main class name**
+
+4. Check success/failure by typing:
+
+```bash
+echo $?
+```
+- `0` = Success
+- Non-zero = Error
+
+---
+### Important Visuals:
+
+- Running JAR Example:
+
+![run yarn jar](https://github.com/user-attachments/assets/cc65a643-3c26-444b-8d27-0814a04217db)
+
+- Successful Execution:
+
+![execution output](https://github.com/user-attachments/assets/be98ebd5-626e-42e7-ae8e-1d9051a6d425)
+
+- Another Output Example:
+
+![hadoop output](https://github.com/user-attachments/assets/dedb7b56-3f0a-48ac-beeb-db28b24d74de)
+
+---
+
+# 🧠 Final Quick Summary
+
+| Step | Action |
+|:----:|:------|
+| 1 | Create Java project |
+| 2 | Create package inside project |
+| 3 | Import Java code |
+| 4 | Fix errors by adding Hadoop JARs |
+| 5 | Compile successfully |
+| 6 | Create `.jar` file |
+| 7 | Verify the `.jar` |
+| 8 | Run using `yarn jar` command |
+| 9 | Debug if necessary (`echo $?`) |
+
+---
+
+# 🌟 And that's it!
+
+**You have now learned how to build a Java MapReduce application and run it on a Hadoop cluster!** 🚀  
