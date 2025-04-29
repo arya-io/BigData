@@ -2679,6 +2679,44 @@ Output:
 ![image](https://github.com/user-attachments/assets/f4f852af-b261-4455-a932-625997c6db0a)
 
 
+Developement will be in BigDataVM
+
+Task1:
+ingest using hadoop client
+stocks.csv using java
+project name: Stock_Upload
+groupid: org.cdac
+package name: org.cdac.pune
+class name: UploadStock
+
+![image](https://github.com/user-attachments/assets/54392749-b429-4e65-8299-4f2ff1f6f4ec)
+![image](https://github.com/user-attachments/assets/c30a70cb-3089-48c5-9ada-d4afa3d158c3)
+![image](https://github.com/user-attachments/assets/32e83170-59ee-418e-804e-d802b60e86f9)
+
+Output:
+![image](https://github.com/user-attachments/assets/16eee65c-b7cf-44fe-9c74-d4360ba87c02)
+![image](https://github.com/user-attachments/assets/33cf4d63-14d1-41a7-836b-be4c8d25b90d)
+
+
+Task 2:
+Take jar and add them in cloudera
+Run jar on cloudera
+![image](https://github.com/user-attachments/assets/4a63bc1c-060f-47c1-93e4-6d3fcc6b8651)
+![image](https://github.com/user-attachments/assets/fe7de6fb-f545-478f-aa54-e9f87a644597)
+![image](https://github.com/user-attachments/assets/d67bb699-e2d9-42d8-92f4-092ac2ef6a43)
+![image](https://github.com/user-attachments/assets/7ba6fda6-82aa-4384-a503-e3309409e29d)
+
+
+
+---
+
+
+
+
+
+
+
+
 
 
 
