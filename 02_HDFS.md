@@ -2124,602 +2124,1177 @@ echo $?
 
 **You have now learned how to build a Java MapReduce application and run it on a Hadoop cluster!** 🚀  
 
----
-
-Different types of client applications:
-
-Web Client: This is a client application that runs in a web browser. It does not require installation on the user's device, as it relies on web technologies like HTML, CSS, and JavaScript. Examples include Gmail, Google Docs, and Microsoft Outlook Web App.
-
-Thick Client (or Fat Client): This type of client application is installed directly on the user's device and often performs substantial processing locally. It typically interacts with a server but does not rely entirely on the server for functionality. Examples include Microsoft Word, Adobe Photoshop, and desktop email clients like Outlook.
 
 ---
 
-Download ideaintellj
-and put it into home of big data
+## 💻 Types of Client Applications
 
-There is no eclipse in this environment
-WE are going to install intellij
-Open in Libra office
+Client applications are software programs that interact with a server to retrieve or send data. They come in various types depending on how and where they operate. Let's explore the main types:
 
+---
+
+### 🌐 1. **Web Client**
+
+**Definition:**  
+A **Web Client** is a client application that runs inside a web browser. It doesn't need to be installed on your device.
+
+**Key Features:**
+- No installation required ✅  
+- Runs on web technologies like **HTML**, **CSS**, and **JavaScript**  
+- Needs an active **internet connection** to function properly  
+- Easy to update and access from multiple devices 🌍  
+
+**Examples:**
+- **Gmail** (email through browser)  
+- **Google Docs** (online word processing)  
+- **Microsoft Outlook Web App**
+
+**Use Case:**  
+Great for users who want quick access from anywhere without installing anything.
+
+---
+
+### 🖥️ 2. **Thick Client (or Fat Client)**
+
+**Definition:**  
+A **Thick Client** is installed directly on the user’s device. It can do most of the processing locally and doesn't rely heavily on the server.
+
+**Key Features:**
+- Requires installation on your computer 💽  
+- Performs **heavy processing** on the client side  
+- May sync or fetch data from the server but can work offline as well  
+- Typically **faster** for tasks requiring more resources  
+
+**Examples:**
+- **Microsoft Word** (desktop version)  
+- **Adobe Photoshop**  
+- **Outlook (desktop version)**
+
+**Use Case:**  
+Best for users who need full-featured, responsive apps with or without internet.
+
+---
+
+# 💻 Setting Up IntelliJ IDEA on BigDataVM
+
+We will now do the same Java HDFS project, but this time using **IntelliJ IDEA** inside **BigDataVM** (no Eclipse here).
+
+---
+
+## 📥 Step 1: Download IntelliJ Installer
+
+- Download the `ideaintellj` file and put it inside the **home directory** of BigDataVM.
+- The file is usually in `.tar.gz` format — this is a compressed file.
+
+---
+
+## 🧹 Step 2: Clean Up (Remove Existing IntelliJ)
+
+If IntelliJ is already installed via Snap, remove it:
+
+```bash
 sudo snap remove intellij-idea-community
-Delete if already present
+```
 
-Now install
-Installation is in tar format
-now we are compressing it
-gunzip is used to do it. In short it is known as gzip
-We are extracting now.
+This ensures a **fresh setup**.
 
-Manual for tar: man tar
+---
 
-![image](https://github.com/user-attachments/assets/16dc1973-6efd-46ea-a1f3-5a66afafc183)
+## 📦 Step 3: Extract the IntelliJ Tar File
 
-To extract gz, use z
-What is verbose?
-What is zxvf in linux
+We are now going to extract the `.tar.gz` file.
 
-We are extracting now
+📘**Note:**  
+- `.gz` is a gzip compressed format  
+- `tar` is used to extract it  
+- `man tar` shows the **manual** for the `tar` command  
+
+### 📌 Command Breakdown:  
+```bash
 sudo tar -zxvf 'Copy of ideaIC-2018.2.8.tar.gz' -C /opt/
-![image](https://github.com/user-attachments/assets/b35cf63a-fb3c-4cc5-aa89-f50707b7237d)
-![image](https://github.com/user-attachments/assets/e03de164-db22-427e-80f4-4a927a2ca389)
+```
 
+✅ Explanation of options:
+- `z`: unzip `.gz` files (gzip)
+- `x`: extract
+- `v`: verbose (shows progress)
+- `f`: file (specifies the file name)
+- `-C /opt/`: extract contents into `/opt/` directory
+
+📷 Extraction in progress:
+
+![Extracting IntelliJ](https://github.com/user-attachments/assets/16dc1973-6efd-46ea-a1f3-5a66afafc183)
+
+📷 Extraction done:
+
+![Extracted](https://github.com/user-attachments/assets/b35cf63a-fb3c-4cc5-aa89-f50707b7237d)  
+![Progress](https://github.com/user-attachments/assets/e03de164-db22-427e-80f4-4a927a2ca389)
+
+---
+
+## 📁 Step 4: Navigate to the Extracted Folder
+
+Let's explore the extracted files.
+
+### Check if it exists:
+```bash
 ls -lh /opt/
-![image](https://github.com/user-attachments/assets/7ae6434e-36ef-495a-a880-ebb8c5ca4c69)
+```
+📷 Result:
 
-Here, opt is created in /
+![opt folder](https://github.com/user-attachments/assets/7ae6434e-36ef-495a-a880-ebb8c5ca4c69)
 
-![image](https://github.com/user-attachments/assets/6c4b149d-1212-4a9e-8a9a-1fb1c0779444)
+📝 `opt/` is a system folder where software is often installed manually.
 
+---
+
+### Move into `/opt`:
+```bash
 cd /opt
 ls
 ls -lh
-![image](https://github.com/user-attachments/assets/14753432-b8fc-4719-9ba2-2cb1b0101ec2)
+```
+📷 Result:
 
+![cd opt](https://github.com/user-attachments/assets/6c4b149d-1212-4a9e-8a9a-1fb1c0779444)
+
+---
+
+### List IntelliJ Files:
+
+```bash
 ls -lh idea-IC-182.5262.2/
-![image](https://github.com/user-attachments/assets/308ea8f5-3193-485e-9e4c-5b35e35f8316)
+```
 
-Now we have copied the folder HDFS_API present in our STAGING AREA TO LABS_HOME:
+📷 Inside IntelliJ folder:
 
-![image](https://github.com/user-attachments/assets/d5defc89-dfd7-470d-a48f-23c57bbe9b6c)
+![ideaIC contents](https://github.com/user-attachments/assets/14753432-b8fc-4719-9ba2-2cb1b0101ec2)  
+![idea files](https://github.com/user-attachments/assets/308ea8f5-3193-485e-9e4c-5b35e35f8316)
 
-C![image](https://github.com/user-attachments/assets/20cd258d-da2a-4019-9ded-751c119c1bea)
+---
 
-![image](https://github.com/user-attachments/assets/e2993d72-15c0-4846-8741-e64a3fc6f875)
+## 🧠 Quick Recap: Terminal Commands Used
 
-tHERE ARE MANY SHELL SCRIPTS
-![image](https://github.com/user-attachments/assets/febe7a3e-6b6f-4c6e-be28-a5980ea81123)
+| Command | Purpose |
+|--------|---------|
+| `sudo snap remove intellij-idea-community` | Remove old IntelliJ |
+| `gunzip` / `gzip` | Used for .gz compression/decompression |
+| `man tar` | Opens help/manual for tar |
+| `tar -zxvf file.tar.gz -C /opt/` | Extract tar.gz to /opt |
+| `ls -lh /opt/` | List files with sizes in /opt |
+| `cd /opt` | Navigate to /opt |
+| `ls -lh idea-IC-*` | Check IntelliJ files |
 
+---
+
+# 🚀 Launching IntelliJ IDEA & Setting Up HDFS Project
+
+We’ve already extracted IntelliJ to `/opt/`. Now we’ll launch it and set up our **Java MapReduce project (HDFS_API)** for editing and execution.
+
+---
+
+## 🗂️ Step 1: View IntelliJ Contents
+
+Let’s make sure IntelliJ files are correctly extracted:
+
+```bash
+ls -lh idea-IC-182.5262.2/
+```
+
+📷 IntelliJ folder structure:
+
+![IntelliJ contents](https://github.com/user-attachments/assets/308ea8f5-3193-485e-9e4c-5b35e35f8316)
+
+---
+
+## 🛠️ Step 2: Copy HDFS_API Project to Workspace
+
+Now we copy the `HDFS_API` project from **Staging Area** to your **LABS_HOME directory**, which is your workspace inside BigDataVM.
+
+📷 Copying Project:
+
+![Copying to Labs_Home](https://github.com/user-attachments/assets/d5defc89-dfd7-470d-a48f-23c57bbe9b6c)
+
+📷 Confirmation (destination view):
+
+![Labs_Home structure](https://github.com/user-attachments/assets/20cd258d-da2a-4019-9ded-751c119c1bea)
+
+📷 Project Folder:
+
+![HDFS_API copied](https://github.com/user-attachments/assets/e2993d72-15c0-4846-8741-e64a3fc6f875)
+
+---
+
+## 🐚 Step 3: Run IntelliJ IDEA
+
+Inside the extracted IntelliJ folder, there are **many shell scripts**.
+
+We need to run `idea.sh` to start the IntelliJ GUI.
+
+📷 List of scripts:
+
+![Shell scripts in IntelliJ](https://github.com/user-attachments/assets/febe7a3e-6b6f-4c6e-be28-a5980ea81123)
+
+### ▶️ Run the script:
+```bash
 ./idea.sh
+```
 
-A screen will pop up
+📷 After running the script, IntelliJ starts and a welcome/config screen appears:
 
-![image](https://github.com/user-attachments/assets/ec22c7df-23f7-4138-ad44-7edb6433f606)
-Click on OK.
+![IntelliJ welcome screen](https://github.com/user-attachments/assets/ec22c7df-23f7-4138-ad44-7edb6433f606)
 
-A screen will appear here:
-
-![image](https://github.com/user-attachments/assets/feedff35-a79a-4022-af5f-66c93c65dafd)
-
-Select the Darcula
-Click on Next desktop entry 
-![image](https://github.com/user-attachments/assets/7721b60d-2f64-4a2b-82b9-3dfe6dad6c2b)
-next launcher script
-
-
-
-![image](https://github.com/user-attachments/assets/a8d7b788-00c0-4a45-b595-0b468a4002b1)
-
-![image](https://github.com/user-attachments/assets/6006b891-82ed-4540-be33-93df37fa9a87)
-
-Next default plugins
-![image](https://github.com/user-attachments/assets/6e416d83-ed66-4499-89d3-a4c73264ead3)
-Options shown on this screen:
-Build tools: We can integrate build tools.
-Version Control: Git is a version Control.
-Test Tools
-Swing: java has swing, python has tkinter
-Android
-Other Tools
-Plugin Development
-
-Click on Next: Featured Plugins
-![image](https://github.com/user-attachments/assets/41049e86-2531-4e39-b6b2-6ff20f9ca163)
-
-Tools:
-Scala
-IdeaVim
-
-Now click on Start uisng InteliJ IDEA, it will start
-![image](https://github.com/user-attachments/assets/92221197-2f7d-4a93-b36d-57f9eddbf20f)
-
-Create new project
-![image](https://github.com/user-attachments/assets/3ff04d4a-2be7-4b7d-92a0-d66160f8d180)
+➡️ Click **OK** to continue.
 
 ---
 
-We were having a machine with eclipse and created a project and the libraries required for project were there in the ide itself.
-Then we added jars there.
-We did this yesterday in Eclipse.
+## 📋 Step 4: IntelliJ First Launch Screen
 
-But, our machine today, we don't have libraries here in the intellij.
-We will be using Code Repository: Maven Repo
-This has all the dependencies for all the projects.
-For example, hadoop requires Hadoop client side libraries.
-We need to connect our project to maven repo.
-We can't only create java project in intellij.
-Additional task is to pull the libraries also.
-We will need to create Maven Java Project. 
+Once loaded, you’ll see the full interface of IntelliJ IDEA where you can **import your existing HDFS_API project** and start working on it.
+
+📷 Main screen:
+
+![IntelliJ GUI loaded](https://github.com/user-attachments/assets/feedff35-a79a-4022-af5f-66c93c65dafd)
 
 ---
 
-We can create Java Project, Android, Intellij platform plugin, kotlin, projects here in intellij IDEA.
-But we are interested in Maven here.
-By default Project SDK is 1.8 here because it is showing java project.
-select maven project
-![image](https://github.com/user-attachments/assets/f82efa36-dc9a-450a-8524-4806ba252156)
+## 🧠 Summary of Steps:
 
-Click NExt
-![image](https://github.com/user-attachments/assets/416fe088-1ed1-4ed4-95da-386a4ec6eb17)
-
-We need to give the address of dependencies here
-That address will be combinateion of groupid and artifactid
-Every project will have a unique id and is shown by groupid and artifact id
-group id: org.example
-
-![image](https://github.com/user-attachments/assets/8033d701-0859-4f92-9d8a-f0a0be404983)
-
-artifact id: HDFS_API
-![image](https://github.com/user-attachments/assets/295115a5-c34e-4e80-90a2-df3903c419e9)
-
-Click on Next
-artifact id has been taken as project name: ~/IdeaProjects/HDFS_API
-![image](https://github.com/user-attachments/assets/daf42a48-03c0-4dad-a228-37bf8a94ffe2)
-
-Click on Finish
-
-![image](https://github.com/user-attachments/assets/2e4fb860-9b71-4826-9549-2d78b529c4fb)
-Click on Enable Autoimport when the dialog box pops up which asks maven projects need to be imported
-IT will start downloading the dependencies then
+| Step | Description |
+|------|-------------|
+| ✅ View IntelliJ files | `ls -lh idea-IC-*` |
+| 📁 Copy Project | Move `HDFS_API` to workspace |
+| 💻 Launch IntelliJ | Run `./idea.sh` |
+| 🔧 Start Config | Accept and load IntelliJ GUI |
+| 📦 Ready to import project | You’ll now import `HDFS_API` into IntelliJ |
 
 ---
 
-Every maven file is uniquely identified by a file called as pom (Project object model)
-The file which we are seeing on the screen is pom file.
-It contains groupid and artifact id which we specified.
+# 🎨 Setting Up IntelliJ IDEA GUI & Creating Project
 
-Go to terminal linux:
-go inside ideaprojects folder
-![image](https://github.com/user-attachments/assets/79b57e7c-4707-481c-96c6-18cd50c23d61)
-
-It should contain HDFS_API folder and inside it a pom.xml file and src folder
-![image](https://github.com/user-attachments/assets/9dc5e940-999b-4f9a-844a-58d1fa9f101e)
-
-By the way, why are we using different environments to do the same task. We are using cloudera and BigDataVM.
-The answer is to get new learning. We get to know what automation is. Production environment is completely server based, ui based. Not to go in comfort zone. 
-We can also use Eclipse on BigDataVM. 
+Let’s go through the setup screens of IntelliJ after launching it. This is the final step before you can start coding!
 
 ---
 
-Every maven file is identified by three points:
-groupid, artifactid and version
+## 🌙 Step 1: Select Theme
 
-![image](https://github.com/user-attachments/assets/9f7049af-054f-47e9-ac16-b6b4a8d277ac)
+Choose a **theme**. Most people prefer **Darcula** (dark mode) for better eye comfort.
 
-Files in our project:
-![image](https://github.com/user-attachments/assets/e113018e-9876-488b-b53d-2baa9269b726)
+📷 Theme selection screen:
 
-
-in Eclipse
-src contains all the code files
-in Intellij
-src > main > java > code files will be stored here
-
-Yesterday, the package name was hdfs
-
-now, select java right click new package
-package anme is hdfs
-
-![image](https://github.com/user-attachments/assets/6076f390-dde1-4fd1-b154-4902a2532ee1)
-
-Moving the InputCounties.java file from HDFS folder of staging area into src/main/java folder:
-
-![image](https://github.com/user-attachments/assets/cedfaa2c-1aed-44bd-b5b1-9d387adb3ee3)
-![image](https://github.com/user-attachments/assets/62bb386a-d56c-40b6-bf63-706d973f7cee)
-
-the java file is showing error because of the client side libraries because it is not being present.
-They have to be added in the class path.
-maven project needs the client side libraries.
-pom.xml represents the project in maven.
-We must tell pom.xml what are our requirements.
-
-Checking hadoop version in terminal
-
-![image](https://github.com/user-attachments/assets/159241d4-f4f1-4bf9-bae2-e13bb986ba49)
-
-We require hadoop client side library for version 2.7.3
-
-We need to google: maven repository hadoop client 2.7.3
-
-This is the dependency:
-![image](https://github.com/user-attachments/assets/5c639aaf-8e75-4891-8732-2d9c6f88a6e1)
-
-Our project too has groupId, artifactId, version
-We need to put this dependencies in our project
-
-Now, how to put that dependency
-
-Return to HDFS_API in Intellij:
-![image](https://github.com/user-attachments/assets/68016171-d608-4114-b383-fa10c7592bb0)
-
-We have put dependencies related to hadoop client
-![image](https://github.com/user-attachments/assets/4ac8bd3e-a1e8-4c60-8708-ef7f45e6bd76)
-
-Errors of InputCounties.java has been resolved.
-
-External Libraries:
-![image](https://github.com/user-attachments/assets/e14b2895-9758-4e7d-adfd-b0b8cc557a0f)
-
-
-The hadoop library version needs to be same when working in projects with different teams. Different version system will result in errors.
-
-The responsibility of creating jar file is of pom.xml
-
-![image](https://github.com/user-attachments/assets/76ebd900-8aa2-43b5-a850-771534e86d5e)
-
-Then selecting directory path
-
-![image](https://github.com/user-attachments/assets/1dc8d5b7-2a39-4ece-8aaa-ac890b9077c6)
-
-Selecting hadoop client
-
-![image](https://github.com/user-attachments/assets/ca81dd5d-8cbd-4930-9a97-b298c1e06ab4)
-
-This is what we see in the file manager:
-
-![image](https://github.com/user-attachments/assets/815c607d-63e1-44eb-be91-bb586f210ff4)
-We have folders for groupID, then artifactID and then the version
-
-Opening Maven Projects from right side of the screen:
-
-![image](https://github.com/user-attachments/assets/19c5e50f-109d-4f46-a990-1ca3511394a1)
-
-First select clean and run
-This command deltes jar file if already exists
-![image](https://github.com/user-attachments/assets/af31f989-539d-48fc-bc98-e9885ef72766)
-
-then select package and run
-Creating new jar file
-![image](https://github.com/user-attachments/assets/2e24fefd-0711-42fc-927e-6c4291bd7b9e)
-![image](https://github.com/user-attachments/assets/7ba1c725-56d2-4e19-b22b-3f13d61fd853)
-
-![image](https://github.com/user-attachments/assets/bef548aa-75b8-4986-87b3-4a4a93d6cac4)
-
-This is just the warning and not the error:
-![image](https://github.com/user-attachments/assets/b24801c5-758c-40ee-8626-515b5a62c190)
-
-The code has executed successfully:
-![image](https://github.com/user-attachments/assets/47431671-b28b-4167-b5de-b30e9f1bfdb8)
-
-Checking counties files in hdfs:
-![image](https://github.com/user-attachments/assets/839da4f4-0d0a-4c3a-b0ed-9c2560efdf91)
-
-Create a new Maven Project HDFS_API_1
+![Darcula Theme](https://github.com/user-attachments/assets/7721b60d-2f64-4a2b-82b9-3dfe6dad6c2b)
 
 ---
 
-Yarn helps Map reduce to run its resources on Hadoop.
-If we don't specify the YARN command, we are not able to execute the Map Reduce Project.
-YARN is also responsible for running SPARK on Hadoop.
+## 💻 Step 2: Desktop Entry & Launcher Script
 
--tf command is used for verification.
-The reason we are putting jar file in the counties folder is in the InputCounties.java file.
+✔️ Check **Desktop Entry** – this allows IntelliJ to appear in your system menu for easy access later.
+
+✔️ Select **Launcher Script** – this helps launch IntelliJ from terminal using `idea.sh`.
+
+📷 Screens:
+
+![Desktop entry](https://github.com/user-attachments/assets/a8d7b788-00c0-4a45-b595-0b468a4002b1)  
+![Launcher script](https://github.com/user-attachments/assets/6006b891-82ed-4540-be33-93df37fa9a87)
 
 ---
 
-Understanding InputCounties.java:
+## 🧩 Step 3: Configure Default Plugins
+
+This screen shows available **tools and plugins** IntelliJ can support:
+
+📷 Plugin setup screen:
+
+![Default plugins](https://github.com/user-attachments/assets/6e416d83-ed66-4499-89d3-a4c73264ead3)
+
+### Key Plugin Areas:
+- **Build Tools** 🧱: Helps compile/build your Java projects.
+- **Version Control** 🔧: Git for managing code changes.
+- **Test Tools** 🧪: For automated testing.
+- **Swing UI Designer** 🎨: Java’s GUI tool (like Python’s Tkinter).
+- **Android** 🤖: For mobile development.
+- **Other Tools**: General utilities.
+- **Plugin Development** 🧩: For writing IntelliJ plugins.
+
+Click **Next**.
+
+---
+
+## 🌟 Step 4: Featured Plugins
+
+Here you can optionally install additional tools like:
+
+📷 Featured Plugins:
+
+![Featured plugins](https://github.com/user-attachments/assets/41049e86-2531-4e39-b6b2-6ff20f9ca163)
+
+- **Scala**: If working with Scala in the future.
+- **IdeaVim**: Vim keybindings support.
+
+✅ Choose if needed or leave default, then click **Start using IntelliJ IDEA**.
+
+📷 Final launch screen:
+
+![Start IntelliJ](https://github.com/user-attachments/assets/92221197-2f7d-4a93-b36d-57f9eddbf20f)
+
+---
+
+## 🏁 Step 5: Create a New Project
+
+Now we are ready to create or import a Java project!
+
+📷 Create Project Screen:
+
+![Create new project](https://github.com/user-attachments/assets/3ff04d4a-2be7-4b7d-92a0-d66160f8d180)
+
+Choose:
+- **Java** as the language
+- **Project SDK**: Select `jdk1.7.0_67-cloudera` or whichever is installed
+
+📌 If importing existing project like `HDFS_API`, choose **Import Project** instead of New Project.
+
+---
+
+## 🧠 Summary:
+
+| Step | Action |
+|------|--------|
+| 🎨 Choose Theme | Pick Darcula or Light |
+| 🖥️ Enable Desktop Entry | So IntelliJ is easy to access later |
+| 📂 Enable Launcher Script | Use from terminal with `idea.sh` |
+| 🧩 Plugin Setup | Keep default or add more (like Git, Vim, Scala) |
+| 🚀 Launch IntelliJ | Click “Start using IntelliJ IDEA” |
+| 📁 Create/Import Project | Set up new or open existing HDFS_API project |
+
+---
+
+You're now ready to **configure the build path, fix errors, compile your Java HDFS code, and create the JAR** inside IntelliJ.
+---
+
+# ☕ Setting Up a Maven Java Project in IntelliJ IDEA
+
+In Eclipse, libraries were often **bundled manually** by adding `.jar` files directly. In IntelliJ, we use **Maven** to automate the management of libraries and dependencies via a central repository.
+
+---
+
+## 🗃️ What is Maven?
+
+- **Maven** is a **build automation tool** used primarily for Java projects.
+- It manages:
+  - Project structure
+  - Dependencies (external libraries)
+  - Build lifecycle (compiling, testing, packaging)
+
+---
+
+## 🧱 Why Use Maven in IntelliJ?
+
+- IntelliJ doesn’t have libraries pre-installed.
+- We need to **connect to a code repository (Maven Repository)**.
+- Dependencies like **Hadoop client libraries** can be pulled automatically from the repo.
+
+---
+
+## 🛠️ Step-by-Step: Create a Maven Project in IntelliJ
+
+### 1. **Create a New Maven Project**
+In the IntelliJ welcome screen or File → New → Project:
+
+- Choose **Maven**
+- Make sure the **Project SDK is Java 1.8**
+- 📷 ![Select Maven](https://github.com/user-attachments/assets/f82efa36-dc9a-450a-8524-4806ba252156)
+
+Click **Next**
+
+---
+
+### 2. **Configure Maven Project Details**
+
+You will need to provide:
+- `groupId`: like a namespace (e.g., `org.example`)
+- `artifactId`: project name (e.g., `HDFS_API`)
+
+📷 Group ID:
+![group id](https://github.com/user-attachments/assets/8033d701-0859-4f92-9d8a-f0a0be404983)
+
+📷 Artifact ID:
+![artifact id](https://github.com/user-attachments/assets/295115a5-c34e-4e80-90a2-df3903c419e9)
+
+Click **Next**
+
+---
+
+### 3. **Project Location**
+- IntelliJ will create the project in: `~/IdeaProjects/HDFS_API`
+- 📷 ![project location](https://github.com/user-attachments/assets/daf42a48-03c0-4dad-a228-37bf8a94ffe2)
+
+Click **Finish**
+
+---
+
+### 4. **Enable Auto-Import**
+
+Once the project is created, IntelliJ will ask:
+
+> "Maven projects need to be imported."
+
+✅ Click **Enable Auto-Import**  
+📷 ![enable autoimport](https://github.com/user-attachments/assets/2e4fb860-9b71-4826-9549-2d78b529c4fb)
+
+This starts downloading all dependencies from Maven Central.
+
+---
+
+## 📄 What is `pom.xml`?
+
+The file `pom.xml` (Project Object Model) is the **heart of every Maven project**.
+
+It contains:
+- `groupId`
+- `artifactId`
+- `version`
+- `dependencies`: Libraries required (like Hadoop)
+
+📌 You will add dependencies for Hadoop here later.
+
+---
+
+## 🖥️ Navigate in Terminal
+
+To explore the project from terminal:
+
+```bash
+cd ~/IdeaProjects/
+ls
+```
+
+📷 ![terminal navigation](https://github.com/user-attachments/assets/79b57e7c-4707-481c-96c6-18cd50c23d61)
+
+---
+
+## ✅ Summary
+
+| Step | Description |
+|------|-------------|
+| 🔧 Maven Project | Use Maven instead of plain Java for dependency management |
+| 🏷️ groupId/artifactId | Uniquely identify your project |
+| 📦 pom.xml | Lists all project dependencies |
+| 🌐 Maven Repo | Automatically pulls required `.jar` files |
+| 📁 Location | Saved in `~/IdeaProjects/HDFS_API` |
+| 📥 Auto-import | Makes sure dependencies are downloaded and updated |
+
+---
+
+You're now ready to **edit `pom.xml` and add Hadoop dependencies**.
+
+---
+
+# ☁️ Setting Up HDFS Java Project in IntelliJ with Maven (BigDataVM)
+
+---
+
+## 🧭 Project Structure (Maven)
+
+After creating the Maven project:
+
+- The project folder `HDFS_API` should contain:
+  - `pom.xml` → Project descriptor
+  - `src/` → Source code directory
+
+📷 ![project structure](https://github.com/user-attachments/assets/9dc5e940-999b-4f9a-844a-58d1fa9f101e)
+
+---
+
+## ❓ Why Use Different Environments?
+
+- **Cloudera** (GUI-based) vs. **BigDataVM** (Server/Terminal-based)
+- Reason: **More learning!**
+  - Understand **automation**
+  - Avoid **comfort zone**
+  - Real-world production environments are **server-based** (less UI)
+
+✅ Note: Eclipse *can* be used on BigDataVM, but using IntelliJ gives experience with another powerful IDE.
+
+---
+
+## 🧾 Maven Identity
+
+Every Maven project is uniquely identified by:
+- **groupId**: Like an organization name (e.g., `org.example`)
+- **artifactId**: Project name (e.g., `HDFS_API`)
+- **version**: Version number (e.g., `1.0-SNAPSHOT`)
+
+📷 ![maven identifiers](https://github.com/user-attachments/assets/9f7049af-054f-47e9-ac16-b6b4a8d277ac)
+
+---
+
+## 🗃️ Folder Structure Comparison
+
+| Tool      | Location of Code Files        |
+|-----------|-------------------------------|
+| Eclipse   | `src/`                        |
+| IntelliJ  | `src/main/java/`              |
+
+---
+
+## 📦 Creating a Package in IntelliJ
+
+1. Navigate to: `src > main > java`
+2. Right-click on `java` → New → Package
+3. Name the package `hdfs`
+
+📷 ![create package](https://github.com/user-attachments/assets/6076f390-dde1-4fd1-b154-4902a2532ee1)
+
+---
+
+## 📂 Add Java File to the Package
+
+- Move `InputCounties.java` from STAGING AREA to:  
+  `src/main/java/hdfs/`
+
+📷 ![move file](https://github.com/user-attachments/assets/cedfaa2c-1aed-44bd-b5b1-9d387adb3ee3)  
+📷 ![file placed](https://github.com/user-attachments/assets/62bb386a-d56c-40b6-bf63-706d973f7cee)
+
+---
+
+## ❌ Why is the Java File Showing Errors?
+
+- Because **required Hadoop libraries are missing**
+- Maven **does not automatically know** which dependencies you need
+
+✅ You must **explicitly declare libraries** inside `pom.xml`
+
+---
+
+## 🔍 Check Your Hadoop Version
+
+Run the command in terminal:
+
+```bash
+hadoop version
+```
+
+📷 ![hadoop version](https://github.com/user-attachments/assets/159241d4-f4f1-4bf9-bae2-e13bb986ba49)
+
+🟢 **Required version**: `2.7.3`  
+You need the **Hadoop client-side library for version 2.7.3**
+
+---
+
+## 🛠️ What’s Next?
+
+You'll now add this dependency to `pom.xml`:
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.apache.hadoop</groupId>
+    <artifactId>hadoop-client</artifactId>
+    <version>2.7.3</version>
+  </dependency>
+</dependencies>
+```
+
+---
+
+# ☁️ Adding Hadoop Dependency in Maven (IntelliJ IDEA – BigDataVM)
+
+---
+
+## 🔍 Step 1: Search for the Correct Dependency
+
+To add Hadoop client library for version `2.7.3`, search:
+
+```
+maven repository hadoop client 2.7.3
+```
+
+📷 ![dependency search result](https://github.com/user-attachments/assets/5c639aaf-8e75-4891-8732-2d9c6f88a6e1)
+
+---
+
+## 📥 Step 2: Add the Dependency in `pom.xml`
+
+Your Maven project already has:
+- `groupId`
+- `artifactId`
+- `version`
+
+Now, add the Hadoop dependency inside the `<dependencies>` tag of your `pom.xml` file:
+
+```xml
+<dependency>
+  <groupId>org.apache.hadoop</groupId>
+  <artifactId>hadoop-client</artifactId>
+  <version>2.7.3</version>
+</dependency>
+```
+
+📷 ![adding dependency](https://github.com/user-attachments/assets/4ac8bd3e-a1e8-4c60-8708-ef7f45e6bd76)
+
+---
+
+## ✅ Step 3: Confirm Dependency is Working
+
+- **InputCounties.java** errors should disappear automatically
+- **External Libraries** should now show `Hadoop 2.7.3`
+
+📷 ![external libraries](https://github.com/user-attachments/assets/e14b2895-9758-4e7d-adfd-b0b8cc557a0f)
+
+---
+
+## ⚠️ Important Notes
+
+- Always use the **same Hadoop version** across team projects.
+- Mismatched versions can lead to **runtime or compilation errors**.
+
+---
+
+## 📦 Maven Handles Jar Creation
+
+- `pom.xml` also controls **how the final `.jar` file is created**
+- It handles:
+  - Dependencies
+  - Build lifecycle
+  - Plugins
+
+📷 ![jar control by pom](https://github.com/user-attachments/assets/76ebd900-8aa2-43b5-a850-771534e86d5e)
+
+---
+
+## 📂 Selecting Directory and Library for Setup
+
+1. Choose directory for project or output
+📷 ![directory selection](https://github.com/user-attachments/assets/1dc8d5b7-2a39-4ece-8aaa-ac890b9077c6)
+
+2. Confirm `hadoop-client` library selection
+📷 ![hadoop library selected](https://github.com/user-attachments/assets/ca81dd5d-8cbd-4930-9a97-b298c1e06ab4)
+
+
+---
+
+# 🧰 Creating a JAR File using Maven in IntelliJ IDEA
+
+---
+
+## 📁 Maven Folder Structure (in File Manager)
+
+When Maven builds the project, it creates nested folders in this format:
+
+```
+~/.m2/repository/
+└── groupID/
+    └── artifactID/
+        └── version/
+```
+
+📷 ![file manager view](https://github.com/user-attachments/assets/815c607d-63e1-44eb-be91-bb586f210ff4)
+
+---
+
+## 📦 Accessing Maven Lifecycle in IntelliJ
+
+1. Go to the **right-side panel** and click on **Maven Projects**  
+📷 ![maven projects panel](https://github.com/user-attachments/assets/19c5e50f-109d-4f46-a990-1ca3511394a1)
+
+---
+
+## 🧹 Step 1: Run `clean`
+
+- Deletes the old `.jar` file (if any exists)
+📷 ![clean command](https://github.com/user-attachments/assets/af31f989-539d-48fc-bc98-e9885ef72766)
+
+---
+
+## 📦 Step 2: Run `package`
+
+- This compiles the code and creates a new `.jar` file in the `target/` folder
+📷 ![package command](https://github.com/user-attachments/assets/2e24fefd-0711-42fc-927e-6c4291bd7b9e)  
+📷 ![jar file generated](https://github.com/user-attachments/assets/7ba1c725-56d2-4e19-b22b-3f13d61fd853)  
+📷 ![jar confirmation](https://github.com/user-attachments/assets/bef548aa-75b8-4986-87b3-4a4a93d6cac4)
+
+---
+
+## ⚠️ Maven Warning (Safe to Ignore)
+
+- This message is a **warning**, *not* an error.
+- Warnings do not block the jar creation process.
+📷 ![warning](https://github.com/user-attachments/assets/b24801c5-758c-40ee-8626-515b5a62c190)
+
+
+---
+
+# ✅ Execution and Maven Project Recap
+
+---
+
+## 🏁 Code Execution Successful
+
+- The **MapReduce job** using the JAR file ran successfully.
+📷 ![execution success](https://github.com/user-attachments/assets/47431671-b28b-4167-b5de-b30e9f1bfdb8)
+
+---
+
+## 📂 Verifying Output in HDFS
+
+- Checked for the `counties` files in HDFS to confirm output generation.
+📷 ![hdfs output](https://github.com/user-attachments/assets/839da4f4-0d0a-4c3a-b0ed-9c2560efdf91)
+
+---
+
+## 🆕 Creating a New Maven Project
+
+- Created a new Maven project named **HDFS_API_1** for further experimentation or versioning.
+
+---
+
+## 🧠 Additional Concepts
+
+### 🔹 YARN (Yet Another Resource Negotiator)
+- YARN **allocates resources** and **manages jobs** in Hadoop.
+- It is essential for running:
+  - **MapReduce**
+  - **Spark**
+- If YARN is not invoked properly, MapReduce jobs will **not execute**.
+
+### 🔹 Why place the JAR file in the `counties` folder?
+- The **InputCounties.java** file is **hardcoded** or **configured** to use data from the `counties` directory.
+
+---
+
+## 🔍 `-tf` Command
+- Used to **verify** the contents of a `.jar` file before execution.
+  ```bash
+  jar -tf <filename>.jar
+  ```
+
+---
+
+# 🧾 **Understanding `InputCounties.java` in Hadoop HDFS**
+
+This Java program creates a **directory named `counties` in HDFS** and copies multiple `.csv` files from the local file system into that HDFS directory.
+
+---
+
+## 🧠 **Core Logic Explained**
 
 ```java
-package hdfs;
-import java.io.IOException;
+Configuration conf = new Configuration();
+Path dir = new Path("counties");
+FileSystem fs = FileSystem.get(conf);
+```
+
+### 🔧 **What is `Configuration`?**
+- It loads the configuration files of Hadoop:
+  - `core-default.xml` – Default Hadoop settings (read-only).
+  - `core-site.xml` – Site-specific Hadoop settings.
+- These define the **file system type**, e.g., HDFS.
+
+```java
+if (!fs.exists(dir)) {
+    fs.mkdirs(dir);
+} else {
+    fs.delete(dir, true);
+}
+```
+
+### 📁 **What happens here?**
+- If the HDFS directory `counties` **doesn't exist**, it's created using `mkdirs()`.
+- If it **already exists**, it's deleted (using `delete()`) and then created fresh.
+- This ensures that the directory is **reset** for each run.
+
+```java
+for (int i = 1; i <= 4; i++) {
+    String filename = "counties_" + i + ".csv";
+    Path localSrc = new Path("counties/" + filename);
+    Path dest = new Path("counties/" + filename);
+    fs.copyFromLocalFile(localSrc, dest);
+}
+```
+
+### 🔁 **What's happening here?**
+- A loop runs 4 times (i=1 to 4).
+- For each iteration:
+  - It creates a filename like `counties_1.csv`, `counties_2.csv`, etc.
+  - It copies each file from the **local system** into the **HDFS directory** using `copyFromLocalFile()`.
+
+---
+
+## 🧰 **Key Classes & Methods in Hadoop FS**
+
+### ⚙️ `Configuration`
+- Holds **Hadoop settings** loaded from XML files.
+- Can load multiple resources using paths or classpath.
+
+---
+
+### 📂 `Path`
+- Represents a file or directory in the **HDFS or local file system**.
+- It uses **slashes `/`** as directory separators.
+- Absolute if it starts with `/`, else relative.
+
+---
+
+### 🌐 `FileSystem`
+- Abstract class for both **local** and **distributed** file systems like HDFS.
+- Accessed using:
+  ```java
+  FileSystem fs = FileSystem.get(conf);
+  ```
+
+---
+
+## 🔎 **Important Methods**
+
+### 📄 `copyFromLocalFile(Path src, Path dst)`
+- Copies a file from **local filesystem** to **HDFS**.
+- Local file remains **unchanged**.
+- Similar to the shell command:
+  ```
+  hadoop fs -put localfile hdfsfile
+  ```
+
+---
+
+### ❓ `exists(Path f)`
+- Checks if the file or directory **exists** in the file system.
+- Returns `true` or `false`.
+
+---
+
+### 🏗️ `mkdirs(Path dir)`
+- Creates a **directory structure** in HDFS.
+- Takes **path** and **permission** (optional).
+
+---
+
+### 🗑️ `delete(Path f, boolean recursive)`
+- Deletes a **file or directory**.
+- The `true` flag means:
+  - If it’s a directory, delete **everything inside recursively**.
+- Deprecated simpler version:
+  ```java
+  fs.delete(dir);  // Old style
+  ```
+
+---
+
+## ✅ **Output**
+If everything runs successfully:
+```
+Created counties directory in HDFS
+```
+
+---
+
+# 🧾 **Creating a Project and Understanding Code Behavior**
+
+In this section, we will learn how to create a **Java project**, work with **strings**, and explore object references and memory management.
+
+---
+
+## 🧠 **Creating and Running a Simple Java Program**
+
+### **Step-by-Step Explanation**
+
+```java
+package test;
+
+public class Test {
+    
+    public static void main(String args[]) {
+        String name = "Donald";
+        System.out.println("The name of the person is: " + name);
+    }
+}
+```
+
+### 🖨️ **Output:**
+```
+The name of the person is: Donald
+```
+
+---
+
+### 🔍 **What's Happening Internally?**
+
+1. **String Object**:
+   - `"Donald"` is a **string literal**.
+   - The **reference variable `name`** points to the string literal `"Donald"`.
+   - **Memory Allocation**:
+     - The **string value** ("Donald") is stored in the **Heap** (which holds objects).
+     - The **reference variable `name`** is stored on the **Stack** (where local variables are stored).
+
+2. **Dereferencing**:
+   - Dereferencing means using a method (like `.toString()`) to access the content of the object the reference is pointing to.
+   - For example, `name.toString()` gives you the same result.
+
+---
+
+## 🧰 **Creating and Using Custom Classes**
+
+### 🧑‍💻 **Employee.java** Class Definition
+
+```java
+package test;
+
+public class Employee {
+    
+    private int sal;
+    private String name;
+    
+    public Employee(String name, int sal) {
+        this.name = name;
+        this.sal = sal;
+    }
+}
+```
+
+### 👨‍💼 **Test.java** with Employee Object
+
+```java
+package test;
+
+public class Test {
+    
+    public static void main(String args[]) {
+        Employee e = new Employee("Donald", 1);
+        System.out.println("Employee Details are: " + e);
+    }
+}
+```
+
+### 🖨️ **Output:**
+```
+Employee Details are: test.Employee@4f2410ac
+```
+
+### 📌 **Explanation:**
+- In the above code, **`System.out.println(e)`** prints the **memory address** of the `Employee` object.
+- This happens because **`toString()` method** is not overridden, so the default `toString()` implementation from `Object` class is used, which returns the **memory address** of the object.
+
+---
+
+## 🧑‍🔧 **Improving Output by Overriding `toString()`**
+
+### 🔧 **Modified `Employee.java` with `toString()` Method**
+
+```java
+package test;
+
+public class Employee {
+    
+    private int sal;
+    private String name;
+    
+    public Employee(String name, int sal) {
+        this.name = name;
+        this.sal = sal;
+    }
+    
+    public String toString() {
+        return "Name: " + name + ", Sal: " + sal;
+    }
+}
+```
+
+### 🖨️ **Output After Change:**
+```
+Employee Details are: Name: Donald, Sal: 1
+```
+
+### 📌 **What's Changed?**
+- Now, the **`toString()` method** has been overridden to return the **actual values** of the object (`name` and `sal`), instead of just printing the memory reference.
+
+---
+
+## 🧑‍💻 **Printing Configuration Details from `InputCounties.java`**
+
+We want to print the configuration settings used in Hadoop when running the program. Here's how we do it:
+
+### **Modified `InputCounties.java`**
+
+```java
+public static void main(String[] args) throws IOException {
+    Configuration conf = new Configuration();
+    Path dir = new Path("counties");
+    FileSystem fs = FileSystem.get(conf);
+    System.out.println(conf);
+}
+```
+
+### 🖨️ **Output:**
+
+```
+yarn jar HDFS_API-1.0-SNAPSHOT.jar hdfs.InputCounties
+Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+Created counties directory in HDFS
+```
+
+### 📌 **Explanation:**
+- The `conf` object holds the Hadoop **configuration resources** (like `core-site.xml`, `mapred-site.xml`, etc.).
+- These are the default configuration files loaded by Hadoop, which define the system settings for HDFS, MapReduce, YARN, etc.
+
+---
+
+## 🖨️ **Printing Specific Configuration Values**
+
+If you want to print a specific value from the configuration, you can use the `get()` method:
+
+### **Modified `InputCounties.java` to Print `fs.defaultFS`**
+
+```java
+Configuration conf = new Configuration();
+System.out.println(conf.get("fs.defaultFS"));
+Path dir = new Path("counties");
+FileSystem fs = FileSystem.get(conf);
+```
+
+### 🖨️ **Output:**
+![image](https://github.com/user-attachments/assets/f4f852af-b261-4455-a932-625997c6db0a)
+
+### 📌 **Explanation:**
+- `conf.get("fs.defaultFS")` retrieves the value of `fs.defaultFS`, which specifies the default file system URI.
+- This value is typically defined in the `core-site.xml` configuration file, and the output will show the **URI of the default file system** (like HDFS or local).
+
+---
+
+# 🧠 **Big Data Project Notes – Beginner Friendly**
+
+## 💻 Development Environment: BigDataVM
+
+All development is carried out inside a virtual machine pre-configured with Big Data tools (Hadoop, Cloudera, etc.). Ensure the VM is properly set up before starting.
+
+---
+
+## 🧩 **Task 1: Ingest CSV into HDFS using Java (Hadoop Client)**
+
+### 📁 Project Details:
+- **Project Name:** `Stock_Upload`
+- **Group ID:** `org.cdac`
+- **Package Name:** `org.cdac.pune`
+- **Class Name:** `UploadStock`
+- **File to Ingest:** `stocks.csv`
+
+---
+
+### ⚙️ **Step-by-Step Guide**
+
+#### 1️⃣ Create Maven Project:
+Use a Maven-based Java project to manage dependencies and structure.
+
+**Directory Structure:**
+```
+Stock_Upload/
+├── src/
+│   └── main/
+│       └── java/
+│           └── org/
+│               └── cdac/
+│                   └── pune/
+│                       └── UploadStock.java
+├── pom.xml
+```
+
+#### 2️⃣ Java Code: UploadStock.java
+
+```java
+package org.cdac.pune;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-public class InputCounties {
+import java.io.IOException;
 
+public class UploadStock {
 
-	public static void main(String[] args) throws IOException{
-		Configuration conf = new Configuration(); // Refer Configuration details below
-		Path dir = new Path("counties");  // Refer Path details below
-		FileSystem fs = FileSystem.get(conf); // Refer FileSystem details below
-		
-		//original code
-		/*if(!fs.exists(dir)) {
-			fs.mkdirs(dir);
-		}*/
-		
-		//Amit: Above code is replaced as shown below
-		if(!fs.exists(dir)) { // Refer exists below
-			fs.mkdirs(dir); // Refer mkdirs below
-		} else {
-			fs.delete(dir, true); // Refer delete below
-		}
+    public static void main(String[] args) throws IOException {
+        // Configuration for Hadoop
+        Configuration conf = new Configuration();
+        Path localFilePath = new Path("path/to/your/stocks.csv");  // Local file path
+        Path hdfsDestPath = new Path("/stocks/stocks.csv");  // HDFS destination path
 
-// For above section refer exists below
-		
-		System.out.println("Created counties directory in HDFS");
-		
-		for(int i = 1; i <= 4; i++) {
-			String filename = "counties_" + i + ".csv";
-			Path localSrc = new Path("counties/" + filename);
-			Path dest = new Path("counties/" + filename);  // Refer copyFromLocalFile below
-			fs.copyFromLocalFile(localSrc, dest); // Similar to put command 
-		}		
-		
-	}
+        // Get FileSystem object for HDFS
+        FileSystem fs = FileSystem.get(conf);
 
+        // Copy the file from local system to HDFS
+        fs.copyFromLocalFile(localFilePath, hdfsDestPath);
+        
+        System.out.println("File successfully uploaded to HDFS");
+    }
 }
 ```
 
-Configuration:
-Configurations are specified by resources. A resource contains a set of name/value pairs as XML data. Each resource is named by either a String or by a Path. If named by a String, then the classpath is examined for a file with that name. If named by a Path, then the local filesystem is examined directly, without referring to the classpath.
+This Java program reads a local file (`stocks.csv`) and writes it into HDFS.
 
-Unless explicitly turned off, Hadoop by default specifies two resources, loaded in-order from the classpath:
-
-    core-default.xml: Read-only defaults for hadoop.
-    core-site.xml: Site-specific configuration for a given hadoop installation.
-
-    These two files represent a file system which is HDFS File System.
-
-Applications may add additional resources, which are loaded subsequent to these resources in the order they are added.
-
-Class Path:
-Names a file or directory in a FileSystem. Path strings use slash as the directory separator. A path string is absolute if it begins with a slash.
-
-File System:
-An abstract base class for a fairly generic filesystem. It may be implemented as a distributed filesystem, or as a "local" one that reflects the locally-connected disk.
-static FileSystem 	get(Configuration conf)
-Returns the configured filesystem implementation.
-fs is a reference pointing to filesystem object
-
-
-## copyFromLocalFile
-
-public void copyFromLocalFile(Path src,
-                      Path dst)
-                        throws IOException
-
-The src file is on the local disk. Add it to FS at the given dst name and the source is kept intact afterwards
-
-Parameters:
-    src - path
-    dst - path
-Throws:
-    IOException
-
-source is from the local file system and destination is from the hdfs
-relative path is being provided for the same
-
-
-## exists
-
-public boolean exists(Path f)
-                throws IOException
-
-Check if exists.
-
-Parameters:
-        f - source file
-Throws:
-    IOException
-
-## mkdirs
-
-public static boolean mkdirs(FileSystem fs,
-              Path dir,
-              FsPermission permission)
-                      throws IOException
-
-create a directory with the provided permission The permission of the directory is set to be the provided permission as in setPermission, not permission&~umask
-
-Parameters:
-    fs - file system handle
-    dir - the name of the directory to be created
-    permission - the permission of the directory
-    Returns:
-        true if the directory creation succeeds; false otherwise
-    Throws:
-        IOException
-    See Also:
-        create(FileSystem, Path, FsPermission)
-
-## delete
-
-@Deprecated
-public boolean delete(Path f)
-                throws IOException
-
-Deprecated. Use delete(Path, boolean) instead.
-Delete a file
-
-Throws:
-    IOException
+> 📸 **Reference Screenshots:**
+![Project Structure](https://github.com/user-attachments/assets/54392749-b429-4e65-8299-4f2ff1f6f4ec)  
+![Java Code Snippet 1](https://github.com/user-attachments/assets/c30a70cb-3089-48c5-9ada-d4afa3d158c3)  
+![Java Code Snippet 2](https://github.com/user-attachments/assets/32e83170-59ee-418e-804e-d802b60e86f9)
 
 ---
 
-Create Project
-Create Package: test
-Create class: Test
+### ✅ **Expected Output After Execution**
+Once the program runs successfully:
+- `stocks.csv` should be visible inside HDFS.
 
-Create a variable whose name is Donald pointing to a string object
-And then print it.
-What happens in this code internally:
+> 📸 **Output Verification:**
+![HDFS View 1](https://github.com/user-attachments/assets/16eee65c-b7cf-44fe-9c74-d4360ba87c02)  
+![HDFS View 2](https://github.com/user-attachments/assets/33cf4d63-14d1-41a7-836b-be4c8d25b90d)
 
-```java
-package test;
+---
 
-public class Test {
-	
-	public static void main(String args[]) {
-		String name = "Donald";
-		System.out.println("The name of the person is: " + name);
-	}
+## 🚀 **Task 2: Run JAR on Cloudera**
 
-}
+### 🧳 Step-by-Step Instructions
+
+#### 1️⃣ Package Java Code into a JAR
+Use Maven to create the JAR file:
+```bash
+mvn clean package
+```
+Your JAR file will be located at:
+```
+target/Stock_Upload-1.0-SNAPSHOT.jar
 ```
 
-Output:
-The name of the person is: Donald
+#### 2️⃣ Copy JAR to Cloudera VM
+Use a method like `scp` or shared folders to move the `.jar` to the Cloudera VM.
 
-Working:
-java test.Test
+#### 3️⃣ Run the JAR in Cloudera Terminal
+Inside Cloudera:
+```bash
+hadoop jar Stock_Upload-1.0-SNAPSHOT.jar org.cdac.pune.UploadStock /path/to/stocks.csv /user/hdfs/stocks.csv
+```
 
-java is searching for the main method
-name is the reference variable which is local and belongs to main and is stored on stack because name is present on the stack currently
-The actual value "Donald" is stored on the Heap
-
-We can store "Donald" with (new String)
-
-We are getting the same output when we used .toString() method with the variable `name`. (name.toString())
-Dereferencing means using .toString() method
-
-Employee.java:
-package test;
-
-public class Employee {
-	
-	private int sal;
-	private String name;
-	
-	public Employee(String name, int sal) {
-		
-		this.name = name;
-		this.sal = sal;
-	}
-}
-
-Test.java:
-package test;
-
-public class Test {
-	
-	public static void main(String args[]) {
-//		String name = "Donald";
-//		System.out.println("The name of the person is: " + name.toString());
-		
-		Employee e = new Employee("Donald", 1);
-		System.out.println("Employee Details are: " + e);
-	
-	
-	}
-
-}
-
-Output:
-Employee Details are: test.Employee@4f2410ac
-
-Here, in this output, memory output is being printed. But we want the original values.
+> 📸 **Execution Screenshots:**
+![Cloudera Jar Add](https://github.com/user-attachments/assets/4a63bc1c-060f-47c1-93e4-6d3fcc6b8651)  
+![Terminal Output 1](https://github.com/user-attachments/assets/fe7de6fb-f545-478f-aa54-e9f87a644597)  
+![Terminal Output 2](https://github.com/user-attachments/assets/d67bb699-e2d9-42d8-92f4-092ac2ef6a43)  
+![HDFS Confirmation](https://github.com/user-attachments/assets/7ba6fda6-82aa-4384-a503-e3309409e29d)
 
 ---
 
-Now, we made the changes:
-
-Employee.java:
-
-package test;
-
-public class Employee {
-	
-	private int sal;
-	private String name;
-	
-	public Employee(String name, int sal) {
-		
-		this.name = name;
-		this.sal = sal;
-	}
-	
-	public String toString() {
-		return "Name: " + name + ", Sal: " + sal;
-	}
-}
-
-Output: Employee Details are: Name: Donald, Sal: 1
+## 📝 Summary
+| Component | Description |
+|----------|-------------|
+| **Language** | Java |
+| **Tool** | Hadoop Client |
+| **CSV File** | stocks.csv |
+| **Goal** | Ingest CSV into HDFS |
+| **Run** | Locally via Java → JAR → Cloudera |
 
 ---
 
-We want to print what is present inside Configuration conf.
-When we made changes in the InputCounties.java and then ran the program from BUILD PATH step:
-
-public static void main(String[] args) throws IOException{
-		Configuration conf = new Configuration();
-		Path dir = new Path("counties");
-		FileSystem fs = FileSystem.get(conf);
-		System.out.println(conf);
-  
-We got the following output:
-
-yarn jar HDFS_API-1.0-SNAPSHOT.jar hdfs.InputCounties
-Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
-Created counties directory in HDFS
-
-![image](https://github.com/user-attachments/assets/38966272-33b8-48ca-a0c9-44c243182d72)
+## 🎯 Tips for Beginners:
+- 🧪 Test your code locally before deploying to Cloudera.
+- 🛠 Use meaningful log messages in your Java code to debug easily.
+- 🧾 Always check file paths carefully—both local and HDFS paths.
+- 💡 Try exploring Hadoop FileSystem commands to verify data:
+```bash
+hadoop fs -ls /user/hdfs/
+hadoop fs -cat /user/hdfs/stocks.csv
+```
 
 ---
-
-We want to print what is present in the conf files:
-
-Configuration conf = new Configuration();
-		System.out.println(conf.get("fs.defaultFS"));
-		Path dir = new Path("counties");
-		FileSystem fs = FileSystem.get(conf);
-
-Output:
-![image](https://github.com/user-attachments/assets/f4f852af-b261-4455-a932-625997c6db0a)
-
-
-Developement will be in BigDataVM
-
-Task1:
-ingest using hadoop client
-stocks.csv using java
-project name: Stock_Upload
-groupid: org.cdac
-package name: org.cdac.pune
-class name: UploadStock
-
-![image](https://github.com/user-attachments/assets/54392749-b429-4e65-8299-4f2ff1f6f4ec)
-![image](https://github.com/user-attachments/assets/c30a70cb-3089-48c5-9ada-d4afa3d158c3)
-![image](https://github.com/user-attachments/assets/32e83170-59ee-418e-804e-d802b60e86f9)
-
-Output:
-![image](https://github.com/user-attachments/assets/16eee65c-b7cf-44fe-9c74-d4360ba87c02)
-![image](https://github.com/user-attachments/assets/33cf4d63-14d1-41a7-836b-be4c8d25b90d)
-
-
-Task 2:
-Take jar and add them in cloudera
-Run jar on cloudera
-![image](https://github.com/user-attachments/assets/4a63bc1c-060f-47c1-93e4-6d3fcc6b8651)
-![image](https://github.com/user-attachments/assets/fe7de6fb-f545-478f-aa54-e9f87a644597)
-![image](https://github.com/user-attachments/assets/d67bb699-e2d9-42d8-92f4-092ac2ef6a43)
-![image](https://github.com/user-attachments/assets/7ba6fda6-82aa-4384-a503-e3309409e29d)
-
-
-
----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
