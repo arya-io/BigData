@@ -2405,26 +2405,278 @@ Checking counties files in hdfs:
 
 Create a new Maven Project HDFS_API_1
 
+---
+
+Yarn helps Map reduce to run its resources on Hadoop.
+If we don't specify the YARN command, we are not able to execute the Map Reduce Project.
+YARN is also responsible for running SPARK on Hadoop.
+
+-tf command is used for verification.
+The reason we are putting jar file in the counties folder is in the InputCounties.java file.
+
+---
+
+Understanding InputCounties.java:
+
+```java
+package hdfs;
+import java.io.IOException;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+
+public class InputCounties {
 
 
+	public static void main(String[] args) throws IOException{
+		Configuration conf = new Configuration(); // Refer Configuration details below
+		Path dir = new Path("counties");  // Refer Path details below
+		FileSystem fs = FileSystem.get(conf); // Refer FileSystem details below
+		
+		//original code
+		/*if(!fs.exists(dir)) {
+			fs.mkdirs(dir);
+		}*/
+		
+		//Amit: Above code is replaced as shown below
+		if(!fs.exists(dir)) { // Refer exists below
+			fs.mkdirs(dir); // Refer mkdirs below
+		} else {
+			fs.delete(dir, true); // Refer delete below
+		}
+
+// For above section refer exists below
+		
+		System.out.println("Created counties directory in HDFS");
+		
+		for(int i = 1; i <= 4; i++) {
+			String filename = "counties_" + i + ".csv";
+			Path localSrc = new Path("counties/" + filename);
+			Path dest = new Path("counties/" + filename);  // Refer copyFromLocalFile below
+			fs.copyFromLocalFile(localSrc, dest); // Similar to put command 
+		}		
+		
+	}
+
+}
+```
+
+Configuration:
+Configurations are specified by resources. A resource contains a set of name/value pairs as XML data. Each resource is named by either a String or by a Path. If named by a String, then the classpath is examined for a file with that name. If named by a Path, then the local filesystem is examined directly, without referring to the classpath.
+
+Unless explicitly turned off, Hadoop by default specifies two resources, loaded in-order from the classpath:
+
+    core-default.xml: Read-only defaults for hadoop.
+    core-site.xml: Site-specific configuration for a given hadoop installation.
+
+    These two files represent a file system which is HDFS File System.
+
+Applications may add additional resources, which are loaded subsequent to these resources in the order they are added.
+
+Class Path:
+Names a file or directory in a FileSystem. Path strings use slash as the directory separator. A path string is absolute if it begins with a slash.
+
+File System:
+An abstract base class for a fairly generic filesystem. It may be implemented as a distributed filesystem, or as a "local" one that reflects the locally-connected disk.
+static FileSystem 	get(Configuration conf)
+Returns the configured filesystem implementation.
+fs is a reference pointing to filesystem object
 
 
+## copyFromLocalFile
+
+public void copyFromLocalFile(Path src,
+                      Path dst)
+                        throws IOException
+
+The src file is on the local disk. Add it to FS at the given dst name and the source is kept intact afterwards
+
+Parameters:
+    src - path
+    dst - path
+Throws:
+    IOException
+
+source is from the local file system and destination is from the hdfs
+relative path is being provided for the same
 
 
+## exists
 
+public boolean exists(Path f)
+                throws IOException
 
+Check if exists.
 
+Parameters:
+        f - source file
+Throws:
+    IOException
 
+## mkdirs
 
+public static boolean mkdirs(FileSystem fs,
+              Path dir,
+              FsPermission permission)
+                      throws IOException
 
+create a directory with the provided permission The permission of the directory is set to be the provided permission as in setPermission, not permission&~umask
 
+Parameters:
+    fs - file system handle
+    dir - the name of the directory to be created
+    permission - the permission of the directory
+    Returns:
+        true if the directory creation succeeds; false otherwise
+    Throws:
+        IOException
+    See Also:
+        create(FileSystem, Path, FsPermission)
 
+## delete
 
+@Deprecated
+public boolean delete(Path f)
+                throws IOException
 
+Deprecated. Use delete(Path, boolean) instead.
+Delete a file
 
+Throws:
+    IOException
 
+---
 
+Create Project
+Create Package: test
+Create class: Test
 
+Create a variable whose name is Donald pointing to a string object
+And then print it.
+What happens in this code internally:
+
+```java
+package test;
+
+public class Test {
+	
+	public static void main(String args[]) {
+		String name = "Donald";
+		System.out.println("The name of the person is: " + name);
+	}
+
+}
+```
+
+Output:
+The name of the person is: Donald
+
+Working:
+java test.Test
+
+java is searching for the main method
+name is the reference variable which is local and belongs to main and is stored on stack because name is present on the stack currently
+The actual value "Donald" is stored on the Heap
+
+We can store "Donald" with (new String)
+
+We are getting the same output when we used .toString() method with the variable `name`. (name.toString())
+Dereferencing means using .toString() method
+
+Employee.java:
+package test;
+
+public class Employee {
+	
+	private int sal;
+	private String name;
+	
+	public Employee(String name, int sal) {
+		
+		this.name = name;
+		this.sal = sal;
+	}
+}
+
+Test.java:
+package test;
+
+public class Test {
+	
+	public static void main(String args[]) {
+//		String name = "Donald";
+//		System.out.println("The name of the person is: " + name.toString());
+		
+		Employee e = new Employee("Donald", 1);
+		System.out.println("Employee Details are: " + e);
+	
+	
+	}
+
+}
+
+Output:
+Employee Details are: test.Employee@4f2410ac
+
+Here, in this output, memory output is being printed. But we want the original values.
+
+---
+
+Now, we made the changes:
+
+Employee.java:
+
+package test;
+
+public class Employee {
+	
+	private int sal;
+	private String name;
+	
+	public Employee(String name, int sal) {
+		
+		this.name = name;
+		this.sal = sal;
+	}
+	
+	public String toString() {
+		return "Name: " + name + ", Sal: " + sal;
+	}
+}
+
+Output: Employee Details are: Name: Donald, Sal: 1
+
+---
+
+We want to print what is present inside Configuration conf.
+When we made changes in the InputCounties.java and then ran the program from BUILD PATH step:
+
+public static void main(String[] args) throws IOException{
+		Configuration conf = new Configuration();
+		Path dir = new Path("counties");
+		FileSystem fs = FileSystem.get(conf);
+		System.out.println(conf);
+  
+We got the following output:
+
+yarn jar HDFS_API-1.0-SNAPSHOT.jar hdfs.InputCounties
+Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+Created counties directory in HDFS
+
+![image](https://github.com/user-attachments/assets/38966272-33b8-48ca-a0c9-44c243182d72)
+
+---
+
+We want to print what is present in the conf files:
+
+Configuration conf = new Configuration();
+		System.out.println(conf.get("fs.defaultFS"));
+		Path dir = new Path("counties");
+		FileSystem fs = FileSystem.get(conf);
+
+Output:
+![image](https://github.com/user-attachments/assets/f4f852af-b261-4455-a932-625997c6db0a)
 
 
 
