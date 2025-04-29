@@ -315,8 +315,8 @@ ls -lh stocks.csv
 
 | Sr. No. | HDP           | BigData (Host)           | Cloudera (VM)        |
 |--------|----------------|--------------------------|----------------------|
-| 1      | HDFS - Home     | /user/root                | /user/talentum        |
-| 2      | LABS_HOME       | /root/hdp/pigandhive/labs  | ~/hdp/pigandhive/labs |
+| 1      | HDFS - Home     | /user/talentum                | /user/cloudera        |
+| 2      | LABS_HOME       | /talentum/hdp/pigandhive/labs  | ~/hdp/pigandhive/labs |
 | 3      | STAGING_AREA    | Host mapped mount point   | Mount point on VM     |
 
 ---
@@ -2129,3 +2129,191 @@ echo $?
 # 🌟 And that's it!
 
 **You have now learned how to build a Java MapReduce application and run it on a Hadoop cluster!** 🚀  
+
+---
+
+Different types of client applications:
+
+Web Client: This is a client application that runs in a web browser. It does not require installation on the user's device, as it relies on web technologies like HTML, CSS, and JavaScript. Examples include Gmail, Google Docs, and Microsoft Outlook Web App.
+
+Thick Client (or Fat Client): This type of client application is installed directly on the user's device and often performs substantial processing locally. It typically interacts with a server but does not rely entirely on the server for functionality. Examples include Microsoft Word, Adobe Photoshop, and desktop email clients like Outlook.
+
+---
+
+Download ideaintellj
+and put it into home of big data
+
+There is no eclipse in this environment
+WE are going to install intellij
+Open in Libra office
+
+sudo snap remove intellij-idea-community
+Delete if already present
+
+Now install
+Installation is in tar format
+now we are compressing it
+gunzip is used to do it. In short it is known as gzip
+We are extracting now.
+
+Manual for tar: man tar
+
+![image](https://github.com/user-attachments/assets/16dc1973-6efd-46ea-a1f3-5a66afafc183)
+
+To extract gz, use z
+What is verbose?
+What is zxvf in linux
+
+We are extracting now
+sudo tar -zxvf 'Copy of ideaIC-2018.2.8.tar.gz' -C /opt/
+![image](https://github.com/user-attachments/assets/b35cf63a-fb3c-4cc5-aa89-f50707b7237d)
+![image](https://github.com/user-attachments/assets/e03de164-db22-427e-80f4-4a927a2ca389)
+
+ls -lh /opt/
+![image](https://github.com/user-attachments/assets/7ae6434e-36ef-495a-a880-ebb8c5ca4c69)
+
+Here, opt is created in /
+
+![image](https://github.com/user-attachments/assets/6c4b149d-1212-4a9e-8a9a-1fb1c0779444)
+
+cd /opt
+ls
+ls -lh
+![image](https://github.com/user-attachments/assets/14753432-b8fc-4719-9ba2-2cb1b0101ec2)
+
+ls -lh idea-IC-182.5262.2/
+![image](https://github.com/user-attachments/assets/308ea8f5-3193-485e-9e4c-5b35e35f8316)
+
+Now we have copied the folder HDFS_API present in our STAGING AREA TO LABS_HOME:
+
+![image](https://github.com/user-attachments/assets/d5defc89-dfd7-470d-a48f-23c57bbe9b6c)
+
+C![image](https://github.com/user-attachments/assets/20cd258d-da2a-4019-9ded-751c119c1bea)
+
+![image](https://github.com/user-attachments/assets/e2993d72-15c0-4846-8741-e64a3fc6f875)
+
+tHERE ARE MANY SHELL SCRIPTS
+![image](https://github.com/user-attachments/assets/febe7a3e-6b6f-4c6e-be28-a5980ea81123)
+
+./idea.sh
+
+A screen will pop up
+
+![image](https://github.com/user-attachments/assets/ec22c7df-23f7-4138-ad44-7edb6433f606)
+Click on OK.
+
+A screen will appear here:
+
+![image](https://github.com/user-attachments/assets/feedff35-a79a-4022-af5f-66c93c65dafd)
+
+Select the Darcula
+Click on Next desktop entry 
+![image](https://github.com/user-attachments/assets/7721b60d-2f64-4a2b-82b9-3dfe6dad6c2b)
+next launcher script
+
+
+
+![image](https://github.com/user-attachments/assets/a8d7b788-00c0-4a45-b595-0b468a4002b1)
+
+![image](https://github.com/user-attachments/assets/6006b891-82ed-4540-be33-93df37fa9a87)
+
+Next default plugins
+![image](https://github.com/user-attachments/assets/6e416d83-ed66-4499-89d3-a4c73264ead3)
+Options shown on this screen:
+Build tools: We can integrate build tools.
+Version Control: Git is a version Control.
+Test Tools
+Swing: java has swing, python has tkinter
+Android
+Other Tools
+Plugin Development
+
+Click on Next: Featured Plugins
+![image](https://github.com/user-attachments/assets/41049e86-2531-4e39-b6b2-6ff20f9ca163)
+
+Tools:
+Scala
+IdeaVim
+
+Now click on Start uisng InteliJ IDEA, it will start
+![image](https://github.com/user-attachments/assets/92221197-2f7d-4a93-b36d-57f9eddbf20f)
+
+Create new project
+![image](https://github.com/user-attachments/assets/3ff04d4a-2be7-4b7d-92a0-d66160f8d180)
+
+---
+
+We were having a machine with eclipse and created a project and the libraries required for project were there in the ide itself.
+Then we added jars there.
+We did this yesterday in Eclipse.
+
+But, our machine today, we don't have libraries here in the intellij.
+We will be using Code Repository: Maven Repo
+This has all the dependencies for all the projects.
+For example, hadoop requires Hadoop client side libraries.
+We need to connect our project to maven repo.
+We can't only create java project in intellij.
+Additional task is to pull the libraries also.
+We will need to create Maven Java Project. 
+
+---
+
+We can create Java Project, Android, Intellij platform plugin, kotlin, projects here in intellij IDEA.
+But we are interested in Maven here.
+By default Project SDK is 1.8 here because it is showing java project.
+select maven project
+![image](https://github.com/user-attachments/assets/f82efa36-dc9a-450a-8524-4806ba252156)
+
+Click NExt
+![image](https://github.com/user-attachments/assets/416fe088-1ed1-4ed4-95da-386a4ec6eb17)
+
+We need to give the address of dependencies here
+That address will be combinateion of groupid and artifactid
+Every project will have a unique id and is shown by groupid and artifact id
+group id: org.example
+
+![image](https://github.com/user-attachments/assets/8033d701-0859-4f92-9d8a-f0a0be404983)
+
+artifact id: HDFS_API
+![image](https://github.com/user-attachments/assets/295115a5-c34e-4e80-90a2-df3903c419e9)
+
+Click on Next
+artifact id has been taken as project name: ~/IdeaProjects/HDFS_API
+![image](https://github.com/user-attachments/assets/daf42a48-03c0-4dad-a228-37bf8a94ffe2)
+
+Click on Finish
+
+![image](https://github.com/user-attachments/assets/2e4fb860-9b71-4826-9549-2d78b529c4fb)
+Click on Enable Autoimport when the dialog box pops up which asks maven projects need to be imported
+IT will start downloading the dependencies then
+
+---
+
+Every maven file is uniquely identified by a file called as pom (Project object model)
+The file which we are seeing on the screen is pom file.
+It contains groupid and artifact id which we specified.
+
+Go to terminal linux:
+go inside ideaprojects folder
+![image](https://github.com/user-attachments/assets/79b57e7c-4707-481c-96c6-18cd50c23d61)
+
+It should contain HDFS_API folder and inside it a pom.xml file and src folder
+![image](https://github.com/user-attachments/assets/9dc5e940-999b-4f9a-844a-58d1fa9f101e)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
