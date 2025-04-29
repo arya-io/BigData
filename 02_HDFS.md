@@ -1948,12 +1948,6 @@ Snapshot:
 
 ---
 
-Got it!  
-You want **best, beginner-friendly notes**, with your **images intact**, a **clear, easy-to-revise structure**, some **emojis** in headers to make it more attractive, and **no missing steps** — like teaching a **child**.  
-I'll upgrade your notes into a beautifully clean format now. Here's the improved version:
-
----
-
 # 📂 Demo: Putting Files in HDFS with Java
 
 Let's learn how to build a Java application to send (ingest) files into Hadoop HDFS!
@@ -2299,6 +2293,128 @@ go inside ideaprojects folder
 
 It should contain HDFS_API folder and inside it a pom.xml file and src folder
 ![image](https://github.com/user-attachments/assets/9dc5e940-999b-4f9a-844a-58d1fa9f101e)
+
+By the way, why are we using different environments to do the same task. We are using cloudera and BigDataVM.
+The answer is to get new learning. We get to know what automation is. Production environment is completely server based, ui based. Not to go in comfort zone. 
+We can also use Eclipse on BigDataVM. 
+
+---
+
+Every maven file is identified by three points:
+groupid, artifactid and version
+
+![image](https://github.com/user-attachments/assets/9f7049af-054f-47e9-ac16-b6b4a8d277ac)
+
+Files in our project:
+![image](https://github.com/user-attachments/assets/e113018e-9876-488b-b53d-2baa9269b726)
+
+
+in Eclipse
+src contains all the code files
+in Intellij
+src > main > java > code files will be stored here
+
+Yesterday, the package name was hdfs
+
+now, select java right click new package
+package anme is hdfs
+
+![image](https://github.com/user-attachments/assets/6076f390-dde1-4fd1-b154-4902a2532ee1)
+
+Moving the InputCounties.java file from HDFS folder of staging area into src/main/java folder:
+
+![image](https://github.com/user-attachments/assets/cedfaa2c-1aed-44bd-b5b1-9d387adb3ee3)
+![image](https://github.com/user-attachments/assets/62bb386a-d56c-40b6-bf63-706d973f7cee)
+
+the java file is showing error because of the client side libraries because it is not being present.
+They have to be added in the class path.
+maven project needs the client side libraries.
+pom.xml represents the project in maven.
+We must tell pom.xml what are our requirements.
+
+Checking hadoop version in terminal
+
+![image](https://github.com/user-attachments/assets/159241d4-f4f1-4bf9-bae2-e13bb986ba49)
+
+We require hadoop client side library for version 2.7.3
+
+We need to google: maven repository hadoop client 2.7.3
+
+This is the dependency:
+![image](https://github.com/user-attachments/assets/5c639aaf-8e75-4891-8732-2d9c6f88a6e1)
+
+Our project too has groupId, artifactId, version
+We need to put this dependencies in our project
+
+Now, how to put that dependency
+
+Return to HDFS_API in Intellij:
+![image](https://github.com/user-attachments/assets/68016171-d608-4114-b383-fa10c7592bb0)
+
+We have put dependencies related to hadoop client
+![image](https://github.com/user-attachments/assets/4ac8bd3e-a1e8-4c60-8708-ef7f45e6bd76)
+
+Errors of InputCounties.java has been resolved.
+
+External Libraries:
+![image](https://github.com/user-attachments/assets/e14b2895-9758-4e7d-adfd-b0b8cc557a0f)
+
+
+The hadoop library version needs to be same when working in projects with different teams. Different version system will result in errors.
+
+The responsibility of creating jar file is of pom.xml
+
+![image](https://github.com/user-attachments/assets/76ebd900-8aa2-43b5-a850-771534e86d5e)
+
+Then selecting directory path
+
+![image](https://github.com/user-attachments/assets/1dc8d5b7-2a39-4ece-8aaa-ac890b9077c6)
+
+Selecting hadoop client
+
+![image](https://github.com/user-attachments/assets/ca81dd5d-8cbd-4930-9a97-b298c1e06ab4)
+
+This is what we see in the file manager:
+
+![image](https://github.com/user-attachments/assets/815c607d-63e1-44eb-be91-bb586f210ff4)
+We have folders for groupID, then artifactID and then the version
+
+Opening Maven Projects from right side of the screen:
+
+![image](https://github.com/user-attachments/assets/19c5e50f-109d-4f46-a990-1ca3511394a1)
+
+First select clean and run
+This command deltes jar file if already exists
+![image](https://github.com/user-attachments/assets/af31f989-539d-48fc-bc98-e9885ef72766)
+
+then select package and run
+Creating new jar file
+![image](https://github.com/user-attachments/assets/2e24fefd-0711-42fc-927e-6c4291bd7b9e)
+![image](https://github.com/user-attachments/assets/7ba1c725-56d2-4e19-b22b-3f13d61fd853)
+
+![image](https://github.com/user-attachments/assets/bef548aa-75b8-4986-87b3-4a4a93d6cac4)
+
+This is just the warning and not the error:
+![image](https://github.com/user-attachments/assets/b24801c5-758c-40ee-8626-515b5a62c190)
+
+The code has executed successfully:
+![image](https://github.com/user-attachments/assets/47431671-b28b-4167-b5de-b30e9f1bfdb8)
+
+Checking counties files in hdfs:
+![image](https://github.com/user-attachments/assets/839da4f4-0d0a-4c3a-b0ed-9c2560efdf91)
+
+Create a new Maven Project HDFS_API_1
+
+
+
+
+
+
+
+
+
+
+
 
 
 
