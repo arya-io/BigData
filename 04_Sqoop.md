@@ -1,3 +1,5 @@
+How is the below code working:
+
 // Abstract class Animal
 abstract class Animal {
     // Abstract method for making sound
@@ -249,11 +251,111 @@ Display Table:
 select * from salaries;
 ![image](https://github.com/user-attachments/assets/377384a6-2b1f-4a43-82ac-49b1d5ea129a)
 
+---
+
+At this point of time our DB is ready to import into hadoop cluster
+
+1) Import the Table into HDFS
+sqoop import --connect jdbc:mysql://quickstart.cloudera:3306/test --driver com.mysql.jdbc.Driver --username root -password cloudera --table salaries
+
+![image](https://github.com/user-attachments/assets/f84b567f-36ac-456c-b2d4-4c6e4c215809)
+![image](https://github.com/user-attachments/assets/91073306-8e84-4328-95dd-0e77124b093c)
+
+This is output of mapreduce program
+
+localhost:19888 on cloudera website
+![image](https://github.com/user-attachments/assets/d22209da-2f7c-4794-b800-bd724646955f)
+
+http port 8088 is of resource manager
+yarn calls it application 19888
+mapreduce calls it job 8088
+
+Verify if salaries folder has been added in hdfs:
+
+hdfs dfs -ls
+
+hdfs dfs -ls salaries
+
+![image](https://github.com/user-attachments/assets/48ceb853-bd81-4e71-9261-0439990f65f7)
+
+Size of data in each map tasks:
+0, 272, 241, 238, 272 (bytes)
+Almost equally distributed
+We hadn't specified split column, then it selected which column for split?
+
+All these map tasks are executed parallely and not sequentially (i.e., starts after the earlier process execution ends).
+
+Mapreduce job through 
+
+![image](https://github.com/user-attachments/assets/2f04843e-c795-4cda-83ef-360c1368e859)
+
+Take application_Id from localhost:8088
+![image](https://github.com/user-attachments/assets/e8faf031-4f5a-4cfb-9ba8-0144f05ba208)
 
 
+yarn logs -applicationId application_1745983395808_0001
+![image](https://github.com/user-attachments/assets/a3e5ff01-6564-4e83-b574-f14992ae3921)
+
+yarn logs -applicationId application_1745983395808_0001 | grep "query:"
+To show only the query part from the logs
+![image](https://github.com/user-attachments/assets/278b2691-80b6-413d-8b75-42d4d79fa7ae)
+
+---
+
+2) Specify Columns to Import
+sqoop import --connect jdbc:mysql://quickstart.cloudera:3306/test --driver com.mysql.jdbc.Driver --username root -password cloudera --table salaries --columns salary,age -m 1 --target-dir salaries2
+
+Also checking:
+
+hdfs dfs -ls
+
+![image](https://github.com/user-attachments/assets/0fe99409-a8b0-43d4-9bf5-4315cb931869)
+
+Now, checking logs with applicationId for salaries2
+
+![image](https://github.com/user-attachments/assets/dbcd755f-b506-4ecc-b658-9c15ae544360)
 
 
+3) Importing from a Query
+sqoop import --connect jdbc:mysql://quickstart.cloudera:3306/test --driver com.mysql.jdbc.Driver --username root --password cloudera --query "select * from salaries s where s.salary > 90000.00 and \$CONDITIONS" --split-by gender -m 2 --target-dir salaries3
 
+![image](https://github.com/user-attachments/assets/60a7bc28-403a-4396-904d-b54959a40070)
+
+Checking hdfs dfs -ls salaries3
+
+![image](https://github.com/user-attachments/assets/55eab0ef-625c-4dc8-976a-f0cef40631c1)
+
+applicaton id for salaries3
+![image](https://github.com/user-attachments/assets/c694bb4d-cf9d-43f1-a7ea-b829bff3889a)
+
+removing condition, we get error:
+![image](https://github.com/user-attachments/assets/8f97b6a4-5b85-423a-91f7-48cb16f7f845)
+
+removing split function
+we get error
+![image](https://github.com/user-attachments/assets/268efaed-4f35-49ec-9fb3-92347461f68d)
+
+So, the takeaway is that both \$CONDITIONS and --split-by is important for a query to run.
+
+Now, automate.sh:
+
+#!/bin/bash
+
+$(hdfs dfs -test -e $1)
+
+if [[ $? -eq 0 ]]; then
+        hdfs dfs -rm -R salaries
+fi
+
+sqoop import --connect jdbc:mysql://talentum-virtual-machine:3306/test?useSSL=false --driver com.mysql.jdbc.Driver --username bigdata -password Bigdata@123 --table salaries
+
+---
+
+## DistCp
+
+## DistCp Recommendations
+
+Default 20 mappers.
 
 
 
