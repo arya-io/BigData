@@ -350,10 +350,13 @@ cal 12 2024 -A 1 -B 1 > mymonths.txt
 
 ![image](https://github.com/user-attachments/assets/6d348ad3-a9f2-4bc1-ad17-414d077f59f0)
 
+Solution: alias calmagic="xargs cal -A 1 -B 1 > thing.txt"
+echo "12 2017" | calmagic
+cat target.txt
 
+![image](https://github.com/user-attachments/assets/a0e69001-0321-4374-87bf-85147b6804ec)
 
-
-
+alias gives you the power to create your own commands.
 
 
 
