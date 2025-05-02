@@ -241,3 +241,5 @@ yarn jar wordcount.jar
 my.WordCountJob input/file.txt result
 
 yarn jar [jarfilename] [package_name].[class_name] [textfile] [foldername to store the output]
+
+Execution
