@@ -243,3 +243,64 @@ my.WordCountJob input/file.txt result
 yarn jar [jarfilename] [package_name].[class_name] [textfile] [foldername to store the output]
 
 Execution
+
+---
+
+Shell Script:
+
+Doc Comments:
+
+# Author
+# Date Created
+# Modification Date
+# Description
+# Usage
+
+--- 
+
+vim and nano are command line editors
+all installation is by default present in nano
+nano is simpler than vim in terms of accessing and using commands
+
+^ symbol in nano editor is known as [Ctrl] key.
+M in nano editor is known as [Alt] key.
+
+To save file in nano, use CTRL + O > ENTER > CTRL + X
+
+After if keyword, use square bracket.
+if hdfs dfs -ls: This will return exit status
+
+---
+
+Whenever there is a code repetition, it is an opportunity to create a function
+
+We can create libraries of functions and then we can use them.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
