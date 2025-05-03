@@ -243,6 +243,7 @@ my.WordCountJob input/file.txt result
 yarn jar [jarfilename] [package_name].[class_name] [textfile] [foldername to store the output]
 
 Execution
+# Executable Jar vs Normal Jar
 
 ---
 
@@ -267,6 +268,39 @@ M in nano editor is known as [Alt] key.
 
 To save file in nano, use CTRL + O > ENTER > CTRL + X
 
+---
+
+nano test.sh
+
+#!/bin/bash
+
+#Author: Priyanka
+#Date Created: 03-05-2025
+#Modification Date: 03-05-2025
+#Description: This is the first nano file
+#Usage: doc/test.sh
+
+$(hdfs dfs -test -e /user/talentum/)
+#if [[ $? -eq 0 ]]; then
+#echo "Path Exists..!!"
+#else
+#echo "Path Doesn't Exists..!!"
+#fi
+
+a=$(echo "Hello")
+echo $a
+
+![image](https://github.com/user-attachments/assets/96d9fbb2-6e49-453d-9d0e-b8d21c4d0d6c)
+
+Output:
+
+bash test.sh
+Hello
+
+![image](https://github.com/user-attachments/assets/9b45997b-c57d-4eb3-bbf0-8fa87de20bcb)
+
+---
+
 After if keyword, use square bracket.
 if hdfs dfs -ls: This will return exit status
 
@@ -276,15 +310,475 @@ Whenever there is a code repetition, it is an opportunity to create a function
 
 We can create libraries of functions and then we can use them.
 
+---
+
+Flow of execution of this command:
+
+yarn jar invertedindex.jar <Main class> inverted/ inverted/output
+
+First Main method will be triggered
+Then ToolRunner will execute the run method
+Configuration conf = super.getConf();
+
+Path in = new Path(args[0]);
+Path out = new Path(args[1]);
+
+This is input (inverted) in args[0] and inverted/output in args[1]
+from
+yarn jar invertedindex.jar <Main class> inverted/ inverted/output
+
+Yarn is responsible for launching instances of Mapper classes.
+
+---
+
+This is the code for this MapReduce implementation:
+
+```java
+
+package inverted;
+
+import java.io.IOException;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+
+public class IndexInverterJob extends Configured implements Tool {
+
+	public static class IndexInverterMapper extends
+			Mapper<LongWritable, Text, Text, Text> {
+
+		private Text outputKey = new Text();
+		private Text outputValue = new Text();
+
+		//TODO
+		@Override
+		protected void map(LongWritable key, Text value, Context context)
+				throws IOException, InterruptedException {
+			String [] words = value.toString().split(",");
+			outputValue.set(words[0]);
+			for(int i = 1; i < words.length; i++) {
+				outputKey.set(words[i]);
+				context.write(outputKey, outputValue);
+			}
+		}
+	}
+
+	//TODO
+	public static class IndexInverterReducer extends
+			Reducer<LongWritable,Text, Text, Text> {
+		private Text outputValue = new Text();
+
+		//TODO
+
+		protected void reduce(Text key,  Iterable<Text> values, Context context)
+				throws IOException, InterruptedException {
+			StringBuilder builder = new StringBuilder();
+			for(Text value: values) {
+				builder.append(value.toString()).append(",");
+			}
+			builder.deleteCharAt(builder.length() - 1);
+			outputValue.set(builder.toString());
+			context.write(key, outputValue);
+		}
+
+	}
 
 
+	public int run(String[] args) throws Exception {
+		Configuration conf = super.getConf();
+		Job job = Job.getInstance(conf, "IndexInverterJob");
+		job.setJarByClass(IndexInverterJob.class);
+
+		Path in = new Path(args[0]);
+		Path out = new Path(args[1]);
+		out.getFileSystem(conf).delete(out, true);
+		FileInputFormat.setInputPaths(job, in);
+		FileOutputFormat.setOutputPath(job,  out);
+
+		//TODO
+		job.setMapperClass(IndexInverterMapper.class);
+		//TODO
+		job.setReducerClass(IndexInverterReducer.class);
+
+		job.setInputFormatClass(TextInputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
+
+		//TODO
+		job.setMapOutputKeyClass(Text.class);
+		job.setMapOutputValueClass(Text.class);
+		//TODO
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(Text.class);
+
+		return job.waitForCompletion(true)?0:1;
+	}
+
+	public static void main(String[] args) {
+		int result;
+		try {
+			//TODO
+			result = ToolRunner.run(new Configuration(),
+					new IndexInverterJob(), args);
+			System.exit(result);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}
+
+//Use following command to run the application
+//$>	yarn jar invertedindex.jar <Main class> inverted/ inverted/output
+
+```
+
+This is the original hortonworks.txt file:
+
+http://hortonworks.com/,hadoop,webinars,articles,download,enterprise,team,reliability
+http://hortonworks.com/products/,hortonworks,services,core,feed,deployments,board,required
+http://hortonworks.com/products/hortonworksdataplatform/,apache,password,directors,enterprise
+http://hortonworks.com/get-started/,data,downloads,founders,hdp,deployments
+http://hortonworks.com/download/,register,hadoop,hdp,download,presentations,videos
+http://hortonworks.com/community/,connect,password,download,articles,knowledgebase,hadoop
+http://hortonworks.com/kb,platform,feed,core,hadoop
+http://hortonworks.com/about-us/,about,hortonworks,apache,hadoop,founders,directors
+http://hortonworks.com/about-us/contact-us/,contact,support,hortonworks,hdp,enterprise
+http://hortonworks.com/resources/,hadoop,services,training,videos
+http://hortonworks.com/events/,hdp,downloads,platform,training,videos
+http://hortonworks.com/webinars/,webinar,hadoop,videos,hdp
+http://hortonworks.com/resources/,feed,blog,platform,hadoop,presentations,reliability
+http://hortonworks.com/hadoop-training/,hadoop,instructor-led,certification,training,courses,learn,hdp
+
+In Mapper Phase,
+k1, v1 are paased and then k2, v2 are generated.
+
+k1 will contain only the link and v1 will contain hadoop,webinars,articles,download,enterprise,team,reliability
+
+After mapper phase, k2, v2 are generated.
+k2 "hadoop"
+v2 list: hortonworks.com/, hortonworks.com/products, 
+hortonworks.com/products/hortonworksdataplatform/
+hortonworks.com/get-started/
+.
+.
+.
+.
+. and so on
+
+---
+
+Reducer Phase:
+
+reduce(Text key,  Iterable<Text> values, Context context)
+
+Text key represents Hadoop
+Iterable<Text> values represents values (v2) -> Output values of Mapper Phase
+
+---
+
+This is the output of the whole program where the output file is stored in hdfs:
+
+hdfs dfs -cat IndexInverterJob_output/part-r-00000
+about	http://hortonworks.com/about-us/
+apache	http://hortonworks.com/products/hortonworksdataplatform/
+apache	http://hortonworks.com/about-us/
+articles	http://hortonworks.com/community/
+articles	http://hortonworks.com/
+blog	http://hortonworks.com/resources/
+board	http://hortonworks.com/products/
+certification	http://hortonworks.com/hadoop-training/
+connect	http://hortonworks.com/community/
+contact	http://hortonworks.com/about-us/contact-us/
+core	http://hortonworks.com/products/
+core	http://hortonworks.com/kb
+courses	http://hortonworks.com/hadoop-training/
+data	http://hortonworks.com/get-started/
+deployments	http://hortonworks.com/products/
+deployments	http://hortonworks.com/get-started/
+directors	http://hortonworks.com/about-us/
+directors	http://hortonworks.com/products/hortonworksdataplatform/
+download	http://hortonworks.com/download/
+download	http://hortonworks.com/community/
+download	http://hortonworks.com/
+downloads	http://hortonworks.com/get-started/
+downloads	http://hortonworks.com/events/
+enterprise	http://hortonworks.com/products/hortonworksdataplatform/
+enterprise	http://hortonworks.com/
+enterprise	http://hortonworks.com/about-us/contact-us/
+feed	http://hortonworks.com/products/
+feed	http://hortonworks.com/resources/
+feed	http://hortonworks.com/kb
+founders	http://hortonworks.com/get-started/
+founders	http://hortonworks.com/about-us/
+hadoop	http://hortonworks.com/
+hadoop	http://hortonworks.com/hadoop-training/
+hadoop	http://hortonworks.com/resources/
+hadoop	http://hortonworks.com/webinars/
+hadoop	http://hortonworks.com/resources/
+hadoop	http://hortonworks.com/about-us/
+hadoop	http://hortonworks.com/kb
+hadoop	http://hortonworks.com/community/
+hadoop	http://hortonworks.com/download/
+hdp	http://hortonworks.com/webinars/
+hdp	http://hortonworks.com/download/
+hdp	http://hortonworks.com/get-started/
+hdp	http://hortonworks.com/events/
+hdp	http://hortonworks.com/about-us/contact-us/
+hdp	http://hortonworks.com/hadoop-training/
+hortonworks	http://hortonworks.com/products/
+hortonworks	http://hortonworks.com/about-us/contact-us/
+hortonworks	http://hortonworks.com/about-us/
+instructor-led	http://hortonworks.com/hadoop-training/
+knowledgebase	http://hortonworks.com/community/
+learn	http://hortonworks.com/hadoop-training/
+password	http://hortonworks.com/community/
+password	http://hortonworks.com/products/hortonworksdataplatform/
+platform	http://hortonworks.com/resources/
+platform	http://hortonworks.com/kb
+platform	http://hortonworks.com/events/
+presentations	http://hortonworks.com/resources/
+presentations	http://hortonworks.com/download/
+register	http://hortonworks.com/download/
+reliability	http://hortonworks.com/
+reliability	http://hortonworks.com/resources/
+required	http://hortonworks.com/products/
+services	http://hortonworks.com/products/
+services	http://hortonworks.com/resources/
+support	http://hortonworks.com/about-us/contact-us/
+team	http://hortonworks.com/
+training	http://hortonworks.com/events/
+training	http://hortonworks.com/resources/
+training	http://hortonworks.com/hadoop-training/
+videos	http://hortonworks.com/webinars/
+videos	http://hortonworks.com/resources/
+videos	http://hortonworks.com/download/
+videos	http://hortonworks.com/events/
+webinar	http://hortonworks.com/webinars/
+webinars	http://hortonworks.com/
+
+Distributed Processing System
+was introduced by Google
+
+Google File System: introduced MapReduce
+
+Head First Java
+
+Sumitabha Das: Linux
+
+---
+
+![image](https://github.com/user-attachments/assets/94daa7b8-aec6-4b52-8639-1895f8ed9824)
+
+This image is a diagram illustrating the process of how data is handled in a **MapReduce** framework. The diagram breaks down the key steps involved in **distributed processing**, showing how input data moves through **Mappers**, intermediate stages, and finally to the **Reducer**.
+
+### Breakdown of the Diagram:
+1. **Input Split**: Data is broken into smaller chunks before processing.
+2. **InputFormat**: Generates `<k1, v1>` key-value pairs for processing.
+3. **Mapper**: Processes the input pairs and transforms them into `<k2, v2>` pairs.
+4. **Map Output Buffer**: Temporarily stores Mapper output before spilling to disk.
+5. **Spill Files**: When the buffer reaches a threshold, sorted records are written to spill files.
+6. **Merge Spill Files**: Multiple spill files are merged into a single sorted file.
+7. **Reducer Input**: The merged spill files become input for the Reducer.
+8. **Reducer**: Processes and aggregates values for each key to produce final results.
+
+Additionally, **NodeManager** is mentioned in the diagram, highlighting its role in managing the nodes involved in the process.
+
+### Why It’s Important:
+This flow visually explains how **large-scale data processing** happens in Hadoop. It provides a structured view of **data movement, storage, and computation**, helping understand how Hadoop optimizes processing by dividing work across multiple nodes.
+
+![image](https://github.com/user-attachments/assets/b0772637-dd21-40ce-bf9f-0adcc25fa694)
+
+This image illustrates the process of data flow in a Hadoop MapReduce framework. It shows how the output from the Mapper phase is transferred to the Reducer phase. The image is divided into two main sections: the **Mapper output** and the **Reducer input**.
+
+### **Key Steps in the Data Flow:**
+1. **Reducer Fetches Data** → The Reducer retrieves data from the Mapper output.
+2. **In-Memory Buffer** → The fetched data is first stored in an in-memory buffer for temporary processing.
+3. **Spill Files Creation** → Once the buffer reaches a threshold, it writes sorted data into spill files.
+4. **Merging Spill Files** → Multiple spill files are merged into a single sorted file.
+5. **Reducer Processing** → The merged data becomes the input for the Reducer, which aggregates results.
+6. **Final Output to HDFS** → The Reducer processes and stores the final results in the Hadoop Distributed File System (HDFS).
+
+### **Key Components in the Image:**
+- **NodeManager** → Manages execution and resource allocation.
+- **Buffer & Spill Files** → Intermediate storage before merging.
+- **Merged Input** → The structured and optimized data used by the Reducer.
+- **HDFS Storage** → Where the final output resides.
+
+This diagram is useful for understanding **how Hadoop optimizes large-scale data processing** by handling intermediate results efficiently before passing them to the Reducer.
+
+## About YARN
+
+YARN = Yet Another Resource Negotiator
+
+YARN splits up the functionality of the JobTracker in Hadoop 1.x into
+two separate processes:
+
+• ResourceManager: for allocating resources and scheduling
+applications
+
+• ApplicationMaster: for executing applications and providing
+failover
+
+ClassLoader gets loaded. It loads the class. It loads into the memory. Which memory? RAM Memory.
+JVM process gets launched.
+There is a stack. There is a heap.
+Process is the running instance of a program.
+JVM Process.
+
+How is the program running?
+
+Main is running on the top of the stack.
+Then the function which is being called inside the main function will get on top of the main in the stack.
+After execution, those functions will be eliminated in the reverse order of their call.
+
+per application process. Whenever program terminates, it de-process.
+
+---
+
+## Open-Source YARN Use Cases
+
+• Tez: improves the execution of MapReduce jobs
+• Slider: for deploying existing distributed applications onto YARN
+• Storm: for real-time computing
+• Spark: a MapReduce-like cluster computing framework designed
+for low-latency iterative jobs and interactive use from an
+interpreter
+• Open MPI: a high-performance Message Passing Library that
+implements MPI-2
+• Apache Giraph: a graph processing platform
+
+---
+
+## The Components of YARN
+
+The ResourceManager communicates with the NodeManagers,
+ApplicationMasters, and Client applications.
+
+![image](https://github.com/user-attachments/assets/b8fdf72a-9a89-4933-9fcf-2d5f29324cb5)
+
+This image illustrates **the components of YARN** (Yet Another Resource Negotiator) and their interaction in a **distributed computing environment**.
+
+### **Key Components:**
+1. **ResourceManager** 🖥️
+   - The central authority managing resources across the cluster.
+   - Communicates with other components to allocate resources efficiently.
+
+2. **NodeManager** ⚙️
+   - Manages resources on individual nodes.
+   - Reports available resources to the ResourceManager.
+   - Executes tasks as directed by the ResourceManager.
+
+3. **ApplicationMaster** 🔗
+   - Manages the execution of a specific application.
+   - Requests resources from the ResourceManager.
+   - Oversees the application's lifecycle and progress.
+
+4. **Client Application** 🏢
+   - The external program submitting tasks to YARN.
+   - Sends job requests to the ResourceManager.
+
+### **Workflow Summary:**
+1. A **Client Application** submits a job to the **ResourceManager**.
+2. The **ResourceManager** assigns an **ApplicationMaster** for the job.
+3. The **ApplicationMaster** requests resources from the **ResourceManager**.
+4. Once resources are allocated, the job runs on different **NodeManagers**.
+5. The **NodeManagers** execute tasks and report progress back.
+
+This architecture enables **efficient resource allocation**, **scalability**, and **multi-tenancy** in big data applications like **Hadoop**.
 
 
+---
+
+## Lifecycle of a YARN Application
+
+![image](https://github.com/user-attachments/assets/011f7bfb-f514-49d7-a7b1-60d3ce41875d)
+
+This image illustrates the **lifecycle of a YARN (Yet Another Resource Negotiator) application**, detailing how a job is processed within a YARN cluster.
+
+### **Lifecycle Steps:**
+1. **Client Submits Application** 📨
+   - A client sends a request to the **ResourceManager** to run an application.
+
+2. **ApplicationMaster Allocation** 🛠️
+   - The ResourceManager identifies a **NodeManager** with available resources.
+   - The **NodeManager** creates a container to launch the **ApplicationMaster**.
+
+3. **ApplicationMaster Requests Resources** 🔄
+   - The **ApplicationMaster** contacts the **ResourceManager** and requests necessary resources.
+   - The **ResourceManager** provides a list of allocated containers.
+
+4. **Task Execution in Containers** 🚀
+   - Containers execute tasks within the **NodeManager**, processing data or computations as required.
+   - The **ApplicationMaster** monitors the execution progress.
+   - We can say containers as the JVM when working with Java.
+
+5. **Completion & Resource Cleanup** ✅
+   - Once tasks are completed, results are stored, and resources are released back to the YARN cluster.
+
+### **Why This Matters?**
+- YARN enables **efficient cluster resource management** for distributed applications.
+- It allows multiple applications to run concurrently while optimizing resource allocation.
+- Helps frameworks like **Hadoop** handle **big data processing** across multiple nodes.
 
 
+This flow is all known as DISTRIBUTED PROGRAMMING.
 
+---
 
+## A Cluster View Example
 
+![image](https://github.com/user-attachments/assets/b57a8e01-85e7-48ba-9c53-366fc5e49ba4)
+
+On running localhost:8088 on Linux Browser, we see:
+
+![image](https://github.com/user-attachments/assets/d5e2a862-838b-403d-a18c-cef532ebb519)
+
+Here, we can see multiple application Ids.
+
+This image titled **"A Cluster View Example"** illustrates the structure and operation of a YARN-based **computing cluster**. The diagram highlights the **ResourceManager**, **NodeManagers**, and their interaction with **Application Masters (AM)** and **Containers**.
+
+### **Key Components in the Cluster:**
+1. **ResourceManager** 🖥️
+   - Manages the entire cluster's resources.
+   - Includes a **Scheduler** that decides resource allocations.
+   - Contains an **ApplicationMaster Scheduler (AsM)** to handle application requests.
+
+2. **NodeManager** ⚙️
+   - Runs on each node in the cluster.
+   - Monitors resources and manages Containers.
+   - Communicates with the ResourceManager.
+
+3. **Application Masters (AM)** 🔗
+   - Each application has its own Application Master.
+   - The AM requests Containers from the ResourceManager.
+   - Manages the execution of tasks across the cluster.
+
+4. **Containers** 📦
+   - Containers execute application tasks.
+   - They are allocated dynamically by the ResourceManager.
+   - Some nodes run both **Containers and AMs**, while others run only Containers.
+
+### **Cluster Structure Insights:**
+- **Nodes with Containers:** These execute computational workloads.
+- **Nodes with Application Masters:** These coordinate the tasks.
+- **Resource Allocation:** Containers are spread across various nodes for parallel execution.
+
+### **Why This Architecture is Useful?**
+- **Scalability:** Can dynamically adjust resources across a distributed system.
+- **Efficiency:** Separates resource management from computation, optimizing performance.
+- **Fault Tolerance:** Tasks can be redistributed if nodes fail.
 
 
 
