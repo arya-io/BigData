@@ -780,12 +780,139 @@ This image titled **"A Cluster View Example"** illustrates the structure and ope
 - **Efficiency:** Separates resource management from computation, optimizing performance.
 - **Fault Tolerance:** Tasks can be redistributed if nodes fail.
 
+---
 
+## What is a Partitioner?
 
+![image](https://github.com/user-attachments/assets/60309caf-5821-42d4-b28e-c8273aaff03d)
 
+This diagram explains the concept of a **Partitioner** in a data processing framework, likely related to **Hadoop MapReduce**. 
 
+### **What is a Partitioner?**
+- The **Partitioner** determines how the output key-value pairs from the **Mapper** are assigned to different **Reducers**.
+- It ensures that all values for a particular key are sent to the same Reducer.
+- This is crucial for efficient processing, ensuring that keys are grouped correctly across distributed computing nodes.
 
+### **Key Elements in the Diagram:**
+1. **Mapper → Partitioner**
+   - The Mapper processes data and generates key-value pairs.
+   - These key-value pairs are passed to the Partitioner.
 
+2. **Partitioner → Reducers**
+   - The Partitioner decides which Reducer will receive which key-value pairs.
+   - Different Reducers receive different partitions of the dataset.
+
+3. **Reducers → NodeManagers**
+   - Each Reducer runs on a **NodeManager**, which manages container execution.
+   - The Reducers process their assigned data chunks separately.
+
+### **Why is a Partitioner Important?**
+- Ensures **load balancing** across Reducers.
+- Helps avoid **data skew**, where one Reducer gets overloaded with too much data.
+- Enables **parallel processing**, improving performance in distributed computing.
+
+![image](https://github.com/user-attachments/assets/0e3c536c-492f-49d7-8991-a9642c4e0ff5)
+
+This diagram illustrates the process of **data partitioning in Hadoop's MapReduce framework**. It shows how key-value pairs outputted by the Mapper are assigned to different Reducers via a **Partitioner**.
+
+### **Step-by-Step Breakdown of the Process:**
+1. **Mapper Outputs `<key, value>` Pairs**  
+   - The Mapper processes input data and generates key-value pairs.
+   - These pairs contain meaningful mappings for distributed processing.
+
+2. **Data is Passed to the Partitioner**  
+   - The **Partitioner** determines which Reducer will process each key-value pair.
+   - This ensures that all values for the same key go to the same Reducer.
+
+3. **Partitioner Assigns Reducer Using `getPartition` Method**  
+   - The `getPartition` method calculates an integer **between 0 and (number of Reducers - 1)`.
+   - This decides **where** each key-value pair should be sent.
+   - Example: If there are **3 Reducers**, `getPartition` may return `0`, `1`, or `2`.
+
+4. **Reducers Process Assigned Data**  
+   - Each Reducer receives only the key-value pairs assigned by the Partitioner.
+   - This ensures efficient and **parallel** processing.
+
+### **Why is Partitioning Important?**
+- **Ensures Load Balancing** → Keys are evenly distributed across Reducers.
+- **Prevents Data Skew** → Avoids situations where one Reducer is overwhelmed.
+- **Optimizes Performance** → Speeds up data processing across multiple nodes.
+
+## The Default Partitioner
+
+public class HashPartitioner<K, V>
+
+extends Partitioner<K, V>
+
+{
+
+public int getPartition(K key, V value,
+int numReduceTasks) {
+
+return (key.hashCode()
+
+& Integer.MAX_VALUE)
+% numReduceTasks;
+
+}
+}
+
+---
+
+## Writing a Custom Partitioner
+public class WordCountPartitioner
+extends Partitioner<Text, IntWritable> {
+public int getPartition(Text key,
+IntWritable value,
+int numReduceTasks) {
+if(numReduceTasks == 1) {
+return 0;
+}
+return (key.toString().length()
+* value.get()) % numReduceTasks;
+
+}
+}
+
+### **Understanding the Custom Partitioner**
+
+The **WordCountPartitioner** class is a **custom partitioner** for Hadoop's MapReduce framework. It ensures that key-value pairs are distributed across Reducers based on a custom logic.
+
+### **Key Components in the Code:**
+1. **Extends `Partitioner<Text, IntWritable>`**
+   - This class **inherits Hadoop’s Partitioner**, allowing customization of how data is distributed across Reducers.
+
+2. **Custom `getPartition()` Method**
+   - Accepts:
+     - **`Text key`** → The word being counted.
+     - **`IntWritable value`** → The count of occurrences.
+     - **`int numReduceTasks`** → The number of Reducers available.
+   - Defines logic for assigning partitions.
+
+### **Partitioning Logic:**
+- **If `numReduceTasks == 1`**, return `0` → All data goes to a single Reducer.
+- **Otherwise, distribute based on `(key.length * value) % numReduceTasks`**:
+  - Uses the length of the word (`key.toString().length()`) multiplied by its frequency (`value.get()`).
+  - The modulo (`% numReduceTasks`) ensures it is **mapped evenly** across available Reducers.
+
+### **Example of How Keys Are Partitioned:**
+#### **Scenario: `numReduceTasks = 3`**
+| Word  | Count | `(length * count) % numReduceTasks` | Partition Assigned |
+|-------|-------|-------------------------------------|---------------------|
+| "data" | 2 | `(4 * 2) % 3 = 2` | Reducer 2 |
+| "hadoop" | 3 | `(6 * 3) % 3 = 0` | Reducer 0 |
+| "big" | 1 | `(3 * 1) % 3 = 0` | Reducer 0 |
+| "processing" | 5 | `(10 * 5) % 3 = 2` | Reducer 2 |
+
+### **Why Use a Custom Partitioner?**
+- **Ensures even load distribution** among Reducers.
+- **Improves performance** by reducing data skew.
+- **Can optimize jobs** based on specific key-value relationships.
+
+---
+
+Add this file into the original WordCountJob File as an inner class.
+Then create a jar and execute the filel.
 
 
 
