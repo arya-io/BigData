@@ -1014,70 +1014,286 @@ In this view, multiple **application IDs** are displayed, showing how **YARN** m
 
 ---
 
-## 🚚 **What is a Partitioner?**
+# 🗂️ Map Aggregation – Simplifying Data Processing 🚀  
 
-![image](https://github.com/user-attachments/assets/60309caf-5821-42d4-b28e-c8273aaff03d)
+![image](https://github.com/user-attachments/assets/bc256336-986a-4f03-b8ea-5c69aa3dee5b)  
 
-This diagram explains the role of the **Partitioner** in a data processing framework, likely **Hadoop MapReduce**.
-
-### **What is a Partitioner?**
-
-* The **Partitioner** decides how the **Mapper’s output key-value pairs** are distributed to the **Reducers**.
-* It ensures that all values for the same key are processed by the same **Reducer**, enabling efficient and accurate data aggregation.
-
-### **Key Elements in the Diagram:**
-
-1. **Mapper → Partitioner**
-
-   * The **Mapper** processes data and generates key-value pairs.
-   * These key-value pairs are passed to the **Partitioner** for distribution.
-
-2. **Partitioner → Reducers**
-
-   * The **Partitioner** determines which **Reducer** receives which key-value pairs, ensuring that values associated with the same key are grouped together.
-
-3. **Reducers → NodeManagers**
-
-   * Each **Reducer** operates on a **NodeManager**, which manages the execution of the tasks in containers.
-   * Reducers process their assigned data chunks, aggregating values for each key.
-
-### **Why is a Partitioner Important?**
-
-* **Load Balancing**: Ensures that work is evenly distributed across the reducers.
-* **Avoids Data Skew**: Prevents one reducer from being overloaded with too much data, improving performance.
-* **Parallel Processing**: Ensures that data can be processed in parallel across multiple nodes for faster results.
+Map Aggregation plays a **key role** in optimizing MapReduce workflows by **reducing intermediate data transfer** between the Mapper and Reducer. Let’s break it down in **simple terms** and understand why it's so important!  
 
 ---
 
-### **Step-by-Step Breakdown of the Partitioning Process in Hadoop:**
+## ❌ Without Aggregation – Lots of Data, More Processing  
+- The **Mapper** processes each word **individually**, generating separate key-value pairs.  
+- Example key-value pairs produced by the Mapper:  
+  - <"by", 1>, <"the", 1>, <"people", 1>  
+  - <"for", 1>, <"the", 1>, <"people", 1>  
+  - <"of", 1>, <"the", 1>, <"people", 1>  
+- Since **every word occurrence** is sent as a separate entry, the **Reducer** has to deal with a **huge volume of data**, increasing:  
+  - 📡 **Network traffic** (data transfer between Mapper & Reducer)  
+  - ⏳ **Processing time** (Reducer takes longer to consolidate results)  
 
-1. **Mapper Outputs `<key, value>` Pairs**
-
-   * The **Mapper** processes the input data and generates key-value pairs that hold the meaningful data.
-
-2. **Data is Passed to the Partitioner**
-
-   * The **Partitioner** determines which **Reducer** should receive each key-value pair.
-   * It ensures that values for the same key go to the same **Reducer**.
-
-3. **Partitioner Assigns Reducer Using `getPartition` Method**
-
-   * The `getPartition` method calculates an integer between 0 and (number of Reducers - 1), deciding which **Reducer** gets each key-value pair.
-   * For example, if there are **3 Reducers**, `getPartition` may return **0**, **1**, or **2**, mapping key-value pairs to corresponding Reducers.
-
-4. **Reducers Process Assigned Data**
-
-   * Each **Reducer** processes the key-value pairs it has been assigned, ensuring that the processing is done efficiently and in parallel.
-
-### **Why is Partitioning Important?**
-
-* **Ensures Load Balancing**: Guarantees an even distribution of work across Reducers.
-* **Prevents Data Skew**: Helps avoid situations where a Reducer gets too much data while others get too little.
-* **Optimizes Performance**: By ensuring even data distribution, partitioning speeds up parallel data processing, thus enhancing performance.
+💡 **Analogy:** Imagine every student in a school submits their own attendance record separately, instead of the teacher summing them up before passing the total count to the office. The office now has **hundreds** of records instead of just one summary—making their job harder!  
 
 ---
 
-## 📦 **The Default Partitioner**
+## ✅ With Aggregation – Less Data, Faster Processing  
+- The **Mapper** pre-processes the data, combining duplicate words before sending output to the Reducer.  
+- Example key-value pairs after aggregation:  
+  - <"by", 1>, <"the", 3>, <"people", 3>  
+  - <"for", 1>, <"of", 1>  
+
+### 🎯 **Why is this Better?**  
+- **🚀 Faster Execution** – Less data means **quicker** transfers.  
+- **🌐 Reduced Network Traffic** – The amount of intermediate data **shrinks**, leading to **smoother** processing.  
+- **💰 Cost-Efficient** – Optimized workflow **reduces computational overhead** and saves resources.  
+
+💡 **Analogy:** Instead of students submitting **individual attendance reports**, the teacher **tallies everything first** and submits just **one final count**—saving time and effort!  
+
+---
+
+## 🏁 **Final Thoughts**  
+Aggregation **reduces redundant data movement** in MapReduce, making workflows **efficient and scalable**, especially when processing **massive datasets**!  
+
+💭 **Remember:** If your data is **huge**, consider aggregation to **speed up** and **optimize** the process. 🚀  
+
+---
+
+# ⚡ Overview of Combiners – Optimizing MapReduce Efficiency 🚀  
+
+![image](https://github.com/user-attachments/assets/eaaa1d77-0dac-4fbd-8f35-6e420bba14c5)  
+
+The **Combiner** in Hadoop’s MapReduce framework plays a **crucial role** in optimizing **file I/O operations** and **reducing data transfer overhead**. Think of it as a **mini Reducer**, working at the Mapper level to **pre-process** data before it reaches the actual Reducer.  
+
+---
+
+## 🏗️ How It Works – Step by Step  
+
+### 1️⃣ **MapOutputBuffer – Where It All Starts**  
+- The **Mapper** processes data and holds the **key-value pairs** (`<k2,v2>`) in a **buffer**.  
+- But buffers have **limits**! 🛑 Once full, the **data spills** to disk, causing extra I/O operations.  
+
+💡 **Analogy:** Think of this like packing a suitcase. If you don’t organize items properly, you might end up stuffing too many bags, leading to unnecessary **baggage weight** (extra disk storage).  
+
+---
+
+### 2️⃣ **Combiner – Reducing the Load**  
+- The **Combiner** steps in before the data hits the disk, grouping values locally.  
+- It **acts like a Reducer**, **summarizing repeated values** before storage.  
+- **Goal:** Reduce **data size** to minimize storage and **speed up** processing.  
+
+💡 **Analogy:** Instead of throwing all items into your suitcase randomly, you neatly **fold and compress** clothes first, so fewer bags are needed! 🎒  
+
+---
+
+### 3️⃣ **Disk Spill Files – Less I/O, More Efficiency**  
+- Since the **Combiner minimizes redundant records**, the disk stores **less data**.  
+- The Mapper’s output eventually becomes the **Reducer’s input**, so **smaller spills mean faster execution**.  
+- 🚀 **End result:** Less **I/O overhead**, **reduced network traffic**, and **optimized MapReduce performance**!  
+
+💡 **Analogy:** If you’ve **pre-sorted** your clothes before packing, you have **fewer bags to carry**, making travel **lighter and smoother**. ✈️  
+
+---
+
+## 🎯 **Why is the Combiner Important?**  
+✅ **Optimizes Disk Usage** – Less storage needed per Mapper output.  
+✅ **Speeds Up Processing** – Data reaches the Reducer in **smaller chunks**.  
+✅ **Reduces Network Load** – Less intermediate data means **faster transfers**.  
+✅ **Boosts Hadoop Efficiency** – A must-have for **large-scale data** workflows!  
+
+---
+
+## 🏁 **Final Thoughts**  
+The **Combiner** is a powerful **local optimization tool** that makes **MapReduce workflows scalable** and **cost-effective**. If your dataset is **large**, using a Combiner can **significantly cut down processing time**!  
+
+---
+
+# 🔄 Reduce-side Combining – Optimizing Data Flow in Hadoop 🚀  
+
+![image](https://github.com/user-attachments/assets/54fecbc7-f554-46d3-b2aa-329192b0e5d2)  
+
+Reduce-side Combining is a **crucial mechanism** in Hadoop’s **Reduce phase**, helping optimize the flow of **intermediate key-value pairs** and **minimizing shuffle data**. Let's break it down in simple terms!  
+
+---
+
+## 🏗️ **How Reduce-side Combining Works**  
+
+### 1️⃣ **In-memory Buffer – First Stop**  
+- Data processed by **Mappers** gets **stored in an in-memory buffer** before further processing.  
+- The buffer **temporarily holds** intermediate results to **minimize direct disk writes**.  
+
+💡 **Analogy:** Imagine gathering test results from different schools in a temporary spreadsheet before organizing them—this saves **time and effort**! 📊  
+
+---
+
+### 2️⃣ **Spill Files – Managing Large Data**  
+- When the buffer **exceeds a threshold**, data spills to disk into **spill files**.  
+- This prevents memory overflow and ensures **smooth processing**.  
+
+💡 **Analogy:** Think of writing quick notes on a whiteboard. Once the board is full, you **copy the notes into a notebook**—that’s like spilling to disk! 📜  
+
+---
+
+### 3️⃣ **Merged Input – Organizing Data**  
+- Multiple **spill files are merged** to create a single **structured input** for the Reducer.  
+- This **reduces redundancy** and makes handling large datasets more **efficient**.  
+
+💡 **Analogy:** Instead of storing separate spreadsheets for every school’s test results, you **merge them into one file**, making analysis **easier**. 🔄  
+
+---
+
+### 4️⃣ **Reducer – Final Processing**  
+- The **Reducer processes the merged data**, performing **grouping and computation** to generate final results.  
+- This is where **actual logic is applied**, such as counting words, aggregating sums, or computing statistics.  
+
+💡 **Analogy:** Imagine grading all student scores after merging test records—it’s the **final step** of creating a structured report! 📝  
+
+---
+
+### 5️⃣ **HDFS – Storing Final Output**  
+- The Reducer’s **processed data** gets stored in **HDFS**, ensuring **distributed and fault-tolerant storage**.  
+
+💡 **Analogy:** Think of uploading a **final exam report** to a central database for long-term storage! 💾  
+
+---
+
+## ⚡ **What About the Combiner?**  
+- **If spill files are created**, a **Combiner** can be used **before data reaches the Reducer**.  
+- The **Combiner optimizes intermediate data** by **pre-grouping values**, reducing **shuffle overhead**.  
+- **Result:** Less **data transfer** → Faster **execution** 🚀  
+
+💡 **Analogy:** Instead of sending **raw student marks** from schools, the teacher **pre-calculates summaries**, making grading **way faster**! 📊  
+
+---
+
+## 🎯 **Why is Reduce-side Combining Important?**  
+✅ **Minimizes disk writes** → Improves **storage efficiency**  
+✅ **Reduces shuffle data** → Speeds up **Reduce phase execution**  
+✅ **Optimizes network transfers** → Boosts **Hadoop performance**  
+✅ **Enhances scalability** → Works well for **large datasets**  
+
+---
+
+## 🏁 **Final Thoughts**  
+Reduce-side Combining ensures data is **well-organized**, **efficiently processed**, and **optimally stored** in Hadoop. By **reducing redundant transfers**, it makes large-scale data processing **smoother and faster**! 🚀 
+
+---
+
+# 📝 Example of a Combiner – Streamlining Data Processing 🚀  
+
+![image](https://github.com/user-attachments/assets/bdab0d10-fe90-491f-ac6f-16df60093184)  
+
+A **Combiner** is a small yet powerful enhancement in MapReduce, helping **reduce data volume** before shuffling key-value pairs to the **Reducer**. Let's break down this classic Word Count Combiner step by step!  
+
+---
+
+## 📜 **WordCountCombiner Code**
+```java
+public class WordCountCombiner 
+extends Reducer<Text, IntWritable, Text, IntWritable> {
+    private IntWritable outputValue = new IntWritable();
+
+    @Override
+    protected void reduce(Text key, Iterable<IntWritable> values, Context context)
+            throws IOException, InterruptedException {
+        int sum = 0;
+        for (IntWritable count : values) {
+            sum += count.get();  // Summing up occurrences
+        }
+        outputValue.set(sum);
+        context.write(key, outputValue);  // Writing reduced output
+    }
+}
+```
+
+---
+
+## 🏗️ **How It Works – Step by Step**  
+
+### 1️⃣ **Summing Values Locally**  
+- The **Mapper** outputs key-value pairs like `<word, 1>` multiple times for the same word.  
+- Instead of sending **individual occurrences** to the Reducer, the **Combiner groups them locally** first.  
+
+💡 **Analogy:** Imagine counting votes in a large election. Instead of sending **individual votes** to the final counting station, each local booth first **tallies their votes**—this saves a lot of processing time! 🗳️  
+
+---
+
+### 2️⃣ **Local Reduction Before Shuffle**  
+- The **reduce method** **iterates over values**, summing them for each word **before sending them to the Reducer**.  
+- Only **aggregated counts** are passed forward, reducing **data transfer** between nodes.  
+
+💡 **Analogy:** Instead of delivering raw sales records from every shop, each store **pre-summarizes** daily totals before sending them to headquarters. 📊  
+
+---
+
+### 3️⃣ **Writing Optimized Output**  
+- The **combined total** is written out, minimizing **network overhead**.  
+- This drastically **reduces the shuffle phase’s workload**, making the **Reducer’s job easier**!  
+
+💡 **Analogy:** Think of summarizing students’ scores before sending them to the school principal. Instead of analyzing **raw marks**, the principal just receives **pre-computed totals** for each subject. 🏫  
+
+---
+
+## 🎯 **Why Use a Combiner?**  
+✅ **Optimizes Bandwidth Usage** – Less data transferred between Mapper and Reducer.  
+✅ **Enhances Performance** – Faster processing by reducing unnecessary computation.  
+✅ **Prevents Redundant Computation** – The Reducer handles **fewer records**, making it more efficient.  
+
+🚀 **End result:** More **scalable** and **optimized** Hadoop workflows!  
+
+---
+
+## 🏁 **Final Thoughts**  
+Using a **Combiner** helps **streamline MapReduce operations**, making distributed data processing **more efficient**. The key takeaway: **Reduce before you shuffle!** 🎯  
+
+---
+
+# 🚚 What is a Partitioner in Hadoop MapReduce?  
+
+![image](https://github.com/user-attachments/assets/60309caf-5821-42d4-b28e-c8273aaff03d)  
+
+In **Hadoop MapReduce**, a **Partitioner** is responsible for **determining which Reducer** will process each **key-value pair** from the Mapper’s output. It ensures that **all values associated with the same key are sent to the same Reducer**, enabling correct and efficient data aggregation.
+
+---
+
+## 🔄 **How the Partitioner Works**  
+
+### **1️⃣ Mapper → Partitioner**  
+- The **Mapper** generates key-value pairs from the input data.  
+- These pairs are then passed to the **Partitioner**, which decides where they should go.  
+
+💡 **Analogy:** Think of a **sorting machine** in a mailroom—it organizes packages so they go to the right recipients! 📦  
+
+---
+
+### **2️⃣ Partitioner → Reducers**  
+- The **Partitioner assigns keys to specific Reducers**, ensuring that **all values for the same key are processed together**.  
+- Without partitioning, data might be scattered across multiple Reducers, **breaking the logic** of aggregation.  
+
+💡 **Analogy:** Imagine sorting student answers in a school exam—**all answers from the same student must go to the same examiner**, not randomly distributed! 🎓  
+
+---
+
+### **3️⃣ Reducers → NodeManagers**  
+- Each **Reducer** processes the assigned data chunks.  
+- The **NodeManager** ensures the Reducers execute efficiently within their respective containers.  
+
+💡 **Analogy:** The **exam papers are handed to the right examiners**, ensuring smooth evaluation without confusion! 📜  
+
+---
+
+## 🎯 **Why is Partitioning Important?**  
+
+✅ **Ensures Load Balancing** – Work is evenly distributed across Reducers.  
+✅ **Prevents Data Skew** – Avoids overwhelming one Reducer with too much data.  
+✅ **Optimizes Parallel Processing** – Allows multiple nodes to process data **simultaneously** for faster results.  
+
+---
+
+# ⚡ Understanding the Default Partitioner  
+
+Hadoop uses the **HashPartitioner** by default, which assigns reducers **based on the hash value of the key**.
+
+### **Default HashPartitioner in Hadoop**  
 
 ```java
 public class HashPartitioner<K, V> extends Partitioner<K, V> {
@@ -1087,18 +1303,20 @@ public class HashPartitioner<K, V> extends Partitioner<K, V> {
 }
 ```
 
-### **Explanation:**
+### 🔍 **How It Works**  
+- **`key.hashCode()`** – Converts the key into a numerical hash.  
+- **`& Integer.MAX_VALUE`** – Ensures the hash is **non-negative**.  
+- **`% numReduceTasks`** – Distributes the key-value pairs **evenly** across available Reducers.  
 
-* The **`HashPartitioner`** is the default partitioner used in Hadoop MapReduce.
-* It uses the **`hashCode()`** method of the key to determine the partition. The partition is computed by performing the following steps:
-
-  * **`key.hashCode()`** → Generates a hash value for the key.
-  * **`& Integer.MAX_VALUE`** → Ensures the hash value is non-negative.
-  * **`% numReduceTasks`** → Distributes the data evenly across the available reducers based on the number of reducers (`numReduceTasks`).
+💡 **Analogy:** It’s like organizing students alphabetically into exam halls—names starting with **A-C go to Room 1, D-F go to Room 2, etc.** 🎯  
 
 ---
 
-## 🛠️ **Writing a Custom Partitioner**
+# 🛠 **Writing a Custom Partitioner**  
+
+Sometimes, the default **HashPartitioner** might not distribute data optimally. You can create a **Custom Partitioner** based on logic suited to your dataset.
+
+### ✅ **Example: Word Count Partitioner**  
 
 ```java
 public class WordCountPartitioner extends Partitioner<Text, IntWritable> {
@@ -1111,74 +1329,727 @@ public class WordCountPartitioner extends Partitioner<Text, IntWritable> {
 }
 ```
 
-### **Explanation of Custom Partitioner:**
+### 🔍 **How This Custom Partitioner Works**  
+- **Uses word length** multiplied by **word frequency** (`value.get()`) to assign Reducers.  
+- Applies **modulo operation** (`% numReduceTasks`) to **distribute work evenly**.  
 
-* The **`WordCountPartitioner`** is a **custom partitioner** designed for the **WordCount** application in Hadoop's MapReduce framework.
-* It extends the **`Partitioner<Text, IntWritable>`**, which is the default Partitioner type for key-value pairs where the key is of type `Text` (string) and the value is of type `IntWritable` (integer).
+💡 **Example Output (For 3 Reducers)**  
 
-#### **Key Components of the Code:**
+| Word         | Count | `(length * count) % numReduceTasks` | Assigned Reducer |
+| ------------ | ----- | ----------------------------------- | ---------------- |
+| "data"       | 2     | `(4 * 2) % 3 = 2`                   | Reducer 2        |
+| "hadoop"     | 3     | `(6 * 3) % 3 = 0`                   | Reducer 0        |
+| "big"        | 1     | `(3 * 1) % 3 = 0`                   | Reducer 0        |
+| "processing" | 5     | `(10 * 5) % 3 = 2`                  | Reducer 2        |
 
-1. **Extends `Partitioner<Text, IntWritable>`:**
-
-   * The custom partitioner extends Hadoop’s base **Partitioner** class, allowing the developer to specify custom logic for partitioning.
-
-2. **`getPartition()` Method:**
-
-   * This method accepts:
-
-     * **`Text key`**: The word being counted (for instance, `"data"`).
-     * **`IntWritable value`**: The count of occurrences of the word (for example, `2` for `"data"`).
-     * **`int numReduceTasks`**: The number of reducers available for the job.
-   * The method defines the partitioning logic:
-
-     * If there is only **one Reducer** (`numReduceTasks == 1`), all data is sent to **Reducer 0**.
-     * Otherwise, the logic for partitioning is based on **`(key.length() * value.get()) % numReduceTasks`**.
-
-       * This formula uses the length of the word (`key.toString().length()`) multiplied by the frequency of the word (`value.get()`), and then applies a modulo operation to determine which reducer the key-value pair should go to.
-
-### **Partitioning Logic Example:**
-
-#### **Scenario: `numReduceTasks = 3`**
-
-| Word         | Count | `(length * count) % numReduceTasks` | Partition Assigned |
-| ------------ | ----- | ----------------------------------- | ------------------ |
-| "data"       | 2     | `(4 * 2) % 3 = 2`                   | Reducer 2          |
-| "hadoop"     | 3     | `(6 * 3) % 3 = 0`                   | Reducer 0          |
-| "big"        | 1     | `(3 * 1) % 3 = 0`                   | Reducer 0          |
-| "processing" | 5     | `(10 * 5) % 3 = 2`                  | Reducer 2          |
-
-#### **Why Use a Custom Partitioner?**
-
-* **Even Load Distribution**: Custom partitioning can ensure that the data is more evenly distributed across reducers, leading to better resource utilization.
-* **Improved Performance**: By customizing the partitioning logic, you can avoid **data skew**, where some reducers receive much larger amounts of data than others, which can lead to slower processing times.
-* **Optimization Based on Specific Relationships**: The custom logic might consider specific relationships in the key-value pairs (such as word length and count) to improve the distribution of data based on the application’s needs.
+🔹 **This prevents data skew and ensures balanced load across Reducers!**  
 
 ---
 
-### **Integrating the Custom Partitioner into a WordCountJob**
+# 🏁 **Final Thoughts**  
 
-To use the `WordCountPartitioner` in your **WordCountJob**, you should include it as an inner class within your existing WordCount application. Afterward, follow these steps:
+Partitioning is **critical** in MapReduce. A well-designed **Partitioner ensures efficient distribution of work**, preventing **bottlenecks** and improving **performance**. Whether using the **default HashPartitioner** or creating a **custom one**, the goal is to **balance Reducer workloads** and **speed up data processing**! 🚀  
 
-1. **Include the Custom Partitioner as an Inner Class:**
-
-   * Add the `WordCountPartitioner` class to the WordCount job file.
-
-2. **Create a JAR File:**
-
-   * Compile your project and package it into a **JAR file**.
-
-3. **Execute the WordCount Job:**
-
-   * Submit the job to the Hadoop cluster using the `hadoop jar` command.
-
-   Example command:
-
-   ```bash
-   hadoop jar wordcount.jar org.apache.hadoop.examples.WordCount input output
-   ```
-
-This process will ensure that the custom partitioning logic is applied, optimizing the distribution of work across the reducers.
 
 ---
 
-This section explains how you can customize the default **Partitioner** in Hadoop MapReduce to suit your specific application needs.
+# 🔄 **Shuffle & Sort in Hadoop MapReduce**  
+
+![image](https://github.com/user-attachments/assets/93372eee-ad72-4d6b-bce2-e15d5be7fcc0)  
+
+The **Shuffle & Sort phase** is one of the most critical stages in **MapReduce**, responsible for efficiently organizing **key-value pairs** before they reach the **Reducer**. Let's break down how it works in simple terms! 🚀  
+
+---
+
+## 🏗️ **Understanding Key-Value Pairs (K2, V2)**  
+- **K2 (Keys):** Represent categories such as `"SC"` and `"LA"`.  
+- **V2 (Values):** Numerical data linked to the key, such as `(40460, 1), (40061, 1)`.  
+
+💡 **Analogy:** Think of K2 as different **departments**, and V2 as the **transactions** happening within them. For example, `"Sales"` could have multiple daily transactions like `(1000,1), (500,1)`.  
+
+---
+
+## 🔄 **Shuffle & Sort – Step by Step**  
+
+### **1️⃣ Mapper Generates Key-Value Pairs**  
+Each **Mapper** processes raw input data and **outputs individual key-value pairs**, such as:  
+```plaintext
+<SC, (40460, 1)>
+<SC, (48847, 1)>
+<LA, (35055, 1)>
+```
+Instead of sending these directly to the **Reducer**, Hadoop optimizes the process using **Shuffle & Sort** first!  
+
+---
+
+### **2️⃣ Sorting Phase – Organizing Data**  
+- Keys are **grouped together** so that all values associated with `"SC"` are collected.  
+- Example after sorting:  
+```plaintext
+SC ("40460, 1", "48847, 1", "35055, 1")
+```
+💡 **Analogy:** Imagine sorting exam papers by subject before grading—this ensures that **all Math papers go to the right teacher**! 📜  
+
+---
+
+### **3️⃣ Combiner Operation – Reducing Intermediate Data**  
+- The **Combiner** is applied to optimize **network traffic**, using **commutative and associative operations** to **reduce** the amount of intermediate data sent to the Reducer.  
+- Instead of storing each individual count, the **Combiner performs local aggregation**:  
+```plaintext
+context.write(key, outputValue);
+```
+💡 **Analogy:** If each student’s **math scores** were individually recorded, it would take too long to process. Instead, **local aggregation** summarizes scores before passing them on! 🏫  
+
+---
+
+### **4️⃣ Reducer Processes Aggregated Data**  
+- The **Reducer** takes all the summed values (`sumCount`) and performs the **final computation**:  
+```java
+outputValue.set(((double) sum)/count);
+```
+💡 **Analogy:** Instead of grading every quiz separately, the teacher **averages scores for each student** before finalizing the results! 🎯  
+
+---
+
+# 📊 **Checking Shuffle & Sort in YARN Logs**  
+Hadoop allows you to **track Shuffle & Sort performance** using YARN logs.  
+
+### ✅ **Fetching Logs for a Specific Application**
+```bash
+yarn logs -applicationId application_1746198666490_0022
+```
+
+💡 **This command retrieves logs** for the Hadoop job, helping debug performance issues.  
+
+![image](https://github.com/user-attachments/assets/dcf55ef3-1817-4859-b7c0-5bd74349031b)
+
+### ✅ **Checking Map Counters in Logs**  
+```bash
+yarn logs -applicationId application_1746198666490_0022 | grep "MAP counter = "
+```
+💡 **This helps monitor mapper statistics**, ensuring efficient data flow in the pipeline!  
+
+![image](https://github.com/user-attachments/assets/d6c7e0e5-fddd-4f32-95a8-512304a2b69f)
+
+---
+
+# 🏁 **Final Thoughts**  
+The **Shuffle & Sort phase** ensures that data is **organized efficiently**, reducing **network congestion** and speeding up **parallel processing** in Hadoop. The **Combiner** further optimizes performance by **aggregating values locally** before they reach the Reducer! 🚀  
+
+---
+
+# 🚀 Partition Continued – Understanding Hadoop Data Flow  
+
+![image](https://github.com/user-attachments/assets/2e3926e6-2868-455e-9753-91c549ecc05b)  
+
+The **partitioning process in Hadoop MapReduce** is essential for **efficient data distribution and processing**. This data flow diagram highlights how raw data transitions **step by step** before reaching meaningful output. Let’s dive in!  
+
+---
+
+## 📌 **Step-by-Step Breakdown of Hadoop MapReduce Data Flow**  
+
+### **1️⃣ Input Splits from HDFS**  
+- The data stored in **HDFS** is **divided** into smaller pieces called **input splits**.  
+- These splits allow **parallel processing** for efficiency.  
+
+💡 **Analogy:** Imagine dividing a **big book** into separate chapters so different people can read parts simultaneously! 📖  
+
+---
+
+### **2️⃣ InputFormat – Converting Data into Key-Value Pairs**  
+- The **InputFormat** defines how each split is structured into **<key, value> pairs**, making data ready for the **Mapper**.  
+- Different formats suit different types of data sources.  
+
+💡 **Analogy:** Think of a **translator** converting a book into different languages based on the reader’s needs! 📚  
+
+---
+
+### **3️⃣ Mapper Execution – Processing Key-Value Pairs**  
+- The **Mapper** processes each key-value pair independently.  
+- It applies **transformations, filtering, and local aggregations** before passing results forward.  
+
+💡 **Analogy:** A **chef** preparing individual meal components before assembling the final dish! 🍽️  
+
+---
+
+### **4️⃣ Reducer Execution – Final Processing**  
+- The output from Mappers is **shuffled, sorted, and grouped**, allowing the **Reducer** to consolidate results.  
+- This step ensures meaningful **data aggregation** based on keys.  
+
+💡 **Analogy:** A **final report** being compiled after receiving categorized survey responses from multiple locations! 📝  
+
+---
+
+### **5️⃣ OutputFormat – Structuring the Final Storage**  
+- The processed results are **formatted properly** before being stored in **HDFS**.  
+- The chosen **OutputFormat** determines how the results appear for further use.  
+
+💡 **Analogy:** Formatting a **report neatly** before submitting it to management! 📊  
+
+---
+
+# 📂 **Built-in Hadoop Input Formats**  
+
+Hadoop provides **various built-in InputFormats** to structure raw data efficiently. Here's a quick rundown:  
+
+### ✅ **FileInputFormat<K, V>**  
+- Acts as the **parent class** for most input formats.  
+- Reads data from HDFS and splits it into **InputSplits** for parallel execution.  
+
+---
+
+### ✅ **TextInputFormat<LongWritable, Text>** _(Default)_  
+- Processes **text files line by line**, treating:  
+  - `LongWritable` → Line offset as the key  
+  - `Text` → The line content as the value  
+- Ideal for **log files and structured text data**.  
+
+---
+
+### ✅ **SequenceFileInputFormat<K, V>**  
+- Works with **binary files** using Hadoop’s SequenceFile format.  
+- Great for storing **compressed and efficiently retrievable** data.  
+
+---
+
+### ✅ **KeyValueTextInputFormat<Text, Text>**  
+- Reads text data as **key-value pairs** where:  
+  - The **first token** is the key  
+  - The remaining line is the value  
+- Perfect for structured records where key-based grouping is required.  
+
+---
+
+### ✅ **CombineFileInputFormat<K, V>**  
+- Designed for **handling many small files efficiently**.  
+- Combines multiple tiny files into **larger splits**, reducing overhead.  
+
+---
+
+### ✅ **MultipleInputs**  
+- Allows **different InputFormats** for various datasets in a single job.  
+- Useful for **mixing data types** (XML, CSV, JSON, etc.).  
+
+---
+
+# 📤 **Built-in Hadoop Output Formats**  
+
+Once the **Reducer** finishes processing, data needs to be written **in a structured format** to storage. Here’s how Hadoop handles output formatting:  
+
+### ✅ **FileOutputFormat<K, V>**  
+- Serves as the **parent class** for all output formats.  
+- Sends processed data to **HDFS** in a structured way.  
+
+---
+
+### ✅ **TextOutputFormat<K, V>** _(Default)_  
+- Saves data in **plain text** with a separator between keys and values.  
+- Best suited for **human-readable outputs**.  
+
+---
+
+### ✅ **SequenceFileOutputFormat<K, V>**  
+- Writes output as **binary Hadoop SequenceFile format**.  
+- Excellent for **efficient storage & retrieval of large datasets**.  
+
+---
+
+### ✅ **MultipleOutputs<K, V>**  
+- Allows **writing results to multiple destinations** within a job.  
+- Ideal for cases where output needs **segmentation per category or format**.  
+
+---
+
+### ✅ **NullOutputFormat<K, V>**  
+- Used when **no output is required**.  
+- Beneficial for **debugging or testing** jobs without generating actual results.  
+
+---
+
+### ✅ **LazyOutputFormat<K, V>**  
+- Writes output **only when a reducer generates non-empty results**.  
+- Avoids **creating unnecessary empty files** in HDFS.  
+
+---
+
+# 🏁 **Final Thoughts**  
+
+Partitioning is **essential** for efficient **data flow, parallel processing, and load balancing** in Hadoop. Choosing the right **InputFormat and OutputFormat** ensures **optimized performance** for large-scale data applications! 🚀  
+
+---
+
+# 🚀 Optimizing MapReduce Jobs – Best Practices for High Performance  
+
+Optimizing Hadoop **MapReduce jobs** is essential for **improving efficiency, reducing computational overhead, and ensuring smooth execution** of large-scale data processing. Here’s a refined breakdown of **key optimization strategies!** 🔥  
+
+---
+
+## 🔄 **1️⃣ Distribute Workload Evenly Across NodeManagers**  
+- Tasks should be **balanced** across available nodes.  
+- **Custom partitioners** help distribute data evenly, preventing one node from getting overloaded.  
+
+💡 **Analogy:** Imagine a classroom with **group projects**—spreading work evenly ensures everyone contributes equally rather than one student doing it all! 📚  
+
+---
+
+## 🔧 **2️⃣ Use a Combiner to Reduce Shuffle Overhead**  
+- The **Combiner** minimizes **data transfer** between the Mapper and Reducer.  
+- Essential for **aggregations** like sum and count, reducing unnecessary computation.  
+
+💡 **Analogy:** Instead of counting individual votes at the **national level**, each district **first summarizes local votes**, reducing workload before final tabulation! 🗳️  
+
+---
+
+## 🏗️ **3️⃣ Avoid Instantiating New Objects**  
+- **Creating new objects** inside loops increases **garbage collection overhead**.  
+- **Reuse existing objects** whenever possible to save memory.  
+
+💡 **Tip:** Instead of declaring new `IntWritable` inside a loop, **reuse one instance**, updating its value dynamically.  
+
+---
+
+## 🚀 **4️⃣ Use StringBuilder Instead of String Concatenation**  
+- Strings are **immutable**—every modification creates a **new object**, increasing memory usage.  
+- **StringBuilder** optimizes string operations by modifying existing memory instead of creating new instances.  
+
+💡 **Example:** Instead of this ⛔:  
+```java
+String result = "";
+for (String value : values) {
+    result += value;
+}
+```
+Use this ✅:  
+```java
+StringBuilder result = new StringBuilder();
+for (String value : values) {
+    result.append(value);
+}
+```
+**Outcome:** Less memory allocation, faster execution! 🚀  
+
+---
+
+## 🗜️ **5️⃣ Enable Data Compression to Reduce Disk I/O**  
+- Use **SequenceFile compression**, **Snappy**, or **Gzip** for **intermediate Mapper output and final Reducer output**.  
+- Reduces **storage footprint** and speeds up data transfers.  
+
+💡 **Tip:**  
+```java
+job.setOutputFormatClass(SequenceFileOutputFormat.class);
+SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
+```
+**Result:** Faster processing due to reduced file sizes!  
+
+---
+
+## 🔢 **6️⃣ Store Numbers in Binary Format Instead of Text**  
+- Numbers in **text format** take **more space** and slow down processing.  
+- Using **binary representations** saves space and speeds up computation.  
+
+💡 **Tip:** Instead of storing `"100"` as text, **use binary storage** for efficiency.  
+
+---
+
+## 🎯 **7️⃣ Define and Configure a RawComparator for Faster Sorting**  
+- **RawComparators** speed up **sorting** by comparing **binary representations directly**, reducing deserialization overhead.  
+- Instead of converting objects to Java types, it works on raw bytes.  
+
+💡 **Example of a RawComparator:**  
+```java
+public class MyRawComparator extends WritableComparator {
+    protected MyRawComparator() {
+        super(Text.class);
+    }
+    @Override
+    public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
+        return WritableComparator.compareBytes(b1, s1, l1, b2, s2, l2);
+    }
+}
+```
+🚀 **Result:** Sorting becomes significantly **faster**, improving job execution!  
+
+---
+
+## 🔍 **8️⃣ Use StringUtils.split Instead of String.split for Faster Parsing**  
+- `String.split()` relies on **regex-based parsing**, which is **slower**.  
+- **StringUtils.split()** is **optimized** for faster text processing.  
+
+💡 **Example Comparison:**  
+⛔ Using `String.split()` (slower):  
+```java
+String[] words = line.split(" ");
+```
+✅ Using `StringUtils.split()` (faster):  
+```java
+String[] words = StringUtils.split(line, ' ');
+```
+🚀 **Outcome:** Faster parsing, reduced overhead!  
+
+---
+
+# 🔥 **Why Doesn't Hadoop Use Java's Primitive Datatypes?**  
+Although Hadoop is **built on Java**, it doesn’t use **primitive datatypes** (`int`, `double`, etc.). Here’s why:  
+
+### 🏗️ **1️⃣ Hadoop is Fully Object-Oriented**  
+- Java uses **primitive datatypes**, but Hadoop is **designed for handling complex objects**.  
+
+---
+
+### 🔄 **2️⃣ Serialization – The Key Factor**  
+- Hadoop relies on **serialization** to **store, process, and transfer data efficiently**.  
+- Java primitives like `int` and `double` **aren't serializable**, but Hadoop’s **Writable classes** (`IntWritable`, `DoubleWritable`) **are**.  
+
+💡 **Example:**  
+⛔ **Using Java primitives (Not Serializable)**
+```java
+int num = 100;  // Not ideal for Hadoop serialization
+```
+✅ **Using Hadoop’s Writable types (Serializable)**
+```java
+IntWritable num = new IntWritable(100);  // Optimized for Hadoop processing
+```
+🚀 **Result:** Proper serialization, making distributed processing more efficient!  
+
+---
+
+# 🏁 **Final Thoughts**  
+Optimizing Hadoop **MapReduce jobs** leads to **better performance, reduced processing time, and enhanced scalability**.  
+
+💡 **Key Takeaways:**  
+✅ **Use Combiners** to **minimize shuffle** overhead.  
+✅ **Enable compression** for **faster data transfers**.  
+✅ **Avoid unnecessary object creation** to **reduce memory usage**.  
+✅ **Optimize sorting with RawComparators**.  
+✅ **Use Hadoop’s Writable datatypes** instead of Java primitives.  
+
+---
+
+# 🗜️ Data Compression in Hadoop 🚀  
+
+Data compression in Hadoop plays a **critical role** in **reducing storage requirements, improving processing speed, and optimizing network bandwidth**. Different compression codecs help **efficiently manage large-scale data**, minimizing I/O overhead.  
+
+---
+
+## 🔧 **Why Use Data Compression?**  
+✅ **Reduces Storage Usage** – Compressed files occupy **less disk space**.  
+✅ **Speeds Up Processing** – Less data means **faster reads/writes**.  
+✅ **Optimizes Network Transfer** – Compressed data reduces **shuffling costs**.  
+✅ **Enhances Performance in Distributed Systems** – Hadoop jobs **run faster** due to minimized file sizes.  
+
+---
+
+## 🏗️ **Common Compression Codecs Used in Hadoop**  
+
+### 🚀 **1️⃣ Snappy (Fast & Lightweight)**  
+- **Codec:** `org.apache.hadoop.io.compress.SnappyCodec`  
+- **Best For:** **High-speed** compression/decompression with **moderate space savings**.  
+- **Advantages:**  
+  - ✅ **Super fast**, optimized for performance.  
+  - ✅ Works well for real-time applications requiring quick I/O.  
+- **Limitations:**  
+  - ❌ Not the most **space-efficient** compared to other methods.  
+
+💡 **Analogy:** Think of Snappy like a **zippered backpack**—quick to open/close but doesn’t shrink content much! 🎒  
+
+---
+
+### 🗜️ **2️⃣ Gzip (Strong Compression & Widely Used)**  
+- **Codec:** `org.apache.hadoop.io.compress.GzipCodec`  
+- **Best For:** Achieving **high compression** ratios, suitable for storing large files.  
+- **Advantages:**  
+  - ✅ **Widely supported**, useful for archival data.  
+  - ✅ **Good compression ratio** for space efficiency.  
+- **Limitations:**  
+  - ❌ **Slower decompression** than Snappy.  
+  - ❌ **Not splittable**, meaning files can’t be divided easily for parallel processing.  
+
+💡 **Analogy:** Think of Gzip as **vacuum-sealed bags**—compact but slower to unpack! 👜  
+
+---
+
+### 🔄 **3️⃣ Bzip2 (High Compression, Splittable)**  
+- **Codec:** `org.apache.hadoop.io.compress.BZip2Codec`  
+- **Best For:** **Efficiently compressing large files** while remaining **splittable**, making it Hadoop-friendly.  
+- **Advantages:**  
+  - ✅ **Splittable**, meaning Hadoop can process chunks of compressed files in parallel.  
+  - ✅ **Higher compression ratio** than Gzip.  
+- **Limitations:**  
+  - ❌ **Slower compression/decompression** compared to Snappy & Gzip.  
+
+💡 **Analogy:** Think of Bzip2 like **efficient luggage packing**—takes longer, but saves space! 🧳  
+
+---
+
+### 🔄 **4️⃣ LZO (Splittable & Optimized for Speed)**  
+- **Codec:** `com.hadoop.compression.lzo.LzopCodec`  
+- **Best For:** **Balancing speed and compression ratio**, often used for **large-scale log files**.  
+- **Advantages:**  
+  - ✅ **Splittable**, great for Hadoop’s distributed processing.  
+  - ✅ **Fast decompression**, making data retrieval smoother.  
+- **Limitations:**  
+  - ❌ **Lower compression ratio** compared to Bzip2 or Gzip.  
+
+💡 **Analogy:** Think of LZO like a **roll-up bag**—good balance between space and speed! 🎒  
+
+---
+
+### 🏗️ **5️⃣ DEFLATE (Versatile & Balanced Compression)**  
+- **Codec:** `org.apache.hadoop.io.compress.DefaultCodec`  
+- **Best For:** **General-purpose compression**, balancing **speed and storage efficiency**.  
+- **Advantages:**  
+  - ✅ **Well-optimized**, commonly used in Hadoop.  
+  - ✅ Works well across different types of data.  
+- **Limitations:**  
+  - ❌ **Not specialized** for any one particular use case.  
+
+💡 **Analogy:** Think of DEFLATE as **a hybrid suitcase**—flexible but not the best in either compression or speed! 🛄  
+
+---
+
+# 🔥 **Choosing the Right Compression Codec**  
+
+| **Codec**  | **Best For**  | **Splittable?** | **Compression Strength** | **Speed** |
+|------------|--------------|----------------|------------------|------------|
+| **Snappy** | Fast processing | ❌ No  | 🔵 Moderate | 🟢 High |
+| **Gzip** | Archival data | ❌ No | 🔴 High | 🔴 Slow |
+| **Bzip2** | Large files, Hadoop-friendly | ✅ Yes | 🟢 High | 🔴 Slow |
+| **LZO** | Large-scale logs | ✅ Yes | 🔵 Moderate | 🟢 Fast |
+| **DEFLATE** | General compression | ❌ No | 🔵 Moderate | 🔵 Medium |
+
+---
+
+# 🏁 **Final Thoughts**  
+
+Compression **enhances storage efficiency and speeds up Hadoop jobs**, making **data movement faster and cheaper**. Choosing the right codec **depends on the use case**—whether prioritizing **speed, compression strength, or splittability**.  
+
+---
+
+# 🚨 Limitations of Compression – Balancing Performance & Efficiency  
+
+Data compression **enhances storage efficiency and speeds up Hadoop workflows**, but it comes with trade-offs. Let’s explore the **key limitations** that impact decision-making in **big data environments**!  
+
+---
+
+## ⚖️ **1️⃣ Space vs. Time Trade-off**  
+- Compression **reduces file size**, saving **disk space** and **network bandwidth**.  
+- However, **compressing & decompressing** data **adds extra computational time**.  
+
+💡 **Key Question:**  
+Is the **time cost** of compression worth the **storage savings**?  
+
+### ✅ **Scenario Where Compression Helps**  
+- If the **dataset is massive**, compression **reduces storage needs** and **speeds up transfers**.  
+- Example: **Log files in Hadoop** → Smaller **compressed logs** minimize I/O overhead.  
+
+### ❌ **Scenario Where Compression Hurts**  
+- If the **data needs frequent access**, decompression **adds unnecessary delays**.  
+- Example: **Real-time streaming analytics** → Compression might **slow down** data retrieval.  
+
+💡 **Analogy:** Imagine stuffing clothes into a **vacuum-sealed bag**. It **saves space**, but you need **extra time** to unpack it when needed! 🧳  
+
+---
+
+## 📝 **2️⃣ Splittable vs. Non-Splittable Compression Formats**  
+One of the biggest concerns in Hadoop **MapReduce** is whether a **compressed file can be split into chunks** for **parallel processing**.  
+
+### ✅ **Splittable Compression Formats** (Good for Hadoop)  
+| **Compression Format** | **Splittable?** | **Best Use Case** |
+|------------------------|----------------|-------------------|
+| **Bzip2** | ✅ Yes | Large datasets needing parallel processing |
+| **LZO** | ✅ Yes | Distributed logs and transactional data |
+
+💡 **Why Splittable Matters?**  
+Hadoop **divides large files** into smaller chunks for **parallel execution**. If compression **prevents splitting**, only **one node** processes the file, defeating Hadoop’s **distributed architecture**!  
+
+---
+
+### ❌ **Non-Splittable Compression Formats** (Can Slow Down Hadoop)  
+| **Compression Format** | **Splittable?** | **Best Use Case** |
+|------------------------|----------------|-------------------|
+| **Gzip** | ❌ No | Archival data where splitting isn’t needed |
+| **Snappy** | ❌ No | Real-time applications requiring fast I/O |
+| **DEFLATE** | ❌ No | General-purpose compression |
+
+💡 **Problem With Non-Splittable Compression**  
+- If a **large Gzip file** is stored, **one reducer** processes it instead of **multiple parallel reducers**.  
+- This slows down Hadoop jobs by **forcing sequential execution** rather than parallel computing.  
+
+💡 **Analogy:** Imagine scanning a **massive book** for keywords. If you **can't divide the pages**, you must **scan everything manually** rather than having multiple people help! 📚  
+
+---
+
+## 🏁 **Final Thoughts**  
+Choosing the right compression format **depends on the use case**! 🚀  
+
+✅ **If processing large datasets in Hadoop → Use splittable formats (Bzip2, LZO).**  
+✅ **If storing data for archival purposes → Use non-splittable formats (Gzip, Snappy).**  
+✅ **If optimizing speed over compression → Choose Snappy or LZO for high-speed applications.**  
+
+---
+
+# 🔬 **Lab 6: Configuring Compression in Hadoop MapReduce**  
+
+In **BigDataVM's IdeaIntelliJ**, **SnappyCodec** wasn’t working, so we switched to **BZip2Codec** for **compressing Mapper output and final Reducer output** in Hadoop MapReduce jobs.  
+
+---
+
+## ⚙️ **Compression Configuration in Hadoop**  
+
+### ✅ **Enabling Compression for Mapper Output**  
+```java
+conf.setBoolean(MRJobConfig.MAP_OUTPUT_COMPRESS, true);
+// conf.setClass(MRJobConfig.MAP_OUTPUT_COMPRESS_CODEC, SnappyCodec.class, CompressionCodec.class);
+conf.setClass(MRJobConfig.MAP_OUTPUT_COMPRESS_CODEC, org.apache.hadoop.io.compress.BZip2Codec.class, CompressionCodec.class);
+```
+🔹 **Purpose:** Reduces network overhead by compressing Mapper output before shuffling.  
+
+---
+
+### ✅ **Enabling Compression for Final Reducer Output**  
+```java
+conf.setBoolean(FileOutputFormat.COMPRESS, true);
+// conf.setClass(FileOutputFormat.COMPRESS_CODEC, SnappyCodec.class, CompressionCodec.class);
+conf.setClass(FileOutputFormat.COMPRESS_CODEC, org.apache.hadoop.io.compress.BZip2Codec.class, CompressionCodec.class);
+```
+🔹 **Purpose:** Saves HDFS storage space by writing compressed reducer output files (`part-r-00000`).  
+
+---
+
+## ⚠️ **What Happens If We Remove Compression Configuration?**  
+
+If we **remove this part of code** and run the Hadoop job via **YARN**, the output **will be different** in key ways:  
+
+### 🔴 **1️⃣ No Compression for Mapper Output**  
+- **Higher network I/O overhead** during the shuffle phase.  
+- **Increased data transfer between nodes**, slowing down execution time.  
+
+💡 **Example:** Without compression, Mapper output increases **network congestion** like sending **raw images** instead of compressed ones! 🖼️  
+
+---
+
+### 🔴 **2️⃣ No Compression for Final Reducer Output**  
+- **Larger storage footprint** in HDFS.  
+- Output files (`part-r-00000`) **will not be compressed**, making them **heavier**.  
+
+💡 **Example:** It’s like storing **uncompressed high-resolution videos**—it takes up more space! 🎥  
+
+---
+
+## 🎯 **Key Takeaways**  
+✅ **Compression Reduces Shuffle & Storage Overhead** – Makes Hadoop jobs **faster & efficient**.  
+✅ **BZip2Codec is Splittable** – Unlike Snappy & Gzip, BZip2 allows **parallel processing**.  
+✅ **Removing Compression Increases File Size** – HDFS storage consumption grows.
+
+---
+
+### 📜 Can We Perform MapReduce Without Using Java? Can We Use Python?
+
+Yes, you **can** perform MapReduce without using Java! This is done using a concept called **Hadoop Streaming**. 
+
+#### 🔍 What is Hadoop Streaming?
+Hadoop Streaming is a utility that allows you to **run MapReduce jobs with any programming language**. Instead of writing Mappers and Reducers in Java, you can use **Python, R, shell scripts, or even other executables**.
+
+💡 **Example**:  
+Imagine you have a text file containing names, and you want to count how often each name appears. Using **Hadoop Streaming**, you can:
+- Write a **Python script** as the Mapper to process input data.
+- Write another **Python script** as the Reducer to aggregate the results.
+
+---
+
+### 🚫 Why Do Many People Not Use Hadoop Streaming?
+
+Even though Hadoop Streaming allows non-Java languages for MapReduce, it is **not widely used** for a few reasons:
+
+1️⃣ **Apache Spark Was Introduced**  
+   - Apache Spark is **faster** and more efficient for processing large-scale data.  
+   - Unlike traditional MapReduce, Spark operates in-memory, reducing disk I/O operations.  
+   - It supports **high-level APIs** in Python, Java, Scala, and R, making it much easier to work with than Hadoop Streaming.
+
+2️⃣ **MapReduce’s Native Implementation is in Java**  
+   - Hadoop’s MapReduce engine is designed to **work best with Java**.  
+   - Java-based MapReduce jobs perform better because they **directly integrate** with the Hadoop ecosystem.  
+   - Using Python or other languages via Hadoop Streaming adds a slight performance overhead.
+
+3️⃣ **Spark Supports Multiple Languages**  
+   - Spark allows programming in **Python, R, Java, and Scala**, which makes it **more flexible** than Hadoop Streaming.  
+   - Python users prefer **PySpark**, which is a **more efficient** way of writing distributed processing jobs than using Hadoop Streaming.  
+   
+---
+
+### 🖼️ Image Description: Hadoop Streaming Flow
+
+![image](https://github.com/user-attachments/assets/78fe4217-78fd-4efd-a3cb-b54daa816e1c)
+
+The image explains **how Hadoop Streaming works**:
+
+1️⃣ **Input Split** → The input data is broken into pieces and formatted as `<key1, value1>` pairs.  
+2️⃣ **Mapper (External Script)** → Converts `<key1, value1>` into lines of text and **sends them to an external program** (e.g., Python script).  
+3️⃣ **Python Mapper Script** → Processes stdin (input) and **outputs `<key2, value2>` pairs**.  
+4️⃣ **Reducer (External Script)** → Receives `<key2, (value2, value2, …)>` and processes them via another external program.  
+5️⃣ **Python Reducer Script** → Outputs final `<key3, value3>` pairs as the result.  
+
+💡 **This image helps visualize how non-Java languages interact with Hadoop Streaming!**
+
+---
+
+### 🚀 Running a Hadoop Streaming Job
+
+A **Streaming Job** is just like a traditional **MapReduce Job**, except it **does not require Java-based Mappers and Reducers**. Instead, it allows using **any executable script** (like Python, Shell, or Perl).
+
+#### 🏗️ Command Structure:
+To run a Hadoop Streaming job, we use the **hadoop-streaming.jar** file:
+
+```bash
+hadoop jar $HADOOP_HOME/lib/hadoop-streaming.jar \
+-input <input_directories> \
+-output <output_directories> \
+-mapper <mapper_script> \
+-reducer <reducer_script>
+```
+
+### 🛠️ Breakdown of the Command:
+🔹 **hadoop jar $HADOOP_HOME/lib/hadoop-streaming.jar** → Runs the Hadoop Streaming utility.  
+🔹 **-input input_directories** → Specifies the HDFS directory containing input files.  
+🔹 **-output output_directories** → Specifies the HDFS directory where output will be saved.  
+🔹 **-mapper mapper_script** → Defines the script to process input (Python, Shell, etc.).  
+🔹 **-reducer reducer_script** → Defines the script to aggregate/compute results.
+
+💡 **Example for Python MapReduce:**  
+Imagine you have a large dataset containing words and want to **count word occurrences** using Python.
+
+#### 🎯 Python Mapper (`mapper.py`)
+```python
+import sys
+for line in sys.stdin:
+    words = line.strip().split()
+    for word in words:
+        print(f"{word}\t1")  # Output as key-value pairs (word, 1)
+```
+
+#### 📝 Python Reducer (`reducer.py`)
+```python
+import sys
+from collections import defaultdict
+
+word_counts = defaultdict(int)
+for line in sys.stdin:
+    word, count = line.strip().split("\t")
+    word_counts[word] += int(count)
+
+for word, count in word_counts.items():
+    print(f"{word}\t{count}")  # Output as key-value pairs (word, total count)
+```
+
+🔹 **Executing the Job:**
+```bash
+hadoop jar $HADOOP_HOME/lib/hadoop-streaming.jar \
+-input /user/hadoop/input \
+-output /user/hadoop/output \
+-mapper mapper.py \
+-reducer reducer.py
+```
+
+✨ This command runs a MapReduce job **without Java**, using Python for both **Mapper** and **Reducer**.
+
+---
