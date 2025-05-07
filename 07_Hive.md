@@ -421,47 +421,126 @@ JOIN orders ON (customers.customerID = orders.customerID);
 
 ---
 
+Here’s your refined, beginner-friendly version of the notes with explanations, structured details, and emojis for better clarity! 🚀📚  
+
+---
+
+# 🛠️ Hive Configuration & Metastore Connection  
+
+### 🔍 Finding the Hive Configuration File  
+To locate the Hive **configuration file** (`hive-site.xml`), use the following command:  
+```bash
 sudo find / -type f -name hive-site.xml
+```
+🔹 This searches your system for `hive-site.xml`, where Hive’s settings are stored.  
 
+### 📂 Viewing the Hive Configuration File  
+Once found, you can open and inspect the configuration file using:  
+```bash
 cat /etc/hive/conf.dist/hive-site.xml
+```
+💡 *This helps you check Hive’s settings, including its connection properties!*  
 
-one of the property is:
+### 🏗️ Hive Metastore Property  
+One key property in this file is:  
+```xml
 javax.jdo.option.ConnectionDriverName
-Driver class name for a JDBC metastore
+```
+- **🔌 Purpose:** Defines the **driver class name** for Hive’s **JDBC metastore**.  
+- **🗄️ Hive uses a database as its metastore**, often MySQL or PostgreSQL, to store metadata about tables and partitions.  
 
 ---
 
+# 🐬 MySQL Commands for Hive Metastore  
+
+### 🔑 Logging into MySQL as the Hive User  
+Run the following command to access the MySQL database Hive uses as its **metastore**:  
+```bash
 mysql -u hive -p
-![image](https://github.com/user-attachments/assets/55e1d505-8f18-4cc2-b187-d922038f37a3)
+```
+🔹 This prompts you to enter the password for the Hive MySQL user.  
 
-show databases;
-![image](https://github.com/user-attachments/assets/2ed7085c-80b7-4be8-8efa-1d1cffc6683b)
+![image](https://github.com/user-attachments/assets/55e1d505-8f18-4cc2-b187-d922038f37a3)  
 
-use metastore;
-![image](https://github.com/user-attachments/assets/dc536da3-2d7d-4d12-a982-b5362177d400)
+### 📚 Listing Databases in MySQL  
+To view all databases in MySQL, use:  
+```sql
+SHOW DATABASES;
+```
+🔹 This reveals the databases stored in MySQL, including Hive’s metastore database.  
 
-show tables;
-![image](https://github.com/user-attachments/assets/668c70d5-1961-499c-a877-633a889181cd)
+![image](https://github.com/user-attachments/assets/2ed7085c-80b7-4be8-8efa-1d1cffc6683b)  
 
-describe tbls;
-![image](https://github.com/user-attachments/assets/761a0274-c05b-4200-a610-4a70c302c77e)
+### 📂 Selecting the Hive Metastore Database  
+To use the Hive **metastore**, switch to it using:  
+```sql
+USE metastore;
+```
+🔹 This ensures you’re working inside Hive’s metadata database.  
 
+![image](https://github.com/user-attachments/assets/dc536da3-2d7d-4d12-a982-b5362177d400)  
+
+### 🗂️ Viewing Tables in the Metastore  
+To list all tables stored in the **metastore database**, run:  
+```sql
+SHOW TABLES;
+```
+🔹 This shows Hive’s internal tables that store metadata about Hive objects.  
+
+![image](https://github.com/user-attachments/assets/668c70d5-1961-499c-a877-633a889181cd)  
+
+### 🔎 Describing a Table in Metastore  
+For detailed table structure, use:  
+```sql
+DESCRIBE tbls;
+```
+🔹 This provides **column details** for the specified table.  
+
+![image](https://github.com/user-attachments/assets/761a0274-c05b-4200-a610-4a70c302c77e)  
+
+### 📊 Retrieving Table Names & Types  
+To get a list of table names along with their types (managed/external), use:  
+```sql
 SELECT TBL_NAME, TBL_TYPE FROM TBLS;
-![image](https://github.com/user-attachments/assets/67040db2-f489-4a26-b08f-8ca73bcfa4b7)
+```
+🔹 This helps you distinguish **internal (managed) and external** Hive tables.  
 
-You must be able to see the wh_visits
+![image](https://github.com/user-attachments/assets/67040db2-f489-4a26-b08f-8ca73bcfa4b7)  
+
+### 🔎 Expected Output:  
+Among the tables listed, you **must see `wh_visits`**, which is likely part of your data stored in Hive!  
 
 ---
 
-hive
+# 🐝 Hive: Understanding Table Metadata  
 
-show tables;
+### 📜 Listing Tables in Hive  
+To list all available tables in Hive, use:  
+```sql
+SHOW TABLES;
+```
+🔹 This command retrieves **all table names** present in the database.  
 
-this information is not coming form hdfs, this info is coming from metastore
+### 🏗️ Where Does This Information Come From?  
+- ❌ **Not from HDFS** – The list of tables does **NOT** come directly from the **Hadoop Distributed File System (HDFS)**.  
+- ✅ **From Metastore** – The information comes from Hive’s **Metastore**, which stores metadata about tables, partitions, and schema definitions.  
 
-describe wh_visits;
+💡 *Think of the Metastore like a database that keeps track of table information, while the actual data resides in HDFS!*  
 
-![image](https://github.com/user-attachments/assets/7951b334-c306-4bae-873d-ae0aa2281d06)
+---
+
+# 🔎 Describing a Hive Table  
+
+### 📂 Viewing Table Structure (`wh_visits`)  
+To check the structure and details of a Hive table, use:  
+```sql
+DESCRIBE wh_visits;
+```
+🔹 This command shows **column names, data types, and additional properties** of the `wh_visits` table.  
+
+![image](https://github.com/user-attachments/assets/7951b334-c306-4bae-873d-ae0aa2281d06)  
+
+💡 *Example:* If `wh_visits` stores website visits, this command will display details like visitor ID, timestamps, and traffic source categories!  
 
 ---
 
@@ -511,56 +590,70 @@ Each partition creates a **subfolder** inside Hive’s warehouse directory:
 
 ---
 
-This is managed Partition Table.
-Partition Table is also known as Special Table. Something which is different than a normal table.
-
-hive> create table employees (id int, name string, salary double) partitioned by (dept string);
-OK
-Time taken: 0.082 seconds
-
-![image](https://github.com/user-attachments/assets/d1b53cca-59e0-428d-983a-ae0ffe471bb5)
-
-When we load data into a partitioned table, the partition values are specified explicitly:
-
-hive> LOAD data local inpath 'localpath' into table employees partition(dept='hr');
-
-Managed Partition Table
-External partition table
-
-Table Parameters:
-numPartitions: 0
-
-
-Why 0? Because the data is not loaded.
+Here’s your refined, beginner-friendly version of the notes with explanations, emojis, and structured details for better understanding! 🚀📚  
 
 ---
 
-Bucketted table:
+# 📂 Partitioned Tables in Hive  
 
-The first rule of Hashing is to know the no. of buckets. Then the data will be bucketted.
+A **Partitioned Table** is a **special** type of table in Hive that organizes data for efficient retrieval. It differs from a **normal table** because its data is divided into **partitions** based on a specified column.  
 
-Bucketing:
+### 🏗️ Creating a Partitioned Table  
+To create a **managed partitioned table** in Hive:  
+```sql
+CREATE TABLE employees (
+    id INT, 
+    name STRING, 
+    salary DOUBLE
+) 
+PARTITIONED BY (dept STRING);
+```
+✔️ The table is partitioned by the `dept` column, meaning data will be stored separately based on department values.  
 
-Anotehr data organizing techinque in Hive.
-All the same column values of a bucketed column will go into same bucket.
-Can be used alone or along with partitioning.
-Bucket is physically a file.
-We can explicitly set the number of buckets during table creation.
-Bucketing can sometimes be more efficient when used alone.
-Bucketed Map joins are the fasters joins.
+![image](https://github.com/user-attachments/assets/d1b53cca-59e0-428d-983a-ae0ffe471bb5)  
 
+### 📤 Loading Data into a Partitioned Table  
+When inserting data, you must specify the partition **explicitly**:  
+```sql
+LOAD DATA LOCAL INPATH 'localpath' INTO TABLE employees PARTITION(dept='hr');
+```
+✔️ This loads data **only into the `'hr'` partition** of the `employees` table.  
 
+🔹 **Table Types:**  
+- **Managed Partition Table** – Hive controls the table’s lifecycle.  
+- **External Partition Table** – Data is stored externally, and Hive just manages metadata.  
 
+### 📊 Table Parameters:  
+When the partitioned table is **new**, the number of partitions is **0** because **no data has been loaded yet**.  
 
+---
 
+# 🏗️ Bucketed Tables in Hive  
 
+### 🔢 What is Bucketing?  
+Bucketing is **another data-organizing technique** in Hive that **groups similar values** together.  
 
+### 🚀 How Bucketing Works  
+✔️ All **same column values** of a **bucketed column** go into the **same bucket**.  
+✔️ Bucketing can be used **alone** or **combined with partitioning**.  
+✔️ **Buckets are stored as physical files** in Hive.  
+✔️ You **explicitly define** the number of buckets during table creation.  
 
+### 📜 Example of Bucketed Table Creation  
+```sql
+CREATE TABLE employee_data (
+    id INT, 
+    name STRING, 
+    salary DOUBLE
+) 
+CLUSTERED BY (id) INTO 4 BUCKETS;
+```
+✔️ The data will be **hashed** into 4 buckets based on the `id` column.  
 
+### 🏎️ Why Use Bucketing?  
+✔️ Bucketing can be **more efficient** when used **alone**, rather than with partitioning.  
+✔️ **Bucketed Map Joins** are the **fastest joins** in Hive!  
 
+💡 *Example:* Think of bucketing like sorting books into **separate shelves** based on their genre. It speeds up searching when you already know which shelf to look at!  
 
-
-
-
-
-
+---
