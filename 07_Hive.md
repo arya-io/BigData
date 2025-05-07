@@ -307,6 +307,52 @@ LOCATION '/user/train/salaries/';
 
 ---
 
+### 🔍 **How to Identify a Managed vs. External Table in Hive?**
+You can check whether a table is **managed or external** using these methods:
+
+#### ✅ **1. Check Table Type using `DESCRIBE FORMATTED`**
+```sql
+DESCRIBE FORMATTED your_table_name;
+```
+- Look for the **Table Type** in the output:
+  - If it says **MANAGED**, it’s a **Managed Table**.
+  - If it says **EXTERNAL**, it’s an **External Table**.
+
+#### ✅ **2. Check Table Definition using `SHOW CREATE TABLE`**
+```sql
+SHOW CREATE TABLE your_table_name;
+```
+- If the output contains **EXTERNAL** in the table definition, it’s an **External Table**.
+- If there’s **no EXTERNAL keyword**, it’s a **Managed Table**.
+
+#### ✅ **3. Check Table Location using `DESCRIBE FORMATTED`**
+```sql
+DESCRIBE FORMATTED your_table_name;
+```
+- **Managed Tables** are stored in `/user/hive/warehouse/`.
+- **External Tables** have a different storage path, often explicitly defined.
+
+#### ✅ **4. Try Dropping the Table (Be Careful!)**
+⚠️ **Warning:** This will remove the table, so **only use on test tables**!
+
+```sql
+DROP TABLE table_name;
+```
+- If **data disappears**, it was a **Managed Table**.
+- If **only metadata disappears but data stays**, it was an **External Table**.
+
+---
+
+### 🎯 **Final Quick Summary**
+| Feature            | Managed Table               | External Table              |
+|--------------------|---------------------------|-----------------------------|
+| **Storage location** | Hive warehouse (`/user/hive/warehouse/`) | Custom location (e.g., HDFS, S3) |
+| **Data management** | Hive **manages** both data & metadata | Hive **only manages** metadata |
+| **Data deletion on `DROP TABLE`** | ❌ Data **is deleted** | ✅ Data **remains** |
+| **Use cases** | Temporary, intermediate, Hive-managed data | Persistent, shared, or external datasets |
+
+---
+
 # 📥 **Loading Data into Hive**  
 
 Once tables are defined, you need to **load** data into Hive for querying. There are **two ways** to load data:  
@@ -374,6 +420,118 @@ JOIN orders ON (customers.customerID = orders.customerID);
 ✔ Joins `customers` and `orders` tables **based on matching customer IDs**, combining data from both tables.  
 
 ---
+
+sudo find / -type f -name hive-site.xml
+
+cat /etc/hive/conf.dist/hive-site.xml
+
+one of the property is:
+javax.jdo.option.ConnectionDriverName
+Driver class name for a JDBC metastore
+
+---
+
+mysql -u hive -p
+![image](https://github.com/user-attachments/assets/55e1d505-8f18-4cc2-b187-d922038f37a3)
+
+show databases;
+![image](https://github.com/user-attachments/assets/2ed7085c-80b7-4be8-8efa-1d1cffc6683b)
+
+use metastore;
+![image](https://github.com/user-attachments/assets/dc536da3-2d7d-4d12-a982-b5362177d400)
+
+show tables;
+![image](https://github.com/user-attachments/assets/668c70d5-1961-499c-a877-633a889181cd)
+
+describe tbls;
+![image](https://github.com/user-attachments/assets/761a0274-c05b-4200-a610-4a70c302c77e)
+
+SELECT TBL_NAME, TBL_TYPE FROM TBLS;
+![image](https://github.com/user-attachments/assets/67040db2-f489-4a26-b08f-8ca73bcfa4b7)
+
+You must be able to see the wh_visits
+
+---
+
+hive
+
+show tables;
+
+this information is not coming form hdfs, this info is coming from metastore
+
+describe wh_visits;
+
+![image](https://github.com/user-attachments/assets/7951b334-c306-4bae-873d-ae0aa2281d06)
+
+---
+
+## 🗂️ **Hive Partitions Explained!**  
+
+Partitioning in Hive helps **organize** data efficiently, making queries **faster**! 🚀 Instead of storing everything in a single large table, **Hive partitions** the data into different subdirectories based on specific column values.  
+
+---
+
+### 📌 **Creating a Partitioned Table**  
+To create a partitioned table, we use the `partitioned by` clause:  
+
+```sql
+CREATE TABLE employees (
+    id INT,
+    name STRING,
+    salary DOUBLE
+) PARTITIONED BY (dept STRING);
+```
+💡 **What this does:**  
+- The `dept` column is used to **partition** the table.  
+- Data will be **organized into separate folders** based on department values instead of storing everything in one place.  
+
+---
+
+### 📂 **How Partitions are Stored**  
+Each partition creates a **subfolder** inside Hive’s warehouse directory:  
+
+📌 **Base directory:** `/apps/hive/warehouse/employees`  
+🔹 Subdirectories for each partition value:  
+```
+/dept=hr/
+/dept=support/
+/dept=engineering/
+/dept=training/
+```
+💡 **What this means:**  
+- Instead of scanning the entire dataset, Hive **only accesses relevant partitions**, improving query speed! ⚡  
+- Each department’s data is stored **separately**, making retrieval more efficient.  
+
+---
+
+### 🎯 **Why Use Partitions?**  
+✅ **Faster queries** – Hive only searches relevant partitions rather than the entire table.  
+✅ **Efficient storage** – Helps organize large datasets effectively.  
+✅ **Better scalability** – Works well for huge datasets with repetitive category-based information.  
+
+---
+
+This is managed Partition Table.
+Partition Table is also known as Special Table. Something which is different than a normal table.
+
+hive> create table employees (id int, name string, salary double) partitioned by (dept string);
+OK
+Time taken: 0.082 seconds
+
+![image](https://github.com/user-attachments/assets/d1b53cca-59e0-428d-983a-ae0ffe471bb5)
+
+When we load data into a partitioned table, the partition values are specified explicitly:
+
+hive> LOAD data local inpath 'localpath' into table employees partition(dept='hr');
+
+Managed Partition Table
+External partition table
+
+Table Parameters:
+numPartitions: 0
+
+
+Why 0? Because the data is not loaded.
 
 
 
