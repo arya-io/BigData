@@ -533,8 +533,21 @@ numPartitions: 0
 
 Why 0? Because the data is not loaded.
 
+---
 
+Bucketted table:
 
+The first rule of Hashing is to know the no. of buckets. Then the data will be bucketted.
+
+Bucketing:
+
+Anotehr data organizing techinque in Hive.
+All the same column values of a bucketed column will go into same bucket.
+Can be used alone or along with partitioning.
+Bucket is physically a file.
+We can explicitly set the number of buckets during table creation.
+Bucketing can sometimes be more efficient when used alone.
+Bucketed Map joins are the fasters joins.
 
 
 
