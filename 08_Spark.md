@@ -56,10 +56,6 @@ Big Data is characterized by three main factors:
 
 ---
 
-Here’s your refined, beginner-friendly version of the notes with explanations, emojis, and structured details for better understanding! 🚀📚
-
----
-
 # 🔥 Apache Spark Components  
 
 ![image](https://github.com/user-attachments/assets/4a5d8342-4251-45ce-9efc-12f3563b7965)  
@@ -144,9 +140,29 @@ This will launch the PySpark interactive shell, allowing you to run Spark comman
 
 ---
 
+To run **PySpark** in the **Python shell** instead of launching Jupyter Notebook, you need to unset certain configurations. Here’s how you can do it:  
 
+### 🛠️ Steps to Unset the Configuration & Use Python Shell  
 
+1️⃣ **Unset the `PYSPARK_DRIVER_PYTHON` and `PYSPARK_DRIVER_PYTHON_OPTS` environment variables**  
+Run the following command in your terminal:  
 
+```bash
+unset PYSPARK_DRIVER_PYTHON
+unset PYSPARK_DRIVER_PYTHON_OPTS
+```
 
+🔹 These environment variables are responsible for launching Jupyter Notebook by default when you run `pyspark`.  
 
+2️⃣ **Run PySpark in the Terminal**  
+Once the configurations are unset, simply enter:  
 
+```bash
+pyspark
+```
+
+✔️ This will now open the **PySpark interactive shell**, instead of Jupyter Notebook.  
+
+💡 *Example:* Think of this like switching from a **fancy graphical interface (Jupyter)** to a **raw terminal experience**, where you can directly run Python commands with Spark.  
+
+---
