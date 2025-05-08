@@ -63,10 +63,6 @@ This HiveQL query selects employee names and ages where the age is greater than 
 
 ---
 
-Here's your refined version of "Hive's Alignment with SQL" with structured explanations and simple language! 🚀📚  
-
----
-
 # 🔄 Hive's Alignment with SQL  
 
 ### 🗂️ **SQL Datatypes in Hive**  
@@ -421,10 +417,6 @@ JOIN orders ON (customers.customerID = orders.customerID);
 
 ---
 
-Here’s your refined, beginner-friendly version of the notes with explanations, structured details, and emojis for better clarity! 🚀📚  
-
----
-
 # 🛠️ Hive Configuration & Metastore Connection  
 
 ### 🔍 Finding the Hive Configuration File  
@@ -590,10 +582,6 @@ Each partition creates a **subfolder** inside Hive’s warehouse directory:
 
 ---
 
-Here’s your refined, beginner-friendly version of the notes with explanations, emojis, and structured details for better understanding! 🚀📚  
-
----
-
 # 📂 Partitioned Tables in Hive  
 
 A **Partitioned Table** is a **special** type of table in Hive that organizes data for efficient retrieval. It differs from a **normal table** because its data is divided into **partitions** based on a specified column.  
@@ -628,7 +616,9 @@ When the partitioned table is **new**, the number of partitions is **0** because
 
 ---
 
-# 🏗️ Bucketed Tables in Hive  
+# 🏗️ Bucketed Tables in Hive
+
+![image](https://github.com/user-attachments/assets/ba443e60-649a-469f-93d9-53b21a2c672e)
 
 ### 🔢 What is Bucketing?  
 Bucketing is **another data-organizing technique** in Hive that **groups similar values** together.  
@@ -657,3 +647,462 @@ CLUSTERED BY (id) INTO 4 BUCKETS;
 💡 *Example:* Think of bucketing like sorting books into **separate shelves** based on their genre. It speeds up searching when you already know which shelf to look at!  
 
 ---
+
+Static Partitioning
+Dynamic Partitioning: Hive carries out this. Set certain configuration. Those are critical.
+
+---
+
+Table is not a data. Metadata is the data.
+For configuration, we checked hive-site.xml
+
+describe formatted table_name:
+Show complete information about table.
+
+Buckets are just the files which runs on HDFS.
+
+What is the purpose of Bucketing, In order to improve the query performance.?
+What is the purpose of Partitioning, In order to improve the query performance.?
+
+---
+
+## What is skewed table?
+
+CREATE TABLE Customers (
+id int,
+username string,
+zip int
+)
+SKEWED BY (zip) ON (57701, 57702)
+STORED as DIRECTORIES;
+
+## Sorting Data
+Hive has two sorting clauses:
+• order by: a complete ordering of the data
+• sort by: data output is sorted per reducer
+
+We do order by in SQL
+
+The Map Reduce is not launched when where clause is using partitioned column.
+We do order by in RDBMS
+
+There is no sort by in RDBMS
+sort by has influence of RDBMS
+it always requires reducers to run.
+
+before firing the sort by query, we will write the normal query.
+this will be used to sort on the basis of reducer (per reducer), not on the global basis.
+We cannot make use of order by then because it is global.
+
+Global ordering: order by in RDBMS
+In Hive's Map Reduce: per reducer basis sorting, use sort by and we have to specify reducers
+
+---
+
+## Using Distribute By
+
+insert overwrite table mytable
+select gender,age,salary
+from salaries
+distribute by age;
+
+insert overwrite table mytable
+select gender,age,salary
+from salaries
+distribute by age
+sort by age; 
+
+Assume we the no. of reducers to 2, then we fire the first command where we are adding data from salaries into mytable.
+When we say distribute by age, the data will inserted in the table only through same reducer which are on the basis of age
+
+Advantages: 2 reducers came into picture here
+same age data will be stored in the same reducer
+if we apply sort by, we get clustering of data
+
+## Implementation:
+
+talentum@talentum-virtual-machine:~$ cd shared
+talentum@talentum-virtual-machine:~/shared$ mkdir hiveDistributeBy
+talentum@talentum-virtual-machine:~/shared$ cd hiveDistributeBy/
+talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ nano people.csv
+talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ cat people.csvF,66,41000.0,95103
+M,40,76000.0,95102
+F,58,95000.0,95103
+F,68,60000.0,95105
+M,85,14000.0,95102
+M,66,84000.0,95102
+M,58,95000.0,95107
+
+![image](https://github.com/user-attachments/assets/399b61ef-dd38-4779-9b83-48f2b3e467bf)
+
+talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ nano people_ddl.hive
+talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ hive -f people_ddl.hive
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/home/talentum/hive/lib/log4j-slf4j-impl-2.6.2.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/home/talentum/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+
+Logging initialized using configuration in jar:file:/home/talentum/hive/lib/hive-common-2.3.6.jar!/hive-log4j2.properties Async: true
+OK
+Time taken: 1.891 seconds
+OK
+Time taken: 0.377 seconds
+Loading data to table default.mytable
+OK
+Time taken: 0.955 seconds
+
+![image](https://github.com/user-attachments/assets/02827e28-1b2f-4a30-bb88-ad78698e6bf2)
+
+talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ cat people_ddl.hive 
+drop table if exists mytable;
+
+create table mytable(gender String, age int, sal double, zip int)
+row format delimited
+fields terminated by ',';
+
+load data local inpath '/home/talentum/shared/hiveDistributeBy/people.csv' overwrite into table mytable;
+
+---
+
+Now we added more data in people_ddl.hive:
+
+drop table if exists distribute_demo;
+
+create table distribute_demo(gender String, age int, sal double, zip int)
+row format delimited
+fields terminated by ',';
+
+set mapreduce.job.reduces=2;
+
+insert overwrite table distribute_demo
+select gender, age, sal, zip from mytable
+distribute by age;
+
+![image](https://github.com/user-attachments/assets/c35320b6-9c2d-4682-84ed-308558411e3e)
+
+
+---
+
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 2   Cumulative CPU: 2.93 sec   HDFS Read: 12611 HDFS Write: 292 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 930 msec
+OK
+Time taken: 24.43 seconds
+
+select * from table;
+
+---
+
+Comment those three lines
+
+and now use sort by
+
+insert overwrite table distribute_demo
+select gender, age, sal, zip from mytable
+distribute by age sort by age;
+
+What will be the output and how is the output generated. Explain.
+
+Now, we changed:
+
+set mapreduce.job.reduces=3;
+
+What will be the output and how is the output generated. Explain.
+
+---
+
+In RDBMS, we would have used GROUP BY clause.
+What if there are millions of records. Then doing group by is efficient?
+Why NoSQL never promote group by operation?
+They say whichever the data is similar, place them in a group.
+Then there is no use of group by.
+
+
+.hive file
+yarn jar should run on hive file
+we will have 10 scs
+first we will have to use hive and then mapreduce
+on inputcounties
+
+Here, the implementation part is over
+---
+
+now we are continuing with the notes
+
+## Storing Results to a File
+
+In Big Data World, 99% of times, we are storing the results of the query.
+
+We can store the results of following queries into a file, but where: local or somewhere else?:
+
+INSERT OVERWRITE DIRECTORY 
+'/user/train/ca_or_sd/' 
+from names
+select name, state 
+where state = 'CA' 
+or state = 'SD';
+
+If we want to store the results into a local file/directory:
+This is not used in the production environment
+
+INSERT OVERWRITE LOCAL DIRECTORY
+'/tmp/myresults/' 
+SELECT * FROM bucketnames 
+ORDER BY age;
+
+This feature is not available in RDBMS, but it is available in data Warehouse.
+
+---
+
+## Specifying MapReduce Properties
+
+This is run for hive cli:
+SET mapreduce.job.reduces = 12
+
+
+What if I want to do this setting for my file and not for the entire Hive cli:
+hive -f myscript.hive 
+-hiveconf mapreduce.job.reduces=12
+
+SELECT * FROM names 
+WHERE age = ${age}
+
+The above query has been returned into a file named myscript.hive
+
+hive -f myscript.hive -hivevar age=33
+
+Here, ${age} will be replaced with 33.
+
+In our implementation, we are running:
+
+hive -f people_ddl.hive -hivevar tbl=mytable
+
+since we replaced mytable in hive file to ${tbl}
+
+When giving multiple arguments:
+
+hive -f people_ddl.hive -hivevar tbl=mytable -hivevar tbl2=distribute_demo
+
+since we now replaced tables with ${tbl} and ${tbl2}
+
+---
+
+## Hive Join Strategies
+
+### 🐝 Hive Join Strategies Explained Simply  
+
+Hive provides different join strategies to optimize performance based on data size and structure. Here’s a beginner-friendly breakdown of the key join types, along with an easy-to-understand explanation and examples!  
+
+#### 🔄 Shuffle Join  
+**Approach:**  
+- Uses **MapReduce** to shuffle join keys across nodes.  
+- Joins are performed on the **reduce side**.  
+
+**Pros:**  
+✅ Works for **any data size** or layout.  
+
+**Cons:**  
+❌ **Slowest** and most resource-intensive join type.  
+
+**Example:**  
+Imagine you have two large tables:  
+- **Orders** (millions of rows)  
+- **Customers** (millions of rows)  
+
+Since both tables are large, Hive distributes the data across multiple nodes, shuffles the matching keys, and performs the join in the reduce phase. This ensures the join works, but it takes more time and resources.  
+
+---
+
+#### 🚀 Map (Broadcast) Join  
+**Approach:**  
+- **Small tables** are loaded into memory on all nodes.  
+- The **mapper** scans through the large table and performs the join.  
+
+**Pros:**  
+✅ **Super fast**—only one scan through the largest table.  
+
+**Cons:**  
+❌ All but one table **must be small enough** to fit in RAM.  
+
+**Example:**  
+Imagine you have:  
+- **Orders** (millions of rows)  
+- **Country Codes** (only 200 rows)  
+
+Since the **Country Codes** table is small, Hive loads it into memory across all nodes. Then, as the **Orders** table is scanned, it quickly matches country codes without needing a shuffle phase.  
+
+---
+
+#### ⚡ Sort-Merge-Bucket Join  
+**Approach:**  
+- Uses **pre-sorted and bucketed** tables to perform efficient joins.  
+- Mappers take advantage of **co-location of keys** for faster processing.  
+
+**Pros:**  
+✅ **Very fast** for tables of any size.  
+
+**Cons:**  
+❌ Data **must be sorted and bucketed** ahead of time.  
+
+**Example:**  
+Imagine you have:  
+- **Orders** (bucketed by customer ID)  
+- **Customers** (bucketed by customer ID)  
+
+Since both tables are **bucketed and sorted**, Hive can directly match rows without shuffling, making the join **super efficient**.  
+
+---
+
+### 📝 Key Takeaways  
+- **Shuffle Join** → Works for all data sizes but is **slow**.  
+- **Map Join** → **Fastest**, but only works when **one table is small**.  
+- **Sort-Merge-Bucket Join** → **Efficient**, but requires **pre-sorted and bucketed tables**.  
+
+📌 **Tip:** If possible, **use Map Join** for small tables and **Sort-Merge-Bucket Join** for large, structured data!  
+
+---
+
+### 🔄 Shuffle Joins in Hive  
+
+Shuffle joins are one of the most common join strategies in Hive, especially when dealing with **large datasets**. They work by **shuffling** data across nodes before performing the join operation. Let’s break it down in simple terms!  
+
+![image](https://github.com/user-attachments/assets/ae929f7a-7229-48dd-ae22-e6132229939f)
+
+
+#### 🛠 How Shuffle Joins Work  
+1️⃣ Hive **distributes** the data across multiple nodes.  
+2️⃣ The data is **partitioned** based on the join key.  
+3️⃣ Matching keys are **shuffled** to the same node.  
+4️⃣ The join operation happens in the **reduce phase**.  
+
+#### ✅ Pros of Shuffle Joins  
+✔ Works for **any data size**—no restrictions!  
+✔ Can handle **large datasets** efficiently.  
+
+#### ❌ Cons of Shuffle Joins  
+❌ **Slowest** join type due to heavy data movement.  
+❌ Requires **high computational resources**.  
+
+#### 📌 Example  
+Imagine you have two large tables:  
+- **Customers** (millions of rows)  
+- **Orders** (millions of rows)  
+
+Since both tables are **large**, Hive **shuffles** the data across nodes, ensuring that rows with the same customer ID end up on the same node. The join is then performed in the **reduce phase**, making it possible to process massive datasets.  
+
+#### 🖼 Visual Representation  
+The image you uploaded illustrates a **shuffle join** using two tables:  
+- **Customer Table** (with `id`, `first name`, `last name`)  
+- **Orders Table** (with `cid`, `price`, `quantity`)  
+
+The SQL query in the image:  
+```sql
+SELECT * FROM customer JOIN orders ON customer.id = orders.cid;
+```  
+This query **joins** the two tables based on the `id` column in **Customer** and the `cid` column in **Orders**, demonstrating how shuffle joins work in SQL.  
+
+### 🚀 Key Takeaways  
+- **Shuffle Joins** are **flexible** but **slow** due to data movement.  
+- Best used when **both tables are large** and cannot fit in memory.  
+- If possible, **opt for Map Joins** when one table is small to improve performance.
+
+## Map (Broadcast) Joins
+
+It will check which table has less data
+Distributed cache
+
+## Sort-Merge-Bucket Joins
+
+Requirement of Bucketed Table
+
+---
+
+Types of Optimisers:
+RBO: Rule Based Optimisers
+CBO: Cost Based Optimisers
+All these things will make use of CBO.
+
+---
+
+## Invoking a Hive UDF (User Defined Functions)
+
+There is a process to use UDF
+
+ADD JAR /myapp/lib/myhiveudfs.jar;
+CREATE TEMPORARY FUNCTION 
+ComputeShipping 
+    AS 'hiveudfs.ComputeShipping';
+    
+FROM orders SELECT
+    address, 
+    description, 
+    ComputeShipping(zip, weight)
+
+Here, ComputeShipping is user defined function
+
+But how to use this function.
+We create a java class who gives the implementation of that function.
+here, that class is hiveudfs
+
+hive specific class is udf
+then give a abstract method - evaluate
+
+compile a class create a jar
+ADD JAR /myapp/lib/myhiveudfs.jar;
+
+Then create a temporary function:
+CREATE TEMPORARY FUNCTION 
+ComputeShipping 
+    AS 'hiveudfs.ComputeShipping';
+
+---
+
+Lab:
+
+create a project with package hiveudfs
+
+project: HiveUDF
+
+filesystem > usr > hive > lib > select all jars but do not select the two folders > OK > OK
+create jar > hiveudf.jar
+put this file in the labshome area/path
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
