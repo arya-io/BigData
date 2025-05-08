@@ -166,3 +166,202 @@ pyspark
 💡 *Example:* Think of this like switching from a **fancy graphical interface (Jupyter)** to a **raw terminal experience**, where you can directly run Python commands with Spark.  
 
 ---
+
+## Understanding SparkContext
+
+SparkContext is an entry point into the world of Spark
+An entry point is away of connecting to Sparkcluster
+An entry point is like a key to the house
+PySpark has adefault SparkContext called sc
+A SparkContext represents the entry point to Spark functionality. It's like a key to your car. PySpark automatically creates a SparkContext for you in the PySpark shell (so you don't have to create it by yourself) and is exposed via a variable sc.
+
+# script.py
+
+# Print the version of SparkContext
+print("The version of Spark Context in the PySpark shell is", sc.version)
+
+# Print the Python version of SparkContext
+print("The Python version of Spark Context in the PySpark shell is", sc.pythonVer)
+
+# Print the master of SparkContext
+print("The master of Spark Context in the PySpark shell is", sc.master)
+
+The version of Spark Context in the PySpark shell is 2.4.5
+The Python version of Spark Context in the PySpark shell is 3.6
+The master of Spark Context in the PySpark shell is local[*]
+
+
+## Inspecting Spark Context
+
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /__ / .__/\_,_/_/ /_/\_\   version 2.4.5
+      /_/
+
+Using Python version 3.6.9 (default, Mar 10 2023 16:46:00)
+SparkSession available as 'spark'.
+
+>>> id(sc)
+139771463232984
+
+>>> type(sc)
+<class 'pyspark.context.SparkContext'>
+
+Version: To retrieve SparkContext version
+>>> sc.version
+'2.4.5'
+
+PythonVersion: To retrieve Python version of SparkContext
+>>> sc.pythonVer
+'3.6'
+
+Master: URL of the cluster or “local” string to run in local mode of SparkContext
+>>> sc.master
+'local[*]'
+
+
+## Loading data in PySpark
+
+SparkContext's parallelize() method
+rdd = sc.parallelize([1,2,3,4,5])
+
+SparkContext's textFile() method
+rdd2 = sc.textFile("test.txt")
+
+File Protocol
+
+jupyter notebook is not a spark shell
+read evaluate print loop (REPL) is same as Spark Shell
+
+## Interactive Use of PySpark
+
+    Spark comes with an interactive python shell in which PySpark is already installed in it. PySpark shell is useful for basic testing and debugging and it is quite powerful. The easiest way to demonstrate the power of PySpark’s shell is to start using it.
+    The most important thing to understand here is that we are not creating any SparkContext object because PySpark automatically creates the SparkContext object named sc, by default in the PySpark shell.
+
+    # Create a python list of numbers from 1 to 100 
+numb = range(1,101)
+print(type(numb))
+
+# Load the list into PySpark  
+spark_data = sc.parallelize(numb)
+print(type(spark_data))
+
+# spark_data.collect()
+print(spark_data.collect())
+
+help(spark_data.collect())
+
+## Loading data in PySpark shell
+
+    In PySpark, we express our computation through operations on distributed collections that are automatically parallelized across the cluster.
+
+    file_path = 'file:////home/talentum/spark/README.md'
+# Load a local file into PySpark shell
+lines = sc.textFile(file_path)
+print(lines.take(5))
+
+file_path = 'file:////home/talentum/spark/README.md'
+
+# Load a local file into PySpark shell
+
+lines = sc.textFile(file_path)
+
+print(lines.take(5))
+
+['# Apache Spark', '', 'Spark is a fast and general cluster computing system for Big Data. It provides', 'high-level APIs in Scala, Java, Python, and R, and an optimized engine that', 'supports general computation graphs for data analysis. It also supports a']
+
+print(type(lines.take))
+print(type(lines.take(5)))
+
+<class 'method'>
+<class 'list'>
+
+lines.first()
+
+'We the People of the United States, in Order to form a more perfect 
+
+type(lines.first())
+str
+
+In Rdd, every line is known as an element.
+
+---
+
+# Use of Lambda function in python filter()
+
+## What are anonymous functions in Python?
+Lambda functions are anonymous functions in Python
+Very powerful and used in Python. Quite effcient with map() and filter()
+Lambda functions create functions to be called later similar to def
+It returns the functions without any name (i.e anonymous)
+Inline a function definition or to defer execution of acode
+
+---
+
+## Lambda function syntax
+The general form of lambda functions is
+lambda arguments: expression
+Example of lambda function
+double = lambda x: x * 2 
+print(double(3))
+
+---
+
+## Difference between def vs lambda functions
+Python code to illustrate cube of anumber
+def cube(x):
+return x ** 3
+g = lambda x: x ** 3
+print(g(10)) 
+print(cube(10))
+1000
+1000
+
+No return statement for lambda
+Can put lambda function anywhere
+
+---
+
+## Use of Lambda function in python - map()
+map() function takes a function and a list and returns a new list which contains items returned by that function for each item
+
+General syntax of map()
+map(function, list)
+
+Example ofmap()
+
+items = [1, 2, 3, 4] 
+list(map(lambda x: x + 2 , items))
+
+[3, 4, 5, 6]
+
+The type of map is a Map Object.
+
+The same functionality can be implemented using for loop. But that approach is verbose. So, in order to eliminate the verbosity, map function comes into picture.
+
+---
+
+## Use of Lambda function in python - filter()
+filter() function takes a function and a list and returns a new list for which the function evaluates as true
+
+General syntax of filter():
+filter(function, list)
+
+Example of filter()
+items = [1, 2, 3, 4]
+list(filter(lambda x: (x%2 != 0), items))
+
+[1, 3]
+
+Lambda Function is not a feature of Spark
+
+
+
+
+
+
+
+
+
