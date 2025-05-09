@@ -344,6 +344,9 @@ The same functionality can be implemented using for loop. But that approach is v
 ---
 
 ## Use of Lambda function in python - filter()
+
+Lambda function is also known as inline function.
+
 filter() function takes a function and a list and returns a new list for which the function evaluates as true
 
 General syntax of filter():
@@ -356,6 +359,102 @@ list(filter(lambda x: (x%2 != 0), items))
 [1, 3]
 
 Lambda Function is not a feature of Spark
+
+---
+
+📌 **Understanding RDD (Resilient Distributed Datasets) in Apache Spark** ⚡
+
+![image](https://github.com/user-attachments/assets/4748b963-20e5-4cdd-a64f-fdc403ed6444)
+
+
+RDD is the **fundamental building block** of Apache Spark, enabling distributed data processing with fault tolerance. Let’s break it down in simple terms! 😊  
+
+---
+
+### 🔍 **What is an RDD?**  
+**Resilient Distributed Dataset (RDD)** is a **distributed collection of data** that is **fault-tolerant** and allows parallel processing across multiple nodes in a cluster.  
+
+Think of an RDD like a **large dataset split into smaller chunks** and spread across multiple computers for efficient processing! 🚀  
+
+---
+
+### 🖥️ **How RDD Works**  
+1️⃣ The **Spark driver** reads data from a source like HDFS, local files, or databases.  
+2️⃣ It **splits the data into multiple partitions** and distributes them across nodes in the cluster.  
+3️⃣ Each partition is **processed in parallel**, making computations much faster! 💡  
+
+📜 **Example Code to Create an RDD:**  
+```python
+rdd = sparkContext.textFile("hdfs://data/sample.txt")
+```
+✅ This loads a text file as an RDD, which Spark processes in chunks across nodes.  
+
+---
+
+### 📷 **Visual Representation**  
+Your image illustrates this well:  
+- The **Spark driver reads data** from a file on disk.  
+- It **creates an RDD** and distributes the partitions across nodes in the cluster.  
+- Each node processes its **RDD partition independently**, ensuring **parallel computation**.  
+
+---
+
+### 🎯 **Key Benefits of RDDs**  
+✅ **Fault Tolerance** → Data is automatically recovered if a failure occurs 🔄  
+✅ **Parallel Processing** → Speeds up computations across multiple machines 🚀  
+✅ **Lazy Evaluation** → Optimizes execution by processing data only when needed 🏎️  
+✅ **Immutability** → Ensures consistency by keeping original data unchanged 🔒  
+
+---
+
+## Decomposing RDDs
+Resilient DistributedDatasets
+Resilient: Abilityto withstandfailures
+Distributed:Spanningacross multiplemachines
+Datasets:Collectionofpartitioneddatae.g,Arrays,Tables,Tuplesetc.,
+
+---
+
+## Creating RDDs. How to do it?
+
+Parallelizing anexistingcollectionofobjects
+Externaldatasets: 
+  Files in HDFS
+  Objects in AmazonS3bucket 
+  lines in a text file
+From existingRDDs
+
+---
+
+## Parallelized collection(parallelizing)
+parallelize() forcreatingRDDs frompythonlists
+numRDD = sc.parallelize([1,2,3,4])
+helloRDD = sc.parallelize("Hello world")
+type(helloRDD)
+<class 'pyspark.rdd.PipelinedRDD'>
+
+---
+
+## From external datasets
+textFile() forcreatingRDDs fromexternaldatasets
+fileRDD = sc.textFile("README.md")
+type(fileRDD)
+<class 'pyspark.rdd.PipelinedRDD'>
+
+---
+
+## Understanding Partitioning inPySpark
+A partition isa logical division ofalargedistributeddataset
+parallelize() method
+numRDD = sc.parallelize(range(10), numSlices = 6)
+textFile() method
+fileRDD = sc.textFile("README.md", minPartitions = 6)
+Thenumberofpartitionsin anRDD canbefound byusing getNumPartitions() method
+
+rdd.glom()
+
+hdfs fsck /user/talentum/stocks.csv -files -blocks -locations
+
 
 
 
