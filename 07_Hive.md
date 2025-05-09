@@ -1068,9 +1068,314 @@ filesystem > usr > hive > lib > select all jars but do not select the two folder
 create jar > hiveudf.jar
 put this file in the labshome area/path
 
+---
+
+## Computing ngrams in Hive
+
+ngrams:
+Collec
+
+select ngrams(sentences(val),2,100) 
+from mytable;
+select context_ngrams(sentences(val),
+array("error","code",null),
+100)
+from mytable;
+
+Top 100 words appearing after error code
+
+---
+
+## Lesson Review
+1. A Hive table consists of a schema stored in the Hive ___________ and data stored 
+in _______________. metastore, hdfs
+
+3. True or False: The Hive metastore requires an underlying SQL database. True
+
+5. What happens to the underlying data of a Hive-managed table when the table is 
+dropped? Data is deleted
+
+7. True or False: A Hive external table must define a LOCATION. Not mandatory
+
+9. List three different ways data can be loaded into a Hive table.
+load data
+local inpath
+insert record
+
+10. When would you use a skewed table?
+
+12. What will the folder structure in HDFS look like for the movies table?
+create table movies (title string, rating string, length double) partitioned by 
+(genre string);
+/user/hive/warehouse/movies/
+
+14. Explain the output of the following query:
+select * from movies order by title;
+global ordering
+
+16. What does the following Hive query compute? 
+from mytable select 
+explode(ngrams(sentences(val),3,100)) as myresult;
+top 100 trigrams
+
+18. What does the following Hive query compute? 
+from mytable select explode(
+context_ngrams(sentences(val),
+array("I","liked",null),10)) as myresult;
+
+---
+
+Avro: Row oriented binary file format
+
+Apache Avro[79] is a language-neutral data serialization system. The project was created by Doug Cutting (the creator of Hadoop) to address the major downside of Hadoop Writables: lack of language portability. Having a data format that can be processed by many languages (currently C, C++, C#, Java, JavaScript, Perl, PHP, Python, and Ruby) makes it easier to share datasets with a wider audience than one tied to a single language. It is also more future-proof, allowing data to potentially outlive the language used to read and write it.
+
+But why a new data serialization system? Avro has a set of features that, taken together, differentiate it from other systems such as Apache Thrift or Google’s Protocol Buffers.[80] Like in these systems and others, Avro data is described using a language-independent schema. However, unlike in some other systems, code generation is optional in Avro, which means you can read and write data that conforms to a given schema even if your code has not seen that particular schema before. To achieve this, Avro assumes that the schema is always present—at both read and write time—which makes for a very compact encoding, since encoded values do not need to be tagged with a field identifier.
+
+Avro schemas are usually written in JSON, and data is usually encoded using a binary format, but there are other options, too. There is a higher-level language called Avro IDL for writing schemas in a C-like language that is more familiar to developers.
+
+---
+
+## Advanced Hive Programming
+
+## Topics to be Covered
+• Performing a Multi-Table/File Insert • Understanding Views
+• Defining Views
+• Using Views
+• The OVER Clause
+• Using Windows
+• Hive Analytics Functions
+• Lab: Advanced Hive Programming
+• Hive File Formats
+• Hive SerDe
+
+## Performing a Multi-Table/File Insert 
+
+![image](https://github.com/user-attachments/assets/a805fc63-f8b5-498c-aedf-e02d38a6f8c2)
+
+insert overwrite directory '2014_visitors' select * from wh_visits 
+where visit_year='2014' 
+insert overwrite directory 'ca_congress' select * from congress 
+where state='CA' ;
+No semicolon
+from visitors
+INSERT OVERWRITE TABLE gender_sum
+SELECT visitors.gender, count_distinct(visitors.userid)
+GROUP BY visitors.gender
+INSERT OVERWRITE DIRECTORY '/user/tmp/age_sum'
+SELECT visitors.age, count_distinct(visitors.userid)
+GROUP BY visitors.age;
+
+📌 **Understanding Views in Hive** 🐝
+
+![image](https://github.com/user-attachments/assets/fa1bac13-de9e-4b10-bb45-f5854ee54b2d)
 
 
+In **Hive**, views play a crucial role in organizing and accessing data efficiently. Let's break it down step by step in simple terms! 
 
+### 🔍 **What Are Views?**
+A **View** in Hive is like a **virtual table**—it is **not physically stored** but is created based on a query. Think of it like a saved search that generates results dynamically whenever you access it.
+
+### 🗄️ **Hive Tables vs. Hive Views**
+- **Hive Tables** 📂: These map directly to **folders in HDFS (Hadoop Distributed File System)**, meaning they store actual data.
+- **Hive Views** 👀: These are **query-generated** results and **do not store any data** physically.
+
+### 📌 **How Views Work**
+Imagine a massive dataset containing stock prices from different companies 📊. If you frequently need to analyze just the tech stocks, instead of creating a new table, you can create a **view** that always retrieves tech stocks using a predefined query.
+
+Example:
+```sql
+CREATE VIEW tech_stocks AS 
+SELECT * FROM stock_data WHERE sector = 'Technology';
+```
+Now, whenever you query `tech_stocks`, you get the latest filtered data without needing to store it separately.
+
+### 📷 **Visual Representation**
+Your image illustrates this concept beautifully:
+- **Tables (Table_1, Table_2, Table_3)** in Hive map to **HDFS folders** ✅.
+- **Views (View_1, View_2)** exist in the **Hive Metastore** but don’t have direct storage in HDFS ⚡.
+- Views are **simply stored queries**, making data retrieval efficient without unnecessary storage use.
+
+### 🎯 **Key Benefits of Using Views**
+✅ No extra storage consumption 🚀  
+✅ Faster data access for common queries 📊  
+✅ Simplifies data organization 💡  
+
+
+## Defining Views
+CREATE VIEW 2010_visitors AS 
+SELECT fname, lname, 
+time_of_arrival, info_comment
+FROM wh_visits 
+WHERE
+cast(substring(time_of_arrival,6,4) 
+AS int) >= 2010 
+AND 
+cast(substring(time_of_arrival,6,4) 
+AS int) < 2011;
+
+## Using Views
+You use a view just like a 
+table:
+from 2010_visitors 
+select * 
+where info_comment like "%CONGRESS%" 
+order by lname;
+
+📌 **Understanding the OVER Clause in SQL** ⚡
+
+![image](https://github.com/user-attachments/assets/96032962-fcf6-4e5d-948a-04a7299850b2)
+
+
+The **OVER** clause in SQL is a powerful tool that allows you to perform calculations across a specific set of rows, without needing to group your data. Let’s break it down in simple terms! 😊
+
+### 🔍 **What Does the OVER Clause Do?**
+- It helps apply **window functions**, meaning you can compute values **without collapsing rows** like `GROUP BY` does.
+- It lets you define a **partition**, similar to creating mini-groups inside your data.
+
+### 🔄 **Comparing GROUP BY vs. OVER Clause**
+Imagine you have a table called **`orders`** containing customer IDs (`cid`), product prices, and quantities. You want to find the **highest price per customer**.
+
+#### ✅ Using `GROUP BY` (Collapses Rows)
+```sql
+SELECT cid, max(price) FROM orders GROUP BY cid;
+```
+💡 **Result:** You get one row per customer (`cid`) with the maximum price, but **other details are lost**.
+
+#### 🔥 Using `OVER` with `PARTITION BY` (Keeps Rows Intact)
+```sql
+SELECT cid, price, max(price) OVER (PARTITION BY cid) FROM orders;
+```
+💡 **Result:** You get **all rows**, but with an additional column showing the maximum price **without removing details!**
+
+### 📷 **Visual Representation** 
+Your image illustrates this concept beautifully:
+- **GROUP BY** shrinks results, showing only the `cid` and maximum price.
+- **OVER (PARTITION BY cid)** keeps all data intact while still displaying the max price.
+
+### 🎯 **Key Benefits of Using the OVER Clause**
+✅ Keeps all details while applying calculations 🚀  
+✅ Helps in advanced analytics, like running totals and ranking 📊  
+✅ Works great with window functions (e.g., `ROW_NUMBER()`, `RANK()`, `SUM() OVER()`)  
+
+---
+
+📌 **Understanding Window Functions in SQL** 🏢  
+
+![image](https://github.com/user-attachments/assets/37ca782c-39bb-4e1b-8e49-c13ca31bf932)
+
+
+Window functions in SQL allow us to perform **calculations across a specific set of rows** in a dataset, without collapsing the data like `GROUP BY`. Let’s break it down in simple terms! 😊  
+
+---
+
+### 🔍 **What Are Window Functions?**  
+A **window function** operates over a **specific range of rows**, known as the **window**, instead of working on the entire dataset. It **does not remove duplicates or group data**, unlike `GROUP BY`.  
+
+Think of it as applying calculations **inside each mini-group**, rather than across the entire table.  
+
+---
+
+### 🖥️ **How Window Functions Work**  
+Imagine you have a dataset of **orders** containing customer IDs (`cid`), product prices, and quantities. You want to calculate the **sum of prices for each customer, considering the last two prices** before the current row.  
+
+📜 **SQL Query:**
+```sql
+SELECT cid, 
+       SUM(price) OVER (PARTITION BY cid ORDER BY price ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+FROM orders;
+```
+💡 **Breaking It Down:**  
+✅ `PARTITION BY cid` → Divides data into groups based on `cid` (each customer)  
+✅ `ORDER BY price` → Sorts the data within each partition  
+✅ `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` → Includes the **current row and the two rows before it** for calculation  
+
+---
+
+### 📷 **Visual Representation**  
+Your image illustrates this concept clearly:  
+- The **orders table** contains `cid`, `price`, and `quantity`.  
+- The **result set** shows how the sum of prices is computed by **considering the current row and the two preceding rows** in each partition.  
+
+---
+
+### 🎯 **Key Benefits of Using Window Functions**
+✅ Retains original rows while applying calculations 🚀  
+✅ Useful for **running totals**, **moving averages**, and **rankings** 📊  
+✅ Provides more flexibility than `GROUP BY`  
+
+---
+
+## Using Windows – cont.
+SELECT cid, sum(price) OVER 
+(PARTITION BY cid ORDER BY price ROWS 
+BETWEEN 2 PRECEDING AND 3 FOLLOWING) 
+FROM orders;
+SELECT cid, sum(price) OVER 
+(PARTITION BY cid ORDER BY price ROWS 
+BETWEEN UNBOUNDED PRECEDING AND 
+CURRENT ROW) FROM orders;
+
+---
+
+📌 **Hive Analytical Functions** 📊  
+
+![image](https://github.com/user-attachments/assets/3345e13c-5789-4892-9ed6-efb3e8bca1b0)
+
+Hive provides powerful **analytical functions** that help in complex data processing, allowing you to perform calculations across sets of rows efficiently. Let's break them down in simple terms! 😊  
+
+---
+
+### 🔍 **What Are Analytical Functions in Hive?**  
+Analytical functions in Hive **process data across multiple rows** and return a value for each row without grouping data. Unlike regular aggregation functions (`SUM()`, `AVG()`), analytical functions **retain individual row data** while applying calculations within a defined window.  
+
+Think of it as applying calculations **without shrinking your dataset**, which is great for **ranking, running totals, and moving averages**.  
+
+---
+
+### 🛠️ **Common Analytical Functions in Hive**  
+
+✅ **RANK()** 🏆 → Assigns a rank to rows based on a specified order.  
+✅ **DENSE_RANK()** 🥇 → Similar to `RANK()`, but without gaps in ranking numbers.  
+✅ **ROW_NUMBER()** 🔢 → Assigns a unique row number starting from 1.  
+✅ **NTILE(N)** 🔄 → Divides rows into **N groups** evenly.  
+✅ **LEAD() & LAG()** 🔄 → Fetches the **next or previous row's value**, useful for comparisons.  
+
+---
+
+### 🖥️ **Example Usage**  
+
+Imagine we have a dataset of **employees** with their names and salaries:  
+
+📜 **SQL Query to Rank Employees by Salary**  
+```sql
+SELECT name, salary, RANK() OVER (ORDER BY salary DESC) AS rank 
+FROM employees;
+```
+💡 **Breaking It Down:**  
+✅ `ORDER BY salary DESC` → Orders employees by highest salary first  
+✅ `RANK() OVER (...)` → Assigns ranking based on salary  
+
+📊 **Example Output:**  
+| Name  | Salary | Rank |
+|-------|--------|------|
+| Alice | 80K    | 1    |
+| Bob   | 75K    | 2    |
+| Carol | 75K    | 2    |
+| Dave  | 70K    | 4    |
+
+🔍 **Notice**: Carol and Bob **have the same salary**, so they share Rank 2!  
+
+---
+
+### 📷 **Visual Representation**  
+Your image illustrates this concept beautifully, showing different analytical functions and how they work in Hive queries.  
+
+---
+
+### 🎯 **Key Benefits of Using Hive Analytical Functions**  
+✅ Perform **ranking, running totals, and comparisons** easily 🚀  
+✅ Avoid unnecessary grouping while applying calculations 🔄  
+✅ Improve **data analysis for large datasets** 📊  
 
 
 
