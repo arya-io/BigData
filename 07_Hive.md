@@ -1377,17 +1377,303 @@ Your image illustrates this concept beautifully, showing different analytical fu
 ✅ Avoid unnecessary grouping while applying calculations 🔄  
 ✅ Improve **data analysis for large datasets** 📊  
 
+---
+
+## Hive File Formats
+• Text file
+• SequenceFile
+• RCFile
+• ORC File: Optimised Record Columnar File
+
+CREATE TABLE names 
+(fname string, lname string)
+STORED AS RCFile;
+
+## Hive SerDe
+
+• SerDe = serializer/deserializer
+• Determines how records are read from a table and written to HDFS
+
+CREATE TABLE emails (
+from_field string,
+sender string,
+email_body string)
+ROW FORMAT SERDE
+'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+STORED AS INPUTFORMAT
+'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputForma
+t'
+OUTPUTFORMAT 
+'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputForm
+at'
+TBLPROPERTIES (
+'avro.schema.url'='hdfs//nn:8020/emailschema.avsc');
+
+---
+
+## Hive ORC Files
+The Optimized Row Columnar (ORC) file format 
+provides a highly efficient way to store Hive data
+CREATE TABLE tablename (
+...
+) STORED AS ORC;
+ALTER TABLE tablename SET FILEFORMAT 
+ORC;
+SET hive.default.fileformat=Orc
+
+create table wh_visits_orc(
+lname string,
+fname string,
+time_of_arrival string,
+appt_scheduled_time string,
+meeting_location string,
+info_comment string) STORED AS ORC;
+
+---
+
+DESCRIBE FORMATTED wh_visits_orc;
+
+INSERT INTO wh_visits_orc select * from wh_visits;
+
+SELECT * FROM wh_visits_orc LIMIT 10;
+
+command line:
+
+hdfs dfs -ls /user/hive/warehouse/wh_visits_orc;
+
+---
+
+## Computing Table and Column Statistics
+ANALYZE TABLE tablename COMPUTE 
+STATISTICS;
+ANALYZE TABLE tablename COMPUTE 
+STATISTICS FOR COLUMNS column_name_1, 
+column_name_2, ... 
+DESCRIBE FORMATTED tablename
+DESCRIBE EXTENDED tablename
+
+## Vectorization
+Vectorization + ORC files = a huge breakthrough in Hive query performance
+
+---
+
+## Hadoop Limitations
+1. Unstructured data
+2. No random access
+3. High latency
+4. Not ACID compliant
+
+Hadoop stores data in HDFS
+The data in HDFS is unstructured
+Unlike databases, hdfs data doesn't have any schema
+It's basically in the form of files Text files, log files, video/audio files.
+There's no concept of rows/columns.
+There are no tables.
+This is not to say that Hadoop can't be used to store structured data.
+You could store your data in a structured format even in Hadoop: csv files, xml files, json
+Each record in these files could be 1 row in a table
+But unlike databases, Hadoop will not enforce the schema or any constraints on these rows/tables.
+
+## Hadoop Limitations
+1. Unstructured data
+2. No random access
+
+Applications that use databases require random access, i.e., the ability to create, acess and modify individual rows of a table.
+
+HDFS is optimal for storing large files
+MapReduce is optional for processing these files as a whole\
+
+If an HDFS file consists of many rows in a table
+
+There is no provision to access or modify a specific row without processing the entire file
+
+## Hadoop Limitations
+1. Unstructured data
+2. No random access
+3. High latency
+
+## Applications also require low latency
+
+Any operations like inserting, updating or deleting daa should occur as fast as possible.
+
+All processing in Hadoop occurs via MapReduce tasks on complete files
+Even on large clusters, these tasks might take minutes or hours at time
+
+## Hadoop Limitations
+1. Unstructured data
+2. No random access
+3. High latency
+4. Not ACID compliant
+
+Databases are the source of truth for the data that they store
+
+Databases guarantee acid properties to maintain the integrity of their data.
+
+ACID properties:
+Atomicity
+Consistency
+Isolation
+Durability
+
+Atomicity:
+Operations (aka transactions) must be all-or-nothing
+Example of a transaction:
+Cash withdrawal from an ATM:
+Update cash balance
+Update account balance
+
+If one of these fails, the whole transaction should fail
+
+Consistency:
+Any changes to the database must not violate any specified database constraints.
+
+Isolation:
+If multiple/concurrent operations occur, the result is as if these operations are applied in sequence.
+
+Durability:
+Once a transaction is executed, the changes are permanent
+
+---
+
+HBASE
+
+ jps
+ 2034  hdfs dfs -ls /
+ 2035  hdfs dfs -ls -r
+ 2036  hdfs dfs -ls -R
+ 2037  ls -lh *.sh
+ 2038  head -n 15 run-hbash.sh
+ 2039  head -n 15 run-hbase.sh
+ 2040  bash run-hbase.sh -s start
+ 2041  jps
+ 2042  history
+
+talentum@talentum-virtual-machine:~$ jps
+4321 SecondaryNameNode
+3364 SparkSubmit
+9126 HRegionServer
+3048 SparkSubmit
+3944 NameNode
+8681 HQuorumPeer
+3277 SparkSubmit
+4622 NodeManager
+8751 HMaster
+8879 HRegionServer
+9711 Jps
+9007 HMaster
+4118 DataNode
+4983 RunJar
+4476 ResourceManager
+
+HRegionServer
+HQuorumPeer : ZooKeeper
+Hmaster: master daemon processes
+
+Directories for hbase are created:
+talentum@talentum-virtual-machine:~$ hdfs dfs -ls -R /
+drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase
+drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/.tmp
+drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/.tmp/data
+drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/.tmp/data/hbase
+drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/MasterProcWALs
+-rw-r--r--   1 talentum supergroup          0 2025-05-10 15:26 /hbase/MasterProcWALs/state-00000000000000000002.log
+drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/WALs
+
+---
+
+Hbase runs in Hmaster
+Edgenode where the client is sitting. From here hbase commands are fired. for that client side libraries need to be installed. in our case those are already installed/
+
+hbase shell: to move to hbase shell
+
+hbase shell
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/home/talentum/hbase/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/home/talentum/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+HBase Shell; enter 'help<RETURN>' for list of supported commands.
+Type "exit<RETURN>" to leave the HBase Shell
+Version 1.3.6, r806dc3625c96fe2cfc03048f3c54a0b38bc9e984, Tue Oct 15 01:55:41 PDT 2019
+
+This is just like hive shell
+
+hbase shell is run in edge node.
+
+commands will be fired on hadoop cluster.
+
+when hbase is run, following daemons are started:
+zookeeper
+hbase master daemons and worker daemons
+
+---
+
+jps -lm
+
+In HBase:
+
+to exit:
+exit<RETURN>
+
+Table name will always be in single quotes
+after comma, everything is column families
+Table cannot exist without column families
+atleast one column family is important to mention
+column families are group of columns
+Column families are groups of which are usually semantically related
+When you create a table in Hbase, you don't have to specify the columns in the table
+For instance, this notification table might have columns like type, text, timestamp, etc.
+
+columns like type, text, timestamp, etc.
+
+Thse columns are defined on the fly when you insert data for a specific a row id
+Every column has to belong to some column family
+
+The attributes column family have columns like type, timestamp
+
+The metrics column family may have columns like #clicks, #views
+
+Every table must have at least 1 column family
+
+Column families, unlike columns are usually created at the time of table creation
+
+It is possible to add or change column families later, but this is rarely done
+
+---
+
+To show tables:
+
+hbase(main):003:0> list
+TABLE                                                                      
+0 row(s) in 0.2680 seconds
 
 
+Example 2:
 
+Inserting data into a table using HBase Shell: put
 
+put 'notifications',2, 'attributes:for_user', 'Chaz'
 
+Data is inserted into Hbase tables using the put operation
 
+Each entry in a HBase table is like a cell in a traditional table
 
+When put, you insert data 1 cell at a time
 
+The commands in the query stands for:
+row, column, value
 
+The column name is specified with it's column family
 
+Every column must belong to a column family
 
+An HBase table is like a sorted map
+
+Key:column
+Value:value
+
+With the put operation, we are 
+inserting new keys into the map
 
 
 
