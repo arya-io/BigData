@@ -648,245 +648,552 @@ CLUSTERED BY (id) INTO 4 BUCKETS;
 
 ---
 
-Static Partitioning
-Dynamic Partitioning: Hive carries out this. Set certain configuration. Those are critical.
+# 🧱 Static vs Dynamic Partitioning in Hive
+
+## 📦 Static Partitioning
+
+* In **Static Partitioning**, you manually specify the partition column value when loading data.
+* Example:
+
+  ```sql
+  LOAD DATA INPATH '/data/customers.csv' 
+  INTO TABLE customers 
+  PARTITION (country='India');
+  ```
+* ✅ Simple, but not scalable when you have many partitions.
+
+## 🔄 Dynamic Partitioning
+
+* **Dynamic Partitioning** is handled automatically by **Hive**.
+* Hive figures out the partition values **during query execution**.
+* 🔧 We configure it using the `hive-site.xml` file.
+
+  **Important configurations**:
+
+  ```sql
+  SET hive.exec.dynamic.partition = true;
+  SET hive.exec.dynamic.partition.mode = nonstrict;
+  ```
+
+🧠 **Why do we use Partitioning?**
+👉 To **speed up query performance** by scanning only relevant data.
 
 ---
 
-Table is not a data. Metadata is the data.
-For configuration, we checked hive-site.xml
+# 🧾 Metadata ≠ Data
 
-describe formatted table_name:
-Show complete information about table.
+> “**Table is not the data. Metadata is the data.**”
 
-Buckets are just the files which runs on HDFS.
+What does this mean?
+Hive tables store **metadata** (like column names, data types, location, etc.) in the metastore.
+But actual **data lives in HDFS**.
 
-What is the purpose of Bucketing, In order to improve the query performance.?
-What is the purpose of Partitioning, In order to improve the query performance.?
+To view full metadata of a table:
+
+```sql
+DESCRIBE FORMATTED table_name;
+```
 
 ---
 
-## What is skewed table?
+# 🪣 Bucketing in Hive
 
+* Buckets are just **files in HDFS**. Think of them as smaller partitions inside a table.
+* Used to **divide data into more manageable chunks** based on a **hash function**.
+* 🎯 Purpose: **Improve query performance**, especially when JOINing large tables.
+
+💡 You can use bucketing when:
+
+* You have a **large dataset**.
+* You want **optimized JOINs** and **sampling**.
+
+---
+
+# ❓ What is a Skewed Table?
+
+Some values in a column appear **much more frequently** than others. This creates an imbalance in data distribution.
+
+### 🧪 Example:
+
+```sql
 CREATE TABLE Customers (
-id int,
-username string,
-zip int
+  id INT,
+  username STRING,
+  zip INT
 )
 SKEWED BY (zip) ON (57701, 57702)
-STORED as DIRECTORIES;
+STORED AS DIRECTORIES;
+```
 
-## Sorting Data
-Hive has two sorting clauses:
-• order by: a complete ordering of the data
-• sort by: data output is sorted per reducer
-
-We do order by in SQL
-
-The Map Reduce is not launched when where clause is using partitioned column.
-We do order by in RDBMS
-
-There is no sort by in RDBMS
-sort by has influence of RDBMS
-it always requires reducers to run.
-
-before firing the sort by query, we will write the normal query.
-this will be used to sort on the basis of reducer (per reducer), not on the global basis.
-We cannot make use of order by then because it is global.
-
-Global ordering: order by in RDBMS
-In Hive's Map Reduce: per reducer basis sorting, use sort by and we have to specify reducers
+Here, `zip` values `57701` and `57702` are skewed (occur very frequently), so Hive stores them **separately** to handle load better.
 
 ---
 
-## Using Distribute By
+# 🌀 Sorting in Hive
 
-insert overwrite table mytable
-select gender,age,salary
-from salaries
-distribute by age;
+Hive provides two types of sorting:
 
-insert overwrite table mytable
-select gender,age,salary
-from salaries
-distribute by age
-sort by age; 
+## 📚 `ORDER BY`
 
-Assume we the no. of reducers to 2, then we fire the first command where we are adding data from salaries into mytable.
-When we say distribute by age, the data will inserted in the table only through same reducer which are on the basis of age
+* Sorts **all data globally**.
+* Only one reducer is used → may be **slow for large datasets**.
+* Just like `ORDER BY` in **SQL/RDBMS**.
 
-Advantages: 2 reducers came into picture here
-same age data will be stored in the same reducer
-if we apply sort by, we get clustering of data
+## 🔀 `SORT BY`
 
-## Implementation:
+* Sorts data **within each reducer** (not global).
+* More efficient than `ORDER BY` for large datasets.
+* ❗Requires you to define the number of reducers.
 
-talentum@talentum-virtual-machine:~$ cd shared
-talentum@talentum-virtual-machine:~/shared$ mkdir hiveDistributeBy
-talentum@talentum-virtual-machine:~/shared$ cd hiveDistributeBy/
-talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ nano people.csv
-talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ cat people.csvF,66,41000.0,95103
+  Example:
+
+  ```sql
+  SET mapreduce.job.reduces = 4;
+  SELECT * FROM table_name SORT BY column_name;
+  ```
+
+🧠 Summary:
+
+| Feature     | ORDER BY       | SORT BY                    |
+| ----------- | -------------- | -------------------------- |
+| Scope       | Global sort    | Per reducer (partial sort) |
+| Reducers    | Single reducer | Multiple reducers          |
+| RDBMS Match | Yes            | No                         |
+
+---
+
+# 💡 Bonus Insight: Query Optimization
+
+* When using **partitioned columns in WHERE clause**, Hive doesn’t launch MapReduce jobs.
+  Example:
+
+  ```sql
+  SELECT * FROM sales WHERE country = 'India';
+  ```
+
+  👉 This avoids full table scan = faster!
+
+---
+
+# 🔁 Using `DISTRIBUTE BY` in Hive
+
+## 🧩 What is `DISTRIBUTE BY`?
+
+`DISTRIBUTE BY` decides **how the data is split and sent to reducers** in a MapReduce job.
+It ensures that **rows with the same value** of a specified column go to the **same reducer**.
+
+---
+
+### 🛠️ Syntax Example:
+
+```sql
+INSERT OVERWRITE TABLE mytable
+SELECT gender, age, salary
+FROM salaries
+DISTRIBUTE BY age;
+```
+
+👉 Here, all records with the **same `age`** will go to the **same reducer**.
+
+---
+
+### 🧠 Real-World Analogy:
+
+Imagine sorting letters by ZIP code in a post office.
+Each ZIP code bucket (age in our case) goes to a specific delivery person (reducer).
+
+---
+
+### 🔀 With Sorting:
+
+```sql
+INSERT OVERWRITE TABLE mytable
+SELECT gender, age, salary
+FROM salaries
+DISTRIBUTE BY age
+SORT BY age;
+```
+
+* `DISTRIBUTE BY` → groups the data by age (to reducers).
+* `SORT BY` → sorts the data **within each reducer**.
+* ✅ This helps in **clustering** similar values together.
+
+---
+
+## 🛠️ Reducers and `DISTRIBUTE BY`
+
+If you set:
+
+```sql
+SET mapreduce.job.reduces = 2;
+```
+
+👉 Hive uses **2 reducers**, and the data is distributed among them **based on age**.
+
+✨ Benefits:
+
+* More parallelism → **better performance**.
+* **Same-age data** stays together.
+* Combined with `SORT BY` → helps in **data clustering**.
+
+---
+
+# 🧪 Practical Implementation
+
+### 📁 Step-by-Step in Terminal:
+
+```bash
+cd ~/shared
+mkdir hiveDistributeBy
+cd hiveDistributeBy/
+nano people.csv
+```
+
+### 🧾 Sample `people.csv` File:
+
+```
+F,66,41000.0,95103
 M,40,76000.0,95102
 F,58,95000.0,95103
 F,68,60000.0,95105
 M,85,14000.0,95102
 M,66,84000.0,95102
 M,58,95000.0,95107
+```
 
-![image](https://github.com/user-attachments/assets/399b61ef-dd38-4779-9b83-48f2b3e467bf)
+![people.csv image](https://github.com/user-attachments/assets/399b61ef-dd38-4779-9b83-48f2b3e467bf)
 
-talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ nano people_ddl.hive
-talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ hive -f people_ddl.hive
-SLF4J: Class path contains multiple SLF4J bindings.
-SLF4J: Found binding in [jar:file:/home/talentum/hive/lib/log4j-slf4j-impl-2.6.2.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: Found binding in [jar:file:/home/talentum/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
-SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+---
 
-Logging initialized using configuration in jar:file:/home/talentum/hive/lib/hive-common-2.3.6.jar!/hive-log4j2.properties Async: true
-OK
-Time taken: 1.891 seconds
-OK
-Time taken: 0.377 seconds
+### 🧾 people\_ddl.hive (Table Creation & Load)
+
+```sql
+DROP TABLE IF EXISTS mytable;
+
+CREATE TABLE mytable (
+  gender STRING,
+  age INT,
+  sal DOUBLE,
+  zip INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INPATH '/home/talentum/shared/hiveDistributeBy/people.csv'
+OVERWRITE INTO TABLE mytable;
+```
+
+📦 Execution:
+
+```bash
+hive -f people_ddl.hive
+```
+
+✅ Output Logs:
+
+```
+SLF4J: Multiple bindings found...
+Logging initialized...
 Loading data to table default.mytable
 OK
-Time taken: 0.955 seconds
+```
 
-![image](https://github.com/user-attachments/assets/02827e28-1b2f-4a30-bb88-ad78698e6bf2)
-
-talentum@talentum-virtual-machine:~/shared/hiveDistributeBy$ cat people_ddl.hive 
-drop table if exists mytable;
-
-create table mytable(gender String, age int, sal double, zip int)
-row format delimited
-fields terminated by ',';
-
-load data local inpath '/home/talentum/shared/hiveDistributeBy/people.csv' overwrite into table mytable;
+![hive log image](https://github.com/user-attachments/assets/02827e28-1b2f-4a30-bb88-ad78698e6bf2)
 
 ---
 
-Now we added more data in people_ddl.hive:
+# 📤 Now: Distribute Data into Another Table
 
-drop table if exists distribute_demo;
+### 📄 Add this to `people_ddl.hive`:
 
-create table distribute_demo(gender String, age int, sal double, zip int)
-row format delimited
-fields terminated by ',';
+```sql
+DROP TABLE IF EXISTS distribute_demo;
 
-set mapreduce.job.reduces=2;
+CREATE TABLE distribute_demo (
+  gender STRING,
+  age INT,
+  sal DOUBLE,
+  zip INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
 
-insert overwrite table distribute_demo
-select gender, age, sal, zip from mytable
-distribute by age;
+SET mapreduce.job.reduces = 2;
 
-![image](https://github.com/user-attachments/assets/c35320b6-9c2d-4682-84ed-308558411e3e)
+INSERT OVERWRITE TABLE distribute_demo
+SELECT gender, age, sal, zip
+FROM mytable
+DISTRIBUTE BY age;
+```
 
+📊 This ensures that:
+
+* Data is split between **2 reducers**.
+* Rows with same **age** go to **same reducer**.
+
+![distribute\_demo result](https://github.com/user-attachments/assets/c35320b6-9c2d-4682-84ed-308558411e3e)
 
 ---
 
+✅ **Quick Recap**:
+
+| Clause        | Purpose                             |
+| ------------- | ----------------------------------- |
+| DISTRIBUTE BY | Groups data sent to each reducer    |
+| SORT BY       | Sorts data within each reducer      |
+| ORDER BY      | Global sort (only one reducer used) |
+
+---
+
+# ⚙️ MapReduce Job Info in Hive
+
+When we run a Hive query, it internally triggers **MapReduce jobs**.
+Example output:
+
+```
 MapReduce Jobs Launched: 
 Stage-Stage-1: Map: 1  Reduce: 2   Cumulative CPU: 2.93 sec   HDFS Read: 12611 HDFS Write: 292 SUCCESS
 Total MapReduce CPU Time Spent: 2 seconds 930 msec
-OK
 Time taken: 24.43 seconds
+```
 
-select * from table;
+👉 This tells us:
 
----
-
-Comment those three lines
-
-and now use sort by
-
-insert overwrite table distribute_demo
-select gender, age, sal, zip from mytable
-distribute by age sort by age;
-
-What will be the output and how is the output generated. Explain.
-
-Now, we changed:
-
-set mapreduce.job.reduces=3;
-
-What will be the output and how is the output generated. Explain.
+* **How many Mappers and Reducers** were used.
+* **CPU time** and **I/O operations**.
+* Whether the job was **successful** or not.
 
 ---
 
-In RDBMS, we would have used GROUP BY clause.
-What if there are millions of records. Then doing group by is efficient?
-Why NoSQL never promote group by operation?
-They say whichever the data is similar, place them in a group.
-Then there is no use of group by.
+# 🧪 Sorting with `DISTRIBUTE BY` + `SORT BY`
 
+```sql
+INSERT OVERWRITE TABLE distribute_demo
+SELECT gender, age, sal, zip 
+FROM mytable
+DISTRIBUTE BY age 
+SORT BY age;
+```
 
-.hive file
-yarn jar should run on hive file
-we will have 10 scs
-first we will have to use hive and then mapreduce
-on inputcounties
+🧠 **Explanation of Output (with 2 reducers)**:
 
-Here, the implementation part is over
+* Data is **distributed by `age`** → all rows with same age go to the same reducer.
+* Within each reducer, data is **sorted by `age`** → resulting in **clustered, sorted data** *locally* per reducer.
+* Final output = files from each reducer with sorted chunks of data.
+
 ---
 
-now we are continuing with the notes
+# 🔁 Now With 3 Reducers
 
-## Storing Results to a File
+```sql
+SET mapreduce.job.reduces = 3;
+```
 
-In Big Data World, 99% of times, we are storing the results of the query.
+📌 What happens?
 
-We can store the results of following queries into a file, but where: local or somewhere else?:
+* Data is split among **3 reducers** based on `age`.
+* `DISTRIBUTE BY age` ensures:
 
-INSERT OVERWRITE DIRECTORY 
-'/user/train/ca_or_sd/' 
-from names
-select name, state 
-where state = 'CA' 
-or state = 'SD';
+  * Same-age records → same reducer.
+* `SORT BY age` ensures:
 
-If we want to store the results into a local file/directory:
-This is not used in the production environment
+  * Within each reducer → data is sorted by age.
 
-INSERT OVERWRITE LOCAL DIRECTORY
-'/tmp/myresults/' 
-SELECT * FROM bucketnames 
+💡 But since reducers work **independently**, global ordering is **not guaranteed** (use `ORDER BY` if you want that, but it uses only one reducer).
+
+---
+
+# 🧮 RDBMS vs Hive on Grouping
+
+## 🏛️ In RDBMS (like MySQL, PostgreSQL):
+
+```sql
+SELECT gender, COUNT(*) 
+FROM mytable 
+GROUP BY gender;
+```
+
+✅ Works well for small to medium datasets.
+
+---
+
+## 🏢 But in Big Data? (Millions of Records)
+
+* `GROUP BY` becomes **expensive** due to data shuffling.
+* In distributed systems (Hive/NoSQL), grouping = **data movement** = performance hit.
+
+---
+
+## ❌ Why NoSQL Avoids GROUP BY
+
+* NoSQL promotes **pre-grouping**:
+  “Store similar data together” → design schema in a way that reduces need for grouping later.
+
+🚫 This avoids expensive **grouping operations** on huge data at query time.
+
+---
+
+# 📦 Running Hive Scripts with YARN
+
+You can execute a `.hive` file like this:
+
+```bash
+hive -f yourfile.hive
+```
+
+Hive internally launches **MapReduce jobs via YARN**.
+So you may see lines like:
+
+```bash
+yarn jar ...
+```
+
+💡 Example:
+
+* Input file: `inputcounties`
+* You may need to run **multiple scripts (10 scs)** using Hive, followed by MapReduce.
+
+---
+
+# 📁 Storing Query Results to Files
+
+## 💼 99% of the time in Big Data, we **store results** of a query, not just display them.
+
+### 💾 HDFS Output (Production Use)
+
+```sql
+INSERT OVERWRITE DIRECTORY '/user/train/ca_or_sd/'
+FROM names
+SELECT name, state 
+WHERE state = 'CA' OR state = 'SD';
+```
+
+✅ Output is stored in **HDFS**, ideal for **production**.
+
+---
+
+### 🖥️ Local Output (Not for Production)
+
+```sql
+INSERT OVERWRITE LOCAL DIRECTORY '/tmp/myresults/'
+SELECT * FROM bucketnames
 ORDER BY age;
+```
 
-This feature is not available in RDBMS, but it is available in data Warehouse.
+📌 Useful for **testing** or **personal exploration**, but:
+
+* ❌ Not used in production environments.
 
 ---
 
-## Specifying MapReduce Properties
+### 🧠 Bonus Insight:
 
-This is run for hive cli:
-SET mapreduce.job.reduces = 12
+🛢️ This capability of storing results directly into directories is **not available in traditional RDBMS**,
+but it's a **powerful feature** in Data Warehouses like Hive.
 
+---
 
-What if I want to do this setting for my file and not for the entire Hive cli:
-hive -f myscript.hive 
--hiveconf mapreduce.job.reduces=12
+# 🛠️ Specifying MapReduce Properties in Hive
 
-SELECT * FROM names 
-WHERE age = ${age}
+In Hive, you can customize how MapReduce jobs behave using properties.
 
-The above query has been returned into a file named myscript.hive
+## 🌐 Setting for Hive CLI Session
 
+If you're working directly in the Hive CLI:
+
+```sql
+SET mapreduce.job.reduces = 12;
+```
+
+🔧 This sets the number of reducers for **that session** only.
+
+---
+
+## 📄 Setting via Hive Script File
+
+If you want to set properties for a specific `.hive` script file:
+
+```bash
+hive -f myscript.hive -hiveconf mapreduce.job.reduces=12
+```
+
+💡 This sets the reducer count only **for that file's execution**—not for the entire CLI.
+
+---
+
+# 💡 Using Variables in Hive Scripts
+
+Hive supports **variable substitution** using `${}` syntax. This helps write **dynamic scripts**!
+
+### 🧾 Example Script (myscript.hive):
+
+```sql
+SELECT * FROM names WHERE age = ${age};
+```
+
+You can run this script and pass the variable `age` as:
+
+```bash
 hive -f myscript.hive -hivevar age=33
+```
 
-Here, ${age} will be replaced with 33.
-
-In our implementation, we are running:
-
-hive -f people_ddl.hive -hivevar tbl=mytable
-
-since we replaced mytable in hive file to ${tbl}
-
-When giving multiple arguments:
-
-hive -f people_ddl.hive -hivevar tbl=mytable -hivevar tbl2=distribute_demo
-
-since we now replaced tables with ${tbl} and ${tbl2}
+✅ Output: Hive replaces `${age}` with `33` → runs the actual query.
 
 ---
+
+### 🧪 Real-World Use Case
+
+Let’s say you want to reuse a script for different table names:
+
+#### Inside your `people_ddl.hive` file:
+
+```sql
+DROP TABLE IF EXISTS ${tbl};
+CREATE TABLE ${tbl}(gender STRING, age INT, sal DOUBLE, zip INT) 
+ROW FORMAT DELIMITED 
+FIELDS TERMINATED BY ',';
+```
+
+### ▶️ Run the script:
+
+```bash
+hive -f people_ddl.hive -hivevar tbl=mytable
+```
+
+📌 Hive will replace `${tbl}` with `mytable`.
+
+---
+
+### 🔗 Using Multiple Variables
+
+You can pass **more than one variable**:
+
+```bash
+hive -f people_ddl.hive -hivevar tbl=mytable -hivevar tbl2=distribute_demo
+```
+
+And your `.hive` file can contain both:
+
+```sql
+INSERT INTO ${tbl2}
+SELECT * FROM ${tbl};
+```
+
+🧠 This makes your Hive scripts **modular**, **flexible**, and easier to maintain!
+
+---
+
+✅ **Summary Cheat Sheet**:
+
+| Task                        | Command Example                                            |
+| --------------------------- | ---------------------------------------------------------- |
+| Set reducer count for CLI   | `SET mapreduce.job.reduces = 12;`                          |
+| Set reducer count in script | `hive -f myscript.hive -hiveconf mapreduce.job.reduces=12` |
+| Pass variable to script     | `hive -f myscript.hive -hivevar age=33`                    |
+| Pass multiple variables     | `-hivevar tbl=table1 -hivevar tbl2=table2`                 |
+
+---
+
 
 ## Hive Join Strategies
 
@@ -1007,163 +1314,421 @@ This query **joins** the two tables based on the `id` column in **Customer** and
 - Best used when **both tables are large** and cannot fit in memory.  
 - If possible, **opt for Map Joins** when one table is small to improve performance.
 
-## Map (Broadcast) Joins
+---
 
-It will check which table has less data
-Distributed cache
+# 🔄 Map (Broadcast) Joins
 
-## Sort-Merge-Bucket Joins
+### 🧩 What happens in a **Map Join**?
 
-Requirement of Bucketed Table
+When Hive executes a **Map Join**, it checks:
+
+* 🧮 **Which table is smaller in size?**
+
+If a table is **small enough to fit in memory**, Hive **broadcasts it to all mappers** using a mechanism called the **Distributed Cache**.
+
+### ✅ Why is this useful?
+
+👉 Avoids reducer stage (no shuffle phase), so it is **much faster**!
+
+📦 Example:
+
+> You’re joining a big `orders` table with a small `cities` table. Hive will send the `cities` table to all mappers and complete the join **in the map phase itself**.
 
 ---
 
-Types of Optimisers:
-RBO: Rule Based Optimisers
-CBO: Cost Based Optimisers
-All these things will make use of CBO.
+# 🔗 Sort-Merge-Bucket Joins
+
+### 🪣 What are these?
+
+This type of join is used **only when**:
+
+* ✅ Tables are **bucketed**
+* ✅ Tables are **sorted** on the join key
+* ✅ Number of buckets should match
+
+🧠 Used for **very large datasets** where Map Join isn't suitable.
+
+📌 **Benefit**: Optimized join performance with better parallelism and minimal shuffle.
 
 ---
 
-## Invoking a Hive UDF (User Defined Functions)
+# 🧠 Types of Hive Optimizers
 
-There is a process to use UDF
+Hive uses two types of optimizers for improving query performance:
 
+| Optimizer | Full Form            | How it works                                                                                              |
+| --------- | -------------------- | --------------------------------------------------------------------------------------------------------- |
+| 🧱 RBO    | Rule-Based Optimizer | Uses predefined rules (e.g., push filters down first)                                                     |
+| 🧮 CBO    | Cost-Based Optimizer | Evaluates multiple plans and chooses the most efficient one based on **cost estimates** like time, memory |
+
+✅ Hive uses **CBO** in modern versions for advanced query planning.
+
+---
+
+# 🔧 Using Hive UDFs (User-Defined Functions)
+
+Sometimes, Hive's built-in functions aren’t enough. You can create your own logic using **Java**, and plug it into Hive using UDFs!
+
+## 📦 Step-by-Step: How to Use a Hive UDF
+
+1. **Create a Java Class**
+   It should:
+
+   * Extend Hive’s `UDF` class
+   * Implement an `evaluate()` method
+
+```java
+public class ComputeShipping extends UDF {
+   public double evaluate(int zip, double weight) {
+       // your logic here
+   }
+}
+```
+
+2. **Compile and Package into a JAR**
+
+```bash
+jar -cvf myhiveudfs.jar hiveudfs/ComputeShipping.class
+```
+
+3. **Register the JAR in Hive**
+
+```sql
 ADD JAR /myapp/lib/myhiveudfs.jar;
-CREATE TEMPORARY FUNCTION 
-ComputeShipping 
-    AS 'hiveudfs.ComputeShipping';
-    
-FROM orders SELECT
+```
+
+4. **Create a Temporary Function**
+
+```sql
+CREATE TEMPORARY FUNCTION ComputeShipping AS 'hiveudfs.ComputeShipping';
+```
+
+5. **Use the Function in Queries**
+
+```sql
+FROM orders 
+SELECT 
     address, 
     description, 
-    ComputeShipping(zip, weight)
+    ComputeShipping(zip, weight);
+```
 
-Here, ComputeShipping is user defined function
-
-But how to use this function.
-We create a java class who gives the implementation of that function.
-here, that class is hiveudfs
-
-hive specific class is udf
-then give a abstract method - evaluate
-
-compile a class create a jar
-ADD JAR /myapp/lib/myhiveudfs.jar;
-
-Then create a temporary function:
-CREATE TEMPORARY FUNCTION 
-ComputeShipping 
-    AS 'hiveudfs.ComputeShipping';
+🧠 Note: The function works **only during the current Hive session** (temporary).
 
 ---
 
-Lab:
+✅ **Why Use UDFs?**
 
-create a project with package hiveudfs
-
-project: HiveUDF
-
-filesystem > usr > hive > lib > select all jars but do not select the two folders > OK > OK
-create jar > hiveudf.jar
-put this file in the labshome area/path
+* To add **custom business logic** that Hive’s built-in functions can’t do.
+* Great for **data transformation**, custom validation, etc.
 
 ---
 
-## Computing ngrams in Hive
+# 🧪 Hive UDF Lab Setup: Step-by-Step Guide
 
-ngrams:
-Collec
+## 🏗️ Step 1: Create the Java Project
 
-select ngrams(sentences(val),2,100) 
-from mytable;
-select context_ngrams(sentences(val),
-array("error","code",null),
-100)
-from mytable;
+### 📂 Project Name: `HiveUDF`
 
-Top 100 words appearing after error code
+### 📦 Package Name: `hiveudfs`
+
+This package will contain your custom Java class for the UDF.
 
 ---
 
-## Lesson Review
-1. A Hive table consists of a schema stored in the Hive ___________ and data stored 
-in _______________. metastore, hdfs
+## 📄 Step 2: Create the UDF Java Class
 
-3. True or False: The Hive metastore requires an underlying SQL database. True
+Example class:
 
-5. What happens to the underlying data of a Hive-managed table when the table is 
-dropped? Data is deleted
+```java
+package hiveudfs;
 
-7. True or False: A Hive external table must define a LOCATION. Not mandatory
+import org.apache.hadoop.hive.ql.exec.UDF;
 
-9. List three different ways data can be loaded into a Hive table.
-load data
-local inpath
-insert record
+public class ComputeShipping extends UDF {
+    public double evaluate(int zip, double weight) {
+        // Sample logic: shipping cost = weight * rate based on zip
+        if (zip == 95103) {
+            return weight * 2.0;
+        } else {
+            return weight * 1.5;
+        }
+    }
+}
+```
 
-10. When would you use a skewed table?
+---
 
-12. What will the folder structure in HDFS look like for the movies table?
-create table movies (title string, rating string, length double) partitioned by 
-(genre string);
+## ⚙️ Step 3: Add Hive JARs to Classpath
+
+Go to your Java project’s **Build Path** settings:
+
+1. Right-click on the project → `Build Path` → `Configure Build Path`
+2. Go to the **Libraries** tab → `Add External JARs`
+3. Navigate to:
+   **`/usr/hive/lib/`**
+4. **Select all the `.jar` files** in this directory ✅
+   **DO NOT select the two folders** ❌
+5. Click `OK` → `Apply and Close`
+
+📦 These Hive JARs provide the classes needed to compile your UDF.
+
+---
+
+## 🧪 Step 4: Create the JAR File
+
+Now, package your class into a `.jar` file:
+
+1. Right-click on the project → `Export`
+2. Select: `Java` → `JAR file` → `Next`
+3. Select your `hiveudfs` package
+4. Choose the destination file path as:
+
+```
+/home/talentum/labshome/hiveudf.jar
+```
+
+5. Click `Finish`
+
+🎉 You’ve successfully created your UDF JAR!
+
+---
+
+✅ Now you can use this JAR in Hive like this:
+
+```sql
+ADD JAR /home/talentum/labshome/hiveudf.jar;
+
+CREATE TEMPORARY FUNCTION ComputeShipping AS 'hiveudfs.ComputeShipping';
+
+SELECT name, weight, ComputeShipping(zip, weight) FROM orders;
+```
+
+---
+
+# 📚 **Ngrams in Hive**: Text Analysis Made Easy 🗣️
+
+## 🔍 What Are Ngrams?
+
+👉 **N-grams** are simply **sequences of N words** from a given text.
+
+* A **bigram** is 2 consecutive words (N=2)
+* A **trigram** is 3 consecutive words (N=3), and so on.
+
+### 🛠️ Use Case:
+
+Used in **text analytics**, **search engines**, **autocorrect**, **spam filters**, etc.
+
+---
+
+## 🧪 Hive Functions to Compute Ngrams
+
+### ➕ Example 1: Extracting Top 100 Bigrams (2-word sequences)
+
+```sql
+SELECT ngrams(sentences(val), 2, 100) 
+FROM mytable;
+```
+
+📌 **Explanation**:
+
+* `sentences(val)` splits the text in the `val` column into individual sentences.
+* `ngrams(..., 2, 100)` extracts **bigrams** (2-word phrases).
+* **Top 100** results are returned.
+
+---
+
+### ➕ Example 2: Contextual Ngrams 📌
+
+```sql
+SELECT context_ngrams(sentences(val), 
+ARRAY("error", "code", NULL), 100) 
+FROM mytable;
+```
+
+📌 **Explanation**:
+
+* This finds the **top 100 words that appear after the phrase "error code"** in the text.
+* The `NULL` indicates a placeholder for the word you want to find after the given context.
+
+---
+
+# ✅ **Lesson Review**: Quick Check 🧠
+
+1️⃣ **A Hive table consists of a schema stored in the Hive `metastore` and data stored in `HDFS`.**
+
+3️⃣ **True or False:**
+The Hive **metastore** requires an underlying SQL database?
+✅ **True**
+
+5️⃣ **What happens to the underlying data of a Hive-managed table when the table is dropped?**
+🗑️ The **data is deleted**.
+
+7️⃣ **True or False:**
+A Hive external table must define a LOCATION?
+❌ **False** – It’s not mandatory, but usually provided.
+
+9️⃣ **List 3 Ways to Load Data into a Hive Table:**
+
+* `LOAD DATA`
+* `LOCAL INPATH`
+* `INSERT RECORD`
+
+🔟 **When would you use a skewed table?**
+👉 When certain values (like specific ZIP codes) occur **very frequently**, skewing the data distribution and affecting performance.
+Helps improve performance by treating those values differently.
+
+---
+
+## 📁 HDFS Folder Structure Example
+
+📌 **Table:**
+
+```sql
+CREATE TABLE movies (
+  title STRING,
+  rating STRING,
+  length DOUBLE
+) PARTITIONED BY (genre STRING);
+```
+
+📁 **HDFS Location:**
+
+```
 /user/hive/warehouse/movies/
-
-14. Explain the output of the following query:
-select * from movies order by title;
-global ordering
-
-16. What does the following Hive query compute? 
-from mytable select 
-explode(ngrams(sentences(val),3,100)) as myresult;
-top 100 trigrams
-
-18. What does the following Hive query compute? 
-from mytable select explode(
-context_ngrams(sentences(val),
-array("I","liked",null),10)) as myresult;
+```
 
 ---
 
-Avro: Row oriented binary file format
+## 🔠 Ordering in Hive
 
-Apache Avro[79] is a language-neutral data serialization system. The project was created by Doug Cutting (the creator of Hadoop) to address the major downside of Hadoop Writables: lack of language portability. Having a data format that can be processed by many languages (currently C, C++, C#, Java, JavaScript, Perl, PHP, Python, and Ruby) makes it easier to share datasets with a wider audience than one tied to a single language. It is also more future-proof, allowing data to potentially outlive the language used to read and write it.
+```sql
+SELECT * FROM movies ORDER BY title;
+```
 
-But why a new data serialization system? Avro has a set of features that, taken together, differentiate it from other systems such as Apache Thrift or Google’s Protocol Buffers.[80] Like in these systems and others, Avro data is described using a language-independent schema. However, unlike in some other systems, code generation is optional in Avro, which means you can read and write data that conforms to a given schema even if your code has not seen that particular schema before. To achieve this, Avro assumes that the schema is always present—at both read and write time—which makes for a very compact encoding, since encoded values do not need to be tagged with a field identifier.
-
-Avro schemas are usually written in JSON, and data is usually encoded using a binary format, but there are other options, too. There is a higher-level language called Avro IDL for writing schemas in a C-like language that is more familiar to developers.
+🧾 **Output Explanation**:
+This gives a **global ordering** of all records by `title`. It uses **1 reducer** to maintain a consistent order.
 
 ---
 
-## Advanced Hive Programming
+## 🧠 Text Analytics Queries Explained
 
-## Topics to be Covered
-• Performing a Multi-Table/File Insert • Understanding Views
-• Defining Views
-• Using Views
-• The OVER Clause
-• Using Windows
-• Hive Analytics Functions
-• Lab: Advanced Hive Programming
-• Hive File Formats
-• Hive SerDe
+### ▶️ **Trigram Extraction (3-word sequences)**
 
-## Performing a Multi-Table/File Insert 
+```sql
+FROM mytable
+SELECT EXPLODE(ngrams(sentences(val), 3, 100)) AS myresult;
+```
 
-![image](https://github.com/user-attachments/assets/a805fc63-f8b5-498c-aedf-e02d38a6f8c2)
+📌 **Explanation**: Extracts **top 100 trigrams** from the text in `val`.
 
-insert overwrite directory '2014_visitors' select * from wh_visits 
-where visit_year='2014' 
-insert overwrite directory 'ca_congress' select * from congress 
-where state='CA' ;
-No semicolon
-from visitors
+---
+
+### ▶️ **Contextual Trigrams**
+
+```sql
+FROM mytable 
+SELECT EXPLODE(
+  context_ngrams(sentences(val),
+  ARRAY("I", "liked", NULL), 10)) AS myresult;
+```
+
+📌 **Explanation**:
+Finds **top 10 words** that most frequently appear **after "I liked"** in the text.
+
+---
+Here’s your next set of **Big Data (Hive + Avro + Advanced Hive Programming)** notes, refined for clarity, engagement, and revision ease 📘🚀:
+
+---
+
+# 🧊 **Avro: Row-Oriented Binary File Format**
+
+### 🔧 What is Avro?
+
+Avro is a **language-neutral** data serialization system developed by **Doug Cutting** (yes, the creator of Hadoop! 🐘).
+
+### 🎯 Why Avro?
+
+* Solves Hadoop’s **language portability issue** with Writables
+* Works with multiple languages:
+  `Java, Python, C, C++, C#, PHP, JavaScript, Perl, Ruby`
+
+### ⚙️ Key Features of Avro
+
+✅ **Schema-based** (written in JSON)
+✅ **Binary format** for compact, fast I/O
+✅ **Code generation is optional**
+✅ **Schema must be present at both read and write time**
+✅ **Future-proof** — data can outlive the application
+✅ Also supports a C-like syntax via **Avro IDL**
+
+📌 **Comparison**:
+
+| Feature         | Avro                        | Thrift/Protobuf          |
+| --------------- | --------------------------- | ------------------------ |
+| Schema format   | JSON                        | Custom or IDL            |
+| Code generation | Optional                    | Required                 |
+| Field tags      | Not required                | Required                 |
+| Use case        | Big Data, Hadoop ecosystems | General purpose RPC/data |
+
+---
+
+# 👩‍💻 **Advanced Hive Programming**
+
+## 🎯 Topics To Be Covered:
+
+* ✅ Multi-Table/File Insert
+* ✅ Views: Creating & Using
+* ✅ `OVER` Clause
+* ✅ Window Functions
+* ✅ Hive Analytics Functions
+* ✅ Hive File Formats & SerDe
+* ✅ 🧪 Lab Practice
+
+---
+
+## 📥 Performing a Multi-Table/File Insert
+
+Hive allows **writing to multiple outputs** (tables/directories) from a **single query**! 🚀
+
+### 💡 Syntax Example:
+
+```sql
+FROM wh_visits
+INSERT OVERWRITE DIRECTORY '2014_visitors'
+SELECT * 
+WHERE visit_year = '2014'
+
+INSERT OVERWRITE DIRECTORY 'ca_congress'
+SELECT * 
+FROM congress 
+WHERE state = 'CA';
+```
+
+⚠️ **Note**: No semicolon `;` until all `INSERT` statements are finished.
+
+---
+
+### ➕ Another Example:
+
+```sql
+FROM visitors
 INSERT OVERWRITE TABLE gender_sum
-SELECT visitors.gender, count_distinct(visitors.userid)
-GROUP BY visitors.gender
+SELECT gender, COUNT(DISTINCT userid)
+GROUP BY gender
+
 INSERT OVERWRITE DIRECTORY '/user/tmp/age_sum'
-SELECT visitors.age, count_distinct(visitors.userid)
-GROUP BY visitors.age;
+SELECT age, COUNT(DISTINCT userid)
+GROUP BY age;
+```
+
+📌 **Why use this?**
+
+* Faster than writing separate queries
+* Efficient for reporting and exporting
+* Reduces processing time by **reusing the same data scan**
+
+---
 
 📌 **Understanding Views in Hive** 🐝
 
@@ -1266,54 +1831,97 @@ Your image illustrates this concept beautifully:
 
 Window functions in SQL allow us to perform **calculations across a specific set of rows** in a dataset, without collapsing the data like `GROUP BY`. Let’s break it down in simple terms! 😊  
 
+# 🔍 **Window Functions in Hive**
+
+### 📌 What is a Window Function?
+
+A **Window Function** performs calculations **across a set of rows (a window)** related to the current row.
+
+🔄 Unlike `GROUP BY`:
+
+* It **doesn't collapse rows**
+* Original rows are **retained**
+* Ideal for **ranking**, **running totals**, **moving averages**, etc.
+
 ---
 
-### 🔍 **What Are Window Functions?**  
-A **window function** operates over a **specific range of rows**, known as the **window**, instead of working on the entire dataset. It **does not remove duplicates or group data**, unlike `GROUP BY`.  
+## 🛠️ **How It Works**
 
-Think of it as applying calculations **inside each mini-group**, rather than across the entire table.  
+### 👇 Query Example:
 
----
-
-### 🖥️ **How Window Functions Work**  
-Imagine you have a dataset of **orders** containing customer IDs (`cid`), product prices, and quantities. You want to calculate the **sum of prices for each customer, considering the last two prices** before the current row.  
-
-📜 **SQL Query:**
 ```sql
 SELECT cid, 
-       SUM(price) OVER (PARTITION BY cid ORDER BY price ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+       SUM(price) OVER (
+           PARTITION BY cid 
+           ORDER BY price 
+           ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+       ) AS running_sum
 FROM orders;
 ```
-💡 **Breaking It Down:**  
-✅ `PARTITION BY cid` → Divides data into groups based on `cid` (each customer)  
-✅ `ORDER BY price` → Sorts the data within each partition  
-✅ `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` → Includes the **current row and the two rows before it** for calculation  
+
+### 🔍 Breakdown:
+
+* **`PARTITION BY cid`** → Groups rows by customer ID
+* **`ORDER BY price`** → Orders rows within each group
+* **`ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`** → Takes:
+
+  * The current row
+  * The **2 previous rows**
+  * Calculates sum of `price` for them
+
+🧠 Think of this as a **rolling window sum** within each customer's order history!
 
 ---
 
-### 📷 **Visual Representation**  
-Your image illustrates this concept clearly:  
-- The **orders table** contains `cid`, `price`, and `quantity`.  
-- The **result set** shows how the sum of prices is computed by **considering the current row and the two preceding rows** in each partition.  
+### 🖼️ Visualization Idea:
+
+| cid | price | Running Sum (`2 PRECEDING` to `CURRENT`) |
+| --- | ----- | ---------------------------------------- |
+| A   | 10    | 10                                       |
+| A   | 20    | 10 + 20 = 30                             |
+| A   | 30    | 10 + 20 + 30 = 60                        |
+| A   | 40    | 20 + 30 + 40 = 90                        |
 
 ---
 
-### 🎯 **Key Benefits of Using Window Functions**
-✅ Retains original rows while applying calculations 🚀  
-✅ Useful for **running totals**, **moving averages**, and **rankings** 📊  
-✅ Provides more flexibility than `GROUP BY`  
+## ➕ More Windowing Examples
 
----
+### 1️⃣ Custom Ranges:
 
-## Using Windows – cont.
-SELECT cid, sum(price) OVER 
-(PARTITION BY cid ORDER BY price ROWS 
-BETWEEN 2 PRECEDING AND 3 FOLLOWING) 
+```sql
+SELECT cid, SUM(price) OVER (
+  PARTITION BY cid 
+  ORDER BY price 
+  ROWS BETWEEN 2 PRECEDING AND 3 FOLLOWING
+) AS custom_sum
 FROM orders;
-SELECT cid, sum(price) OVER 
-(PARTITION BY cid ORDER BY price ROWS 
-BETWEEN UNBOUNDED PRECEDING AND 
-CURRENT ROW) FROM orders;
+```
+
+* Includes 2 rows before and 3 after the current row in sum
+
+---
+
+### 2️⃣ Cumulative Sum:
+
+```sql
+SELECT cid, SUM(price) OVER (
+  PARTITION BY cid 
+  ORDER BY price 
+  ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+) AS cumulative_sum
+FROM orders;
+```
+
+* Adds all rows from the **start of partition** up to **current row**
+
+---
+
+## 💡 Benefits of Window Functions
+
+✅ Do **not modify row structure**
+✅ Great for **analytics and reporting**
+✅ Replace complex subqueries
+✅ Powerful alternative to self-joins or correlated queries
 
 ---
 
@@ -1379,306 +1987,390 @@ Your image illustrates this concept beautifully, showing different analytical fu
 
 ---
 
-## Hive File Formats
-• Text file
-• SequenceFile
-• RCFile
-• ORC File: Optimised Record Columnar File
+# **Hive File Formats & SerDe**
 
-CREATE TABLE names 
-(fname string, lname string)
-STORED AS RCFile;
+### 📂 **Hive File Formats**
 
-## Hive SerDe
+Hive supports multiple file formats for storing data efficiently. Here are some of the popular ones:
 
-• SerDe = serializer/deserializer
-• Determines how records are read from a table and written to HDFS
+1. **Text File**
+   Simple line-by-line file storage (default format).
 
+2. **SequenceFile**
+   Binary file format for storing key-value pairs.
+
+3. **RCFile (Record Columnar File)**
+   A hybrid of row and column-based storage, improving query performance.
+
+4. **ORC (Optimized Row Columnar) File**
+   A columnar file format that is **highly optimized** for Hive's read and write operations. It improves performance by reducing I/O and supporting advanced compression techniques.
+
+   **Example:**
+
+   ```sql
+   CREATE TABLE names 
+   (fname string, lname string)
+   STORED AS RCFile;
+   ```
+
+---
+
+### 🔄 **Hive SerDe (Serializer/Deserializer)**
+
+* **SerDe** is a mechanism used to convert between **Hive data** and the **storage format**.
+* It controls how **records are read from** and **written to HDFS**.
+
+#### Example of Using a SerDe:
+
+```sql
 CREATE TABLE emails (
-from_field string,
-sender string,
-email_body string)
-ROW FORMAT SERDE
+   from_field string,
+   sender string,
+   email_body string
+)
+ROW FORMAT SERDE 
 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
-STORED AS INPUTFORMAT
-'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputForma
-t'
+STORED AS INPUTFORMAT 
+'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
 OUTPUTFORMAT 
-'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputForm
-at'
+'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
 TBLPROPERTIES (
-'avro.schema.url'='hdfs//nn:8020/emailschema.avsc');
+   'avro.schema.url' = 'hdfs://nn:8020/emailschema.avsc'
+);
+```
+
+* Here, **AvroSerDe** is used to read/write Avro-formatted data.
+* The **Avro schema** (`emailschema.avsc`) defines the structure of the data.
 
 ---
 
-## Hive ORC Files
-The Optimized Row Columnar (ORC) file format 
-provides a highly efficient way to store Hive data
-CREATE TABLE tablename (
-...
+### 🗂️ **Using ORC Files in Hive**
+
+The **ORC file format** is optimized for fast read/write operations and columnar storage.
+
+#### Example of Creating a Table with ORC Format:
+
+```sql
+CREATE TABLE wh_visits_orc (
+   lname string,
+   fname string,
+   time_of_arrival string,
+   appt_scheduled_time string,
+   meeting_location string,
+   info_comment string
 ) STORED AS ORC;
-ALTER TABLE tablename SET FILEFORMAT 
-ORC;
-SET hive.default.fileformat=Orc
+```
 
-create table wh_visits_orc(
-lname string,
-fname string,
-time_of_arrival string,
-appt_scheduled_time string,
-meeting_location string,
-info_comment string) STORED AS ORC;
+* **ALTER TABLE** can also be used to change the storage format:
+
+```sql
+ALTER TABLE tablename SET FILEFORMAT ORC;
+```
+
+#### Default ORC Format Setting:
+
+You can set ORC as the default file format for new tables:
+
+```sql
+SET hive.default.fileformat=Orc;
+```
 
 ---
 
-DESCRIBE FORMATTED wh_visits_orc;
+### 🧑‍💻 **Working with ORC Files in Hive**
 
-INSERT INTO wh_visits_orc select * from wh_visits;
+After creating an ORC table, you can insert data and query it.
 
+#### Insert Data:
+
+```sql
+INSERT INTO wh_visits_orc 
+SELECT * FROM wh_visits;
+```
+
+#### Query Data:
+
+```sql
 SELECT * FROM wh_visits_orc LIMIT 10;
+```
 
-command line:
+#### Checking ORC File Storage in HDFS:
 
+Use the HDFS command to check the stored ORC files:
+
+```bash
 hdfs dfs -ls /user/hive/warehouse/wh_visits_orc;
+```
 
 ---
 
-## Computing Table and Column Statistics
-ANALYZE TABLE tablename COMPUTE 
-STATISTICS;
-ANALYZE TABLE tablename COMPUTE 
-STATISTICS FOR COLUMNS column_name_1, 
-column_name_2, ... 
-DESCRIBE FORMATTED tablename
-DESCRIBE EXTENDED tablename
+# **Computing Table and Column Statistics in Hive**
 
-## Vectorization
-Vectorization + ORC files = a huge breakthrough in Hive query performance
+### 📊 **Table Statistics**
 
----
+You can compute statistics for a table to help the query optimizer make better decisions.
 
-## Hadoop Limitations
-1. Unstructured data
-2. No random access
-3. High latency
-4. Not ACID compliant
+1. **Compute Statistics for a Table:**
 
-Hadoop stores data in HDFS
-The data in HDFS is unstructured
-Unlike databases, hdfs data doesn't have any schema
-It's basically in the form of files Text files, log files, video/audio files.
-There's no concept of rows/columns.
-There are no tables.
-This is not to say that Hadoop can't be used to store structured data.
-You could store your data in a structured format even in Hadoop: csv files, xml files, json
-Each record in these files could be 1 row in a table
-But unlike databases, Hadoop will not enforce the schema or any constraints on these rows/tables.
+   ```sql
+   ANALYZE TABLE tablename COMPUTE STATISTICS;
+   ```
 
-## Hadoop Limitations
-1. Unstructured data
-2. No random access
+2. **Compute Statistics for Specific Columns:**
 
-Applications that use databases require random access, i.e., the ability to create, acess and modify individual rows of a table.
+   ```sql
+   ANALYZE TABLE tablename COMPUTE STATISTICS FOR COLUMNS column_name_1, column_name_2, ...;
+   ```
 
-HDFS is optimal for storing large files
-MapReduce is optional for processing these files as a whole\
+3. **Describe Formatted Table (Detailed Info):**
 
-If an HDFS file consists of many rows in a table
+   ```sql
+   DESCRIBE FORMATTED tablename;
+   ```
 
-There is no provision to access or modify a specific row without processing the entire file
+4. **Describe Extended Table (Extended Info):**
 
-## Hadoop Limitations
-1. Unstructured data
-2. No random access
-3. High latency
-
-## Applications also require low latency
-
-Any operations like inserting, updating or deleting daa should occur as fast as possible.
-
-All processing in Hadoop occurs via MapReduce tasks on complete files
-Even on large clusters, these tasks might take minutes or hours at time
-
-## Hadoop Limitations
-1. Unstructured data
-2. No random access
-3. High latency
-4. Not ACID compliant
-
-Databases are the source of truth for the data that they store
-
-Databases guarantee acid properties to maintain the integrity of their data.
-
-ACID properties:
-Atomicity
-Consistency
-Isolation
-Durability
-
-Atomicity:
-Operations (aka transactions) must be all-or-nothing
-Example of a transaction:
-Cash withdrawal from an ATM:
-Update cash balance
-Update account balance
-
-If one of these fails, the whole transaction should fail
-
-Consistency:
-Any changes to the database must not violate any specified database constraints.
-
-Isolation:
-If multiple/concurrent operations occur, the result is as if these operations are applied in sequence.
-
-Durability:
-Once a transaction is executed, the changes are permanent
+   ```sql
+   DESCRIBE EXTENDED tablename;
+   ```
 
 ---
 
-HBASE
+# **Vectorization in Hive**
 
- jps
- 2034  hdfs dfs -ls /
- 2035  hdfs dfs -ls -r
- 2036  hdfs dfs -ls -R
- 2037  ls -lh *.sh
- 2038  head -n 15 run-hbash.sh
- 2039  head -n 15 run-hbase.sh
- 2040  bash run-hbase.sh -s start
- 2041  jps
- 2042  history
+### 🚀 **Vectorization + ORC Files = Improved Performance**
 
-talentum@talentum-virtual-machine:~$ jps
-4321 SecondaryNameNode
-3364 SparkSubmit
-9126 HRegionServer
-3048 SparkSubmit
-3944 NameNode
-8681 HQuorumPeer
-3277 SparkSubmit
-4622 NodeManager
-8751 HMaster
-8879 HRegionServer
-9711 Jps
-9007 HMaster
-4118 DataNode
-4983 RunJar
-4476 ResourceManager
-
-HRegionServer
-HQuorumPeer : ZooKeeper
-Hmaster: master daemon processes
-
-Directories for hbase are created:
-talentum@talentum-virtual-machine:~$ hdfs dfs -ls -R /
-drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase
-drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/.tmp
-drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/.tmp/data
-drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/.tmp/data/hbase
-drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/MasterProcWALs
--rw-r--r--   1 talentum supergroup          0 2025-05-10 15:26 /hbase/MasterProcWALs/state-00000000000000000002.log
-drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/WALs
+* **Vectorization** improves the performance of queries by enabling Hive to process **multiple rows** in a **single operation** (batch processing), rather than processing them one at a time.
+* When used with **ORC files**, vectorization can lead to **significant performance improvements** in query execution.
 
 ---
 
-Hbase runs in Hmaster
-Edgenode where the client is sitting. From here hbase commands are fired. for that client side libraries need to be installed. in our case those are already installed/
+# **Hadoop Limitations**
 
-hbase shell: to move to hbase shell
+While Hadoop is a powerful tool for big data processing, it comes with several **limitations**:
 
-hbase shell
-SLF4J: Class path contains multiple SLF4J bindings.
-SLF4J: Found binding in [jar:file:/home/talentum/hbase/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: Found binding in [jar:file:/home/talentum/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
-SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
-HBase Shell; enter 'help<RETURN>' for list of supported commands.
-Type "exit<RETURN>" to leave the HBase Shell
-Version 1.3.6, r806dc3625c96fe2cfc03048f3c54a0b38bc9e984, Tue Oct 15 01:55:41 PDT 2019
+### 1. **Unstructured Data**
 
-This is just like hive shell
+* Hadoop stores **unstructured** data in HDFS, meaning there’s no predefined schema (like in traditional databases).
+* HDFS stores data as **files** (text, log, audio, video, etc.), which are not structured in the same way databases store data in tables or rows.
+* While structured formats like **CSV**, **XML**, and **JSON** can be stored in HDFS, Hadoop does not enforce any schema or constraints on these files.
 
-hbase shell is run in edge node.
+### 2. **No Random Access**
 
-commands will be fired on hadoop cluster.
+* **Random access** (the ability to access and modify individual rows) is not possible in HDFS.
+* **HDFS** is optimized for **storing large files** and **batch processing** them.
+* You cannot modify a specific row in a file stored in HDFS without processing the entire file, making it unsuitable for **real-time** or **transactional systems**.
 
-when hbase is run, following daemons are started:
-zookeeper
-hbase master daemons and worker daemons
+### 3. **High Latency**
+
+* Hadoop processes data in **batch jobs** using **MapReduce**.
+* This processing method can introduce **high latency**, as it may take **minutes or hours** to process large datasets, even with a large cluster.
+
+### 4. **Not ACID Compliant**
+
+* Hadoop is **not ACID compliant**, which means it doesn’t guarantee **Atomicity**, **Consistency**, **Isolation**, and **Durability** for transactions.
+* In contrast, traditional relational databases are **ACID-compliant**, ensuring data consistency even during failures or concurrent operations.
+* Hadoop does not provide the same transactional guarantees.
+
 
 ---
 
-jps -lm
+### 🧠 **ACID Properties in Databases**
 
-In HBase:
-
-to exit:
-exit<RETURN>
-
-Table name will always be in single quotes
-after comma, everything is column families
-Table cannot exist without column families
-atleast one column family is important to mention
-column families are group of columns
-Column families are groups of which are usually semantically related
-When you create a table in Hbase, you don't have to specify the columns in the table
-For instance, this notification table might have columns like type, text, timestamp, etc.
-
-columns like type, text, timestamp, etc.
-
-Thse columns are defined on the fly when you insert data for a specific a row id
-Every column has to belong to some column family
-
-The attributes column family have columns like type, timestamp
-
-The metrics column family may have columns like #clicks, #views
-
-Every table must have at least 1 column family
-
-Column families, unlike columns are usually created at the time of table creation
-
-It is possible to add or change column families later, but this is rarely done
+Databases guarantee **ACID properties** to ensure data integrity. These properties make sure that transactions (operations on the database) are processed reliably and maintain the system's correctness. Let’s break down each property:
 
 ---
 
-To show tables:
+#### 🔄 **Atomicity**: "All or Nothing" 🛑
 
-hbase(main):003:0> list
-TABLE                                                                      
-0 row(s) in 0.2680 seconds
+* **Definition**: A transaction must either be fully completed or not executed at all. If one part of the transaction fails, the entire transaction is rolled back to its original state.
 
+* **Example**:
+  Imagine you're withdrawing cash from an ATM. The operation has two main steps:
 
-Example 2:
+  1. **Update the cash balance** (the money in the ATM)
+  2. **Update the account balance** (the amount in your bank account)
 
-Inserting data into a table using HBase Shell: put
+  If, for some reason, the ATM can't update your account balance but successfully dispenses cash, it would leave the system in an inconsistent state. **Atomicity** ensures that both actions happen together: either both are successful, or neither happens. If something fails, the transaction is canceled.
 
-put 'notifications',2, 'attributes:for_user', 'Chaz'
+---
 
-Data is inserted into Hbase tables using the put operation
+#### ⚖️ **Consistency**: "Data Validity" ✅
 
-Each entry in a HBase table is like a cell in a traditional table
+* **Definition**: Any changes made to the database must follow predefined rules, known as **constraints**, and must not leave the database in an inconsistent state.
 
-When put, you insert data 1 cell at a time
+* **Example**:
+  Suppose there's a rule that a bank account balance can never be negative. If a transaction tries to reduce an account balance below zero, the **Consistency** property ensures that the change will not be allowed, keeping the data valid.
 
-The commands in the query stands for:
-row, column, value
+---
 
-The column name is specified with it's column family
+#### 🔒 **Isolation**: "Separation of Operations" 🏗️
 
-Every column must belong to a column family
+* **Definition**: If multiple transactions are happening at the same time (concurrently), **Isolation** ensures that each transaction is processed as though it were the only one happening, preventing conflicts between them.
 
-An HBase table is like a sorted map
+* **Example**:
+  Imagine two people transferring money from the same bank account at the same time. If transaction A is subtracting \$100, and transaction B is adding \$50, isolation guarantees that each transaction will appear to run independently—one won’t interfere with the other. It’s like giving each person their own "turn" to interact with the account.
 
-Key:column
-Value:value
+---
 
-With the put operation, we are 
-inserting new keys into the map
+#### 🔒 **Durability**: "Permanent Changes" 📅
 
+* **Definition**: Once a transaction is committed, the changes are permanent, even in the case of power outages or crashes. This ensures that after a successful transaction, the changes will survive and be available when the system restarts.
 
+* **Example**:
+  After a successful purchase on an e-commerce website, even if the website crashes or the system shuts down, the transaction (the purchase) will remain intact and visible when the system recovers.
 
+---
 
+### **Why ACID Matters**
 
+ACID properties are crucial because they ensure **data reliability**, **accuracy**, and **consistency**, which is especially important in financial systems, e-commerce websites, and applications where transactions need to be processed correctly without loss of data.
+
+---
+
+These ACID properties lay the foundation for traditional relational databases, ensuring that transactions are processed reliably. However, in the world of **Big Data**, these strict guarantees might not always be feasible, leading to the use of more flexible, distributed systems. But understanding ACID helps you grasp the core principles of data integrity! 😎
+
+---
+
+### 🌐 **What is HBase?**
+
+HBase is a **NoSQL database** built on top of Hadoop and designed for handling **large-scale, sparse** data across clusters. It’s a **distributed** column-family-based storage system that can store billions of rows and columns of data.
+
+---
+
+### 🧑‍💻 **HBase Commands**
+
+Below are some important HBase-related commands:
+
+#### 🏷️ **Basic Commands**:
+
+* **`jps`**: Lists all the Java processes running on the system (HBase daemons included).
+
+  * Example:
+
+    ```bash
+    jps
+    ```
+
+    Shows various processes like **HRegionServer**, **HMaster**, and **HQuorumPeer** (ZooKeeper).
+
+* **HDFS Commands**:
+
+  * **`hdfs dfs -ls /`**: List the contents of the HDFS root directory.
+  * **`hdfs dfs -ls -R /`**: Recursively lists files and directories in HDFS.
+
+  HBase directories in HDFS will be created like this:
+
+  ```bash
+  drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase
+  drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/.tmp
+  drwxr-xr-x   - talentum supergroup          0 2025-05-10 15:26 /hbase/MasterProcWALs
+  ```
+
+---
+
+### 🔧 **HBase Daemons**
+
+When **HBase** is running, the following daemons are started:
+
+1. **Zookeeper**: Manages coordination between different HBase instances.
+2. **HBase Master Daemon**: Coordinates the region servers and handles cluster-wide actions.
+3. **HBase RegionServer Daemon**: Manages the actual data (regions) in the table.
+
+---
+
+### 🖥️ **HBase Shell**
+
+The **HBase Shell** is used to interact with HBase directly, similar to how we use the **Hive Shell** for Hive operations.
+
+* **Command to enter HBase Shell**:
+
+  ```bash
+  hbase shell
+  ```
+
+  * Once inside the shell, you can execute commands such as `put`, `get`, `list`, and more.
+
+---
+
+### 🏷️ **Table Structure in HBase**
+
+In HBase, a **table** consists of **column families**. These column families group **related columns** together. Here are some important details:
+
+* **Column Families**:
+
+  * Each column belongs to one column family.
+  * Example: If you have a `notifications` table, you might have two column families:
+
+    * `attributes`: Holds data like `type`, `timestamp`.
+    * `metrics`: Holds data like `#clicks`, `#views`.
+* **Table Creation**:
+  When creating a table, you must **define at least one column family**. You don’t need to specify individual columns when creating the table; they are defined dynamically when data is inserted.
+
+---
+
+### 💡 **Inserting Data in HBase**
+
+In HBase, data is inserted **one cell at a time** using the **`put`** command. Here's an example:
+
+* **Syntax**:
+
+  ```bash
+  put 'table_name', row_id, 'column_family:column_name', 'value'
+  ```
+
+* **Example**:
+  Insert data into the `notifications` table:
+
+  ```bash
+  put 'notifications', 2, 'attributes:for_user', 'Chaz'
+  ```
+
+  * **Explanation**:
+
+    * `'notifications'`: Table name
+    * `2`: Row ID
+    * `'attributes:for_user'`: Column family and column name
+    * `'Chaz'`: Value inserted into the cell
+
+  HBase tables are like a **sorted map**, where:
+
+  * **Key**: column (with its column family)
+  * **Value**: actual data (value)
+
+---
+
+### 🗃️ **Viewing Tables and Data**
+
+* **List Tables**:
+  To see a list of all HBase tables:
+
+  ```bash
+  list
+  ```
+
+* **Get Data**:
+  Retrieve a cell value by using the `get` command:
+
+  ```bash
+  get 'notifications', 2
+  ```
+
+---
+
+### 📝 **Summary**
+
+* HBase is a **distributed** column-family-based NoSQL database.
+* **Column families** are created during table creation, and individual columns are added dynamically.
+* **Data insertion** in HBase is done one cell at a time, where each cell consists of a row ID, column family, column, and value.
+
+---
+
+### 🚀 **HBase in Action**
+
+Once you've set up HBase and interacted with it via the shell, you'll notice that HBase’s architecture is optimized for storing **massive amounts of sparse data**, making it ideal for Big Data applications like storing logs, sensor data, or any other time-series data.
+
+---
 
 
 
