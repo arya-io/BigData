@@ -455,6 +455,411 @@ rdd.glom()
 
 hdfs fsck /user/talentum/stocks.csv -files -blocks -locations
 
+---
+
+### 🔥 Overview of PySpark Operations  
+
+![image](https://github.com/user-attachments/assets/ccff4a44-8a7c-4c61-9277-2ac240308f2a)  
+
+PySpark, the Python API for Apache Spark, is all about handling large-scale data processing efficiently. It operates on two key concepts:  
+
+#### 🐛 Transformations – Creating New RDDs  
+Transformations are operations that take an RDD (Resilient Distributed Dataset) and create a new one without modifying the original. Think of it like a caterpillar turning into a butterfly—each transformation results in a new dataset.  
+
+For example:  
+```python
+rdd1 = sparkContext.parallelize([1, 2, 3, 4])
+rdd2 = rdd1.map(lambda x: x * 2)  # Transformation (map) creates a new RDD
+```
+Here, `map()` applies a function to each element, creating a new RDD (`rdd2`). The original RDD (`rdd1`) remains unchanged.  
+
+#### 🖨️ Actions – Performing Computations on RDDs  
+Actions trigger computations and return values. Until an action is performed, transformations are **lazy**, meaning they don’t execute immediately but wait for an action to trigger processing.  
+
+For example:  
+```python
+result = rdd2.collect()  # Action (collect) triggers computation
+print(result)  # Output: [2, 4, 6, 8]
+```
+Here, `collect()` gathers the elements of `rdd2` and prints them.  
+
+So, remember:  
+✅ **Transformations** create new RDDs but don’t execute immediately.  
+✅ **Actions** trigger computation and return results.  
+
+This way, PySpark optimizes processing by applying transformations lazily and executing only when needed! 🚀  
+
+---
+
+### ⚡ RDD Transformations – Lazy Evaluation  
+
+![image](https://github.com/user-attachments/assets/d0be59c6-a464-4f04-a379-469a98b17b33)  
+
+RDD transformations in PySpark are **lazy**, meaning they don’t execute immediately! Instead, they wait until an **action** is triggered, ensuring efficient computation by avoiding unnecessary processing.  
+
+#### 🚀 How Lazy Evaluation Works  
+Imagine a factory assembling a product but only running machines when an order is placed. Similarly, RDD transformations stack up, but PySpark waits until an action demands results before processing them.  
+
+##### 🔗 Data Flow in Lazy Evaluation  
+1️⃣ **RDD1** is created from storage (e.g., reading a file).  
+2️⃣ Transformation applies → **RDD2** is generated but not processed yet.  
+3️⃣ Another transformation applies → **RDD3** is ready but still waiting.  
+4️⃣ Finally, an **action** executes → Computation occurs, and results are returned.  
+
+#### 🔥 Basic RDD Transformations  
+These fundamental operations help manipulate data efficiently:  
+
+✅ `map()`: Applies a function to each element and returns a new RDD.  
+```python
+rdd = sparkContext.parallelize([1, 2, 3])
+mapped_rdd = rdd.map(lambda x: x * 2)  # [2, 4, 6]
+```  
+
+✅ `filter()`: Extracts elements based on a condition.  
+```python
+filtered_rdd = rdd.filter(lambda x: x % 2 == 0)  # [2]
+```  
+
+✅ `flatMap()`: Flattens nested structures by splitting elements into multiple outputs.  
+```python
+rdd = sparkContext.parallelize(["Hello World"])
+flat_mapped_rdd = rdd.flatMap(lambda x: x.split())  # ["Hello", "World"]
+```  
+
+✅ `union()`: Merges two RDDs into one.  
+```python
+rdd1 = sparkContext.parallelize([1, 2])
+rdd2 = sparkContext.parallelize([3, 4])
+union_rdd = rdd1.union(rdd2)  # [1, 2, 3, 4]
+```  
+
+### 📝 Recap:  
+✨ **Transformations** create new RDDs but do not execute immediately.  
+✨ **Lazy evaluation** optimizes performance by delaying computation.  
+✨ Common transformations like `map()`, `filter()`, `flatMap()`, and `union()` help manipulate data efficiently.  
+
+---
+
+### 🔄 `map()` Transformation – Applying a Function to All Elements  
+
+![image](https://github.com/user-attachments/assets/54629600-f45d-4bde-9ccb-61508c2d35c8)  
+
+#### ✨ What is `map()` Transformation?  
+The `map()` transformation is used in PySpark to apply a **function** to every element in an RDD, producing a **new RDD** with transformed values.  
+
+Think of it like a **magic converter**—every item in the dataset passes through a function and comes out transformed!  
+
+#### 🔍 Example Breakdown  
+```python
+RDD = sc.parallelize([1, 2, 3, 4])  # Creating an RDD with numbers  
+RDD_map = RDD.map(lambda x: x * x)  # Squaring each number  
+```
+🔹 The `map()` function applies `lambda x: x * x` to each element in `RDD`.  
+🔹 The new RDD (`RDD_map`) contains `[1, 4, 9, 16]`.  
+
+#### 📊 Visual Representation  
+Imagine the original RDD as a conveyor belt:  
+**Before `map()` Transformation**: `[1, 2, 3, 4]`  
+➡ Function applied (`x * x`)  
+**After `map()` Transformation**: `[1, 4, 9, 16]`  
+
+This transformation is **element-wise**, meaning it **processes each item independently**.  
+
+#### 🚀 Key Points to Remember  
+✅ `map()` **always returns a new RDD** (original RDD remains unchanged).  
+✅ It is a **one-to-one transformation** (each input results in one output).  
+✅ Used for **modifying values** (e.g., squaring, doubling, converting formats).  
+
+---
+
+### 🚦 `filter()` Transformation – Selecting Specific Elements  
+
+![image](https://github.com/user-attachments/assets/6aa6dfaa-a6e2-4148-b552-69e55e2486b5)  
+
+#### 🔍 What is `filter()` Transformation?  
+The `filter()` transformation helps **extract only the elements that meet a specific condition**, creating a **new RDD** with the filtered results.  
+
+Think of it like a **sieve**—it keeps what you need and removes the rest!  
+
+#### ✨ Example Breakdown  
+```python
+RDD = sc.parallelize([1, 2, 3, 4])  # Creating an RDD with numbers  
+RDD_filter = RDD.filter(lambda x: x > 2)  # Keep only numbers greater than 2  
+```
+🔹 The function `lambda x: x > 2` checks each element, keeping only `3` and `4`.  
+🔹 The new RDD (`RDD_filter`) contains `[3, 4]`.  
+
+#### 📊 Visual Representation  
+Imagine the original RDD is a list of items:  
+**Before `filter()` Transformation**: `[1, 2, 3, 4]`  
+➡ Condition applied (`x > 2`)  
+**After `filter()` Transformation**: `[3, 4]`  
+
+### 🚀 Key Takeaways  
+✅ `filter()` **creates a new RDD** with only selected elements.  
+✅ It **removes** elements that don’t match the condition.  
+✅ Used for **data preprocessing** (e.g., filtering errors, selecting relevant data).  
+
+
+---
+
+### 🌊 `flatMap()` Transformation – Expanding Elements  
+
+![image](https://github.com/user-attachments/assets/4eebc285-9729-45f2-be1c-70eee10bc780)  
+
+#### 🔍 What is `flatMap()` Transformation?  
+Unlike `map()`, which transforms each element **one-to-one**, `flatMap()` **splits** elements and returns **multiple values** for each original item, creating a **flattened** RDD.  
+
+Think of it like breaking sentences into individual words—each input expands into multiple outputs!  
+
+#### ✨ Example Breakdown  
+```python
+RDD = sc.parallelize(["hello world", "how are you"])  
+RDD_flatmap = RDD.flatMap(lambda x: x.split(" "))  
+```
+🔹 The function `lambda x: x.split(" ")` splits each string into words.  
+🔹 The new RDD (`RDD_flatmap`) contains `["hello", "world", "how", "are", "you"]`.  
+
+#### 📊 Visual Representation  
+**Before `flatMap()` Transformation**:  
+`["hello world", "how are you"]`  
+
+➡ Function applied (`split()` on space)  
+
+**After `flatMap()` Transformation**:  
+`["hello", "world", "how", "are", "you"]`  
+
+#### 🚀 Key Takeaways  
+✅ `flatMap()` **splits elements into multiple outputs** (not one-to-one like `map()`).  
+✅ Creates a **flattened RDD**, removing nested structures.  
+✅ Useful for **text processing**, where sentences need to be broken into words.  
+
+
+
+---
+
+### 🔗 `union()` Transformation – Merging RDDs  
+
+![image](https://github.com/user-attachments/assets/4bb17119-cc1a-4892-b5ca-cd9c3286b816)  
+
+#### 🔍 What is `union()` Transformation?  
+The `union()` transformation **combines two RDDs into a single RDD**, merging all elements while keeping duplicates.  
+
+Think of it like **merging two lists**—you get everything from both, without any filtering!  
+
+#### ✨ Example Breakdown  
+```python
+inputRDD = sc.textFile("logs.txt")  # Reading log file as RDD  
+
+errorRDD = inputRDD.filter(lambda x: "error" in x.split())  # Filtering error messages  
+warningsRDD = inputRDD.filter(lambda x: "warnings" in x.split())  # Filtering warnings  
+
+combinedRDD = errorRDD.union(warningsRDD)  # Merging both RDDs  
+```
+🔹 `errorRDD` keeps lines containing **"error"**  
+🔹 `warningsRDD` keeps lines containing **"warnings"**  
+🔹 `union()` merges both, keeping all elements  
+
+#### 📊 Visual Representation  
+Imagine two lists:  
+**Before `union()` Transformation**  
+`errorRDD`: `["Error: Disk Full", "Error: Timeout"]`  
+`warningsRDD`: `["Warning: Low Memory", "Warning: High CPU Usage"]`  
+
+➡ `union()` merges them  
+
+**After `union()` Transformation**  
+`["Error: Disk Full", "Error: Timeout", "Warning: Low Memory", "Warning: High CPU Usage"]`  
+
+#### 🚀 Key Takeaways  
+✅ `union()` **combines two RDDs** while keeping duplicates  
+✅ Useful for **merging filtered results** (like logs, events, data subsets)  
+✅ Doesn’t remove duplicates—both datasets are preserved  
+
+---
+
+## RDD Actions
+Operation return avalueafterrunning acomputation ontheRDD
+BasicRDD Actions
+collect()
+take(N) 
+hrst() 
+count()
+
+---
+
+## collect() and take()Actions
+collect() return all the elements of the dataset as an array 
+take(N) returns anarray with thehrstN elements ofthedataset
+RDD_map.collect()
+[1, 4, 9, 16]
+RDD_map.take(2)
+[1, 4]
+
+---
+
+## first() andcount() Actions
+hrst() printsthehrstelementoftheRDD
+RDD_map.first()
+[1]
+count() returnthenumberofelements in theRDD
+RDD_flatmap.count()
+5
+
+---
+
+Lab:
+
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+numbRDD = sc.parallelize(numbers)
+
+# Create map() transformation to cube numbers
+cubedRDD = numbRDD.map(lambda x: x ** 3)
+
+# Collect the results
+numbers_all = cubedRDD.collect()
+
+# Print the numbers from numbers_all
+for numb in numbers_all:
+    print(numb)
+
+Output:
+1
+8
+27
+64
+125
+216
+343
+512
+729
+1000
+
+---
+
+file_path = 'file:////home/talentum/spark/README.md'
+
+# Create a fileRDD from file_path
+fileRDD = sc.textFile(file_path)
+
+# Filter the fileRDD to select lines with Spark keyword
+fileRDD_filter = fileRDD.filter(lambda line: 'Spark' in line)
+
+# How many lines are there in fileRDD?
+print("The total number of lines with the keyword Spark is", fileRDD_filter.count())
+
+# Print the first four lines of fileRDD
+for line in fileRDD_filter.take(4): 
+  print(line)
+
+Output:
+The total number of lines with the keyword Spark is 19
+# Apache Spark
+Spark is a fast and general cluster computing system for Big Data. It provides
+rich set of higher-level tools including Spark SQL for SQL and DataFrames,
+and Spark Streaming for stream processing.
+
+---
+
+## Introduction to pair RDDs in PySpark
+Real lifedatasetsareusually key/valuepairs
+Each rowis akeyandmapstooneormorevalues
+Pair RDD is aspecialdatastructureto workwith thiskindofdatasets
+Pair RDD: Key istheidentiherandvalueisdata
+
+---
+
+## Creating pairRDDs
+TwocommonwaystocreatepairRDDs 
+  From a list ofkey-valuetuple
+  From a regularRDD
+Get thedatainto key/valueformforpairedRDD
+
+my_tuple = [('Sam', 23), ('Mary', 34), ('Peter', 25)] 
+pairRDD_tuple = sc.parallelize(my_tuple)
+
+my_list = ['Sam 23', 'Mary 34', 'Peter 25'] 
+regularRDD = sc.parallelize(my_list)
+pairRDD_RDD = regularRDD.map(lambda s: (s.split(' ')[0], s.split(' ')[1]))
+
+---
+
+## Transformations on pair RDDs
+All regulartransformationsworkonpairRDD
+Haveto passfunctions that operateonkeyvaluepairsratherthanonindividual elements
+Examples ofpaired RDD Transformations
+reduceByKey(func): Combinevalueswith thesamekey
+groupByKey(): Group valueswith thesamekey
+sortByKey(): Return anRDD sortedby thekey
+join(): Join two pairRDDs basedontheirkey
+
+---
+
+## reduceByKey() transformation
+reduceByKey() transformation combines valueswith thesamekey
+It runsparalleloperationsforeachkeyin thedataset 
+It isatransformationand not action
+regularRDD = sc.parallelize([("Messi", 23), ("Ronaldo", 34),
+("Neymar", 22), ("Messi", 24)]) 
+pairRDD_reducebykey = regularRDD.reduceByKey(lambda x,y : x + y) 
+pairRDD_reducebykey.collect()
+[('Neymar', 22), ('Ronaldo', 34), ('Messi', 47)]
+
+---
+
+## sortByKey() transformation
+sortByKey() operationorders pairRDD by key
+It returns an RDD sortedby keyin ascendingordescendingorder
+pairRDD_reducebykey_rev = pairRDD_reducebykey.map(lambda x: (x[1], x[0])) 
+pairRDD_reducebykey_rev.sortByKey(ascending=False).collect()
+[(47, 'Messi'), (34, 'Ronaldo'), (22, 'Neymar')]
+
+---
+
+## groupByKey() transformation
+groupByKey() groupsallthevalueswith thesamekeyin thepairRDD
+airports = [("US", "JFK"),("UK", "LHR"),("FR", "CDG"),("US", "SFO")]
+regularRDD = sc.parallelize(airports) 
+pairRDD_group = regularRDD.groupByKey().collect() 
+for cont, air in pairRDD_group:
+print(cont, list(air))
+FR ['CDG']
+US ['JFK', 'SFO'] 
+UK ['LHR']
+
+---
+
+join() transformation
+join() transformationjoinsthetwo pairRDDs basedontheirkey
+RDD1 = sc.parallelize([("Messi", 34),("Ronaldo", 32),("Neymar", 24)])
+RDD2 = sc.parallelize([("Ronaldo", 80),("Neymar", 120),("Messi", 100)])
+RDD1.join(RDD2).collect()
+[('Neymar', (24, 120)), ('Ronaldo', (32, 80)), ('Messi', (34, 100))]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
