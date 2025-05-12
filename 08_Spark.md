@@ -1224,9 +1224,56 @@ With pair RDDs, you can easily process key-value datasets like user data, logs, 
 
 ---
 
+# More Actions
+
+## reduce() action
+reduce(func) action isusedforaggregatingtheelements ofaregularRDD
+Thefunction should becommutative(changingtheorderoftheoperandsdoesnot changetheresult) 
+andassociative
+An exampleof reduce() action inPySpark
+x = [1,3,4,6]
+RDD = sc.parallelize(x) 
+RDD.reduce(lambda x, y : x + y)
+14
+
+---
+
+## saveAsTextFile() action
+saveAsTextFile() action savesRDD into atexthleinsideadirectorywith eachpartition asa 
+separatehle
+RDD.saveAsTextFile("tempFile")
+coalesce() methodcanbeusedtosaveRDD asasingletexthle
 
 
+RDD.coalesce(1).saveAsTextFile("tempFile")
+This is a transformation operation still generating a new RDD
+---
 
+## Action Operations on pair RDDs
+RDD actionsavailable forPySparkpairRDDs
+Pair RDD actionsleveragethekey-valuedata
+FewexamplesofpairRDD actionsinclude
+countByKey()
+collectAsMap()
+
+---
+
+## countByKey() action
+countByKey() only available fortype(K, V)
+countByKey() action counts thenumberofelements for eachkey
+Exampleof countByKey() onasimplelist
+rdd = sc.parallelize([("a", 1), ("b", 1), ("a", 1)]) 
+for kee, val in rdd.countByKey().items():
+print(kee, val)
+('a', 2)
+('b', 1)
+
+
+## collectAsMap() action
+collectAsMap() returnthekey-valuepairsin theRDD asadictionary
+Exampleof collectAsMap() onasimpletuple
+sc.parallelize([(1, 2), (3, 4)]).collectAsMap()
+{1: 2, 3: 4}
 
 
 
