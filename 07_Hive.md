@@ -2286,6 +2286,7 @@ The **HBase Shell** is used to interact with HBase directly, similar to how we u
 * **Command to enter HBase Shell**:
 
   ```bash
+  bash run-hbase.sh -s start
   hbase shell
   ```
 
