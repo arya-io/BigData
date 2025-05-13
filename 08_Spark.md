@@ -1224,80 +1224,860 @@ With pair RDDs, you can easily process key-value datasets like user data, logs, 
 
 ---
 
-# More Actions
+# 🚀 **PySpark Actions: Transforming and Aggregating RDDs**  
 
-## reduce() action
-reduce(func) action isusedforaggregatingtheelements ofaregularRDD
-Thefunction should becommutative(changingtheorderoftheoperandsdoesnot changetheresult) 
-andassociative
-An exampleof reduce() action inPySpark
-x = [1,3,4,6]
-RDD = sc.parallelize(x) 
-RDD.reduce(lambda x, y : x + y)
-14
+Actions in PySpark trigger computation and return results to the driver program. Unlike transformations, actions **execute immediately** and generate **final outputs**. Let’s simplify these concepts with examples! 😊  
 
 ---
 
-## saveAsTextFile() action
-saveAsTextFile() action savesRDD into atexthleinsideadirectorywith eachpartition asa 
-separatehle
-RDD.saveAsTextFile("tempFile")
-coalesce() methodcanbeusedtosaveRDD asasingletexthle
+## 🔹 **reduce() Action**  
 
+✅ **Aggregates elements in an RDD using a specified function**.  
+✅ The function must be **commutative** (order does not change the result) and **associative** (grouping does not affect the result).  
 
-RDD.coalesce(1).saveAsTextFile("tempFile")
-This is a transformation operation still generating a new RDD
----
-
-## Action Operations on pair RDDs
-RDD actionsavailable forPySparkpairRDDs
-Pair RDD actionsleveragethekey-valuedata
-FewexamplesofpairRDD actionsinclude
-countByKey()
-collectAsMap()
+📜 **Example of reduce() in PySpark:**  
+```python
+x = [1, 3, 4, 6]  
+RDD = sc.parallelize(x)  
+RDD.reduce(lambda x, y: x + y)  # Output: 14
+```
+💡 **Think of `reduce()` like summing up values in a shopping cart**—it combines all elements efficiently!  
 
 ---
 
-## countByKey() action
-countByKey() only available fortype(K, V)
-countByKey() action counts thenumberofelements for eachkey
-Exampleof countByKey() onasimplelist
-rdd = sc.parallelize([("a", 1), ("b", 1), ("a", 1)]) 
-for kee, val in rdd.countByKey().items():
-print(kee, val)
-('a', 2)
-('b', 1)
+## 📝 **saveAsTextFile() Action**  
 
+✅ Saves an RDD **into a text file inside a directory**, with **each partition stored as a separate file**.  
+✅ Use `coalesce()` to **combine partitions** and save the RDD as **a single text file**.  
 
-## collectAsMap() action
-collectAsMap() returnthekey-valuepairsin theRDD asadictionary
-Exampleof collectAsMap() onasimpletuple
+📜 **Example Usage:**  
+```python
+RDD.saveAsTextFile("tempFile")  # Saves data into multiple files  
+RDD.coalesce(1).saveAsTextFile("tempFile")  # Saves as a single file  
+```
+🚀 **This is a transformation operation, still generating a new RDD!**  
+
+💡 **Imagine exporting a dataset—by default, PySpark saves multiple files, but `coalesce(1)` combines everything into a single file for easier management!**  
+
+---
+
+## 🔄 **Action Operations on Pair RDDs**  
+
+✅ **Pair RDDs store key-value data**, allowing easy aggregation and retrieval.  
+✅ Common actions used in **pair RDDs** include:  
+   - `countByKey()`
+   - `collectAsMap()`  
+
+📜 **Example of `countByKey()` on a simple list:**  
+```python
+rdd = sc.parallelize([("a", 1), ("b", 1), ("a", 1)])  
+for key, val in rdd.countByKey().items():  
+    print(key, val)  
+# Output:
+# 'a' → 2
+# 'b' → 1
+```
+🚀 **This counts occurrences of each key efficiently!**  
+
+---
+
+## 🔍 **collectAsMap() Action**  
+
+✅ **Converts an RDD into a dictionary**, preserving **key-value pairs**.  
+✅ **Efficiently retrieves all values** without needing iterative lookups.  
+
+📜 **Example Usage:**  
+```python
 sc.parallelize([(1, 2), (3, 4)]).collectAsMap()
-{1: 2, 3: 4}
+# Output: {1: 2, 3: 4}
+```
+💡 **Think of this like converting a list into a quick-access dictionary!** 🔥  
 
+---
 
+### 🎯 **Key Takeaways:**  
+✅ **`reduce()` aggregates elements efficiently.**  
+✅ **`saveAsTextFile()` writes RDDs to files, with `coalesce()` ensuring a single output file.**  
+✅ **Pair RDD actions leverage key-value operations for easy aggregation (`countByKey()`, `collectAsMap()`).**  
+✅ **Actions return final results, while transformations create new RDDs.**  
 
+---
 
+# 🏗️ **Lab: Action Operations in PySpark RDDs**  
 
+This lab explores **RDD actions** such as `countByKey()` and `flatMap()` in PySpark, demonstrating their ability to **process data and return results** efficiently. Let’s break it down step by step! 😊  
 
+---
 
+## 🔹 **Counting Keys in an RDD**  
 
+✅ Uses `countByKey()` to **count occurrences of each key** in a pair RDD.  
+✅ Returns a **default dictionary**, storing counts for each unique key.  
+✅ `countByKey()` is an **action**, meaning it triggers computation **immediately** and **does not create a new RDD**.  
 
+📜 **Example Code:**  
+```python
+dataset = [(1, 2), (3, 4), (3, 6), (4, 5)]
+Rdd = sc.parallelize(dataset)
 
+# Apply countByKey action
+total = Rdd.countByKey()
 
+# Check the type
+print("The type of total is", type(total))
 
+# Iterate over the result
+for k, v in total.items(): 
+  print("key", k, "has", v, "counts")
+```
+📌 **Expected Output:**  
+```
+The type of total is <class 'collections.defaultdict'>
+key 1 has 1 counts
+key 3 has 2 counts
+key 4 has 1 counts
+```
+🚀 **This confirms `countByKey()` returns key counts as a `defaultdict` instead of a new RDD!**  
 
+---
 
+## 🏷️ **Reading and Processing a Text File**  
 
+✅ **Creates an RDD from a text file**, ensuring the file exists before reading.  
+✅ **Uses `flatMap()` to split lines into individual words**, expanding each line into multiple elements.  
+✅ Applies `.count()` to **compute the total number of words in the dataset**.  
 
+📜 **Example Code:**  
+```python
+file_path = "file:///home/talentum/test-jupyter/P2/M2/SM4/4_AdvancedRddActions/Dataset/Complete_Shakespeare.txt"
 
+# Create RDD from file
+baseRDD = sc.textFile(file_path)
 
+# Split lines into words
+splitRDD = baseRDD.flatMap(lambda x: x.split())
 
+# Count total words
+print("Total number of words in splitRDD:", splitRDD.count())
+```
+📌 **Expected Output:**  
+```
+Total number of words in splitRDD: 128576
+```
+💡 **This demonstrates how to efficiently process a large text file using RDD actions!**  
 
+---
 
+### 🎯 **Key Takeaways:**  
+✅ **`countByKey()` counts occurrences of each key, returning a dictionary.**  
+✅ **Actions trigger computation immediately, unlike transformations.**  
+✅ **Reading a text file with `textFile()` and splitting data using `flatMap()` allows efficient processing.**  
+✅ **PySpark is optimized for handling large-scale datasets dynamically.**  
 
+---
 
+# 📌 **Text Processing in PySpark: Word Frequency Analysis**  
 
+This lab explores **RDD transformations and actions** using PySpark to **process and analyze text data** from the *Complete Works of Shakespeare*. Let’s break down each step! 😊  
 
+---
 
+## 🏗️ **Step 1: Reading and Preprocessing the Text File**  
 
+✅ **Load the dataset** using `sc.textFile()` to create an RDD from a file.  
+✅ **Split the text** into individual words using `flatMap()`.  
+✅ **Convert words to lowercase** and **remove stop words** using `filter()`.  
+
+📜 **Code Example:**  
+```python
+file_path = "file:///home/talentum/test-jupyter/P2/M2/SM4/4_AdvancedRddActions/Dataset/Complete_Shakespeare.txt"
+
+# Create a baseRDD from the file path
+baseRDD = sc.textFile(file_path)
+
+# Split lines into words
+splitRDD = baseRDD.flatMap(lambda x: x.split(' '))
+
+# Convert words to lowercase and remove stop words
+splitRDD_no_stop = splitRDD.filter(lambda x: x.lower() not in stop_words)
+```
+💡 **This step ensures we only process meaningful words without common stop words!**  
+
+---
+
+## 🔍 **Step 2: Word Count Computation**  
+
+✅ **Create key-value pairs** (`(word, 1)`) using `map()`.  
+✅ **Use `reduceByKey()` to count occurrences** of each unique word in the dataset.  
+
+📜 **Code Example:**  
+```python
+# Create (word, 1) tuples
+splitRDD_no_stop_words = splitRDD_no_stop.map(lambda w: (w.lower(), 1))
+
+# Count occurrences of each word
+resultRDD = splitRDD_no_stop_words.reduceByKey(lambda x, y: x + y)
+
+# Display some results
+print(resultRDD.take(10))
+```
+📌 **Expected Output:**  
+```
+[('project', 40), ('gutenberg', 35), ('ebook', 4), ('complete', 33), ('works', 35), ('william', 39), ('shakespeare,', 1), ('shakespeare', 42), ('', 65498), ('use', 68)]
+```
+💡 **This helps analyze word frequencies efficiently in large-scale text data!** 🚀  
+
+---
+
+## 📊 **Step 3: Sorting Word Frequencies**  
+
+✅ **Swap keys and values** (`(count, word)`) to enable sorting by frequency.  
+✅ **Use `sortByKey(False)` to arrange words in descending order** of occurrence.  
+✅ **Retrieve the top 10 most frequently used words**.  
+
+📜 **Code Example:**  
+```python
+# Swap (word, count) → (count, word)
+resultRDD_swap = resultRDD.map(lambda x: (x[1], x[0]))
+
+# Sort by count in descending order
+resultRDD_swap_sort = resultRDD_swap.sortByKey(ascending=False)
+
+# Display the top 10 most frequent words
+for word in resultRDD_swap_sort.take(10):
+    print("{} has {} counts".format(word[1], word[0]))
+```
+📌 **Expected Output:**  
+```
+thou has 650 counts
+thy has 574 counts
+shall has 393 counts
+would has 311 counts
+good has 295 counts
+thee has 286 counts
+love has 273 counts
+Enter has 269 counts
+th' has 254 counts
+```
+💡 **This confirms common Shakespearean words like "thou" and "thy" appear frequently!** 🔥  
+
+---
+
+### 🎯 **Key Takeaways:**  
+✅ **PySpark efficiently processes massive text files** with distributed computing.  
+✅ **Actions like `reduceByKey()` compute word frequencies efficiently**.  
+✅ **Sorting allows quick identification of the most used words**.  
+✅ **Using `filter()` removes unnecessary stop words**, keeping only meaningful data.  
+
+---
+
+# 🏗️ **Performing RDD Operations on `constitution.txt`**  
+
+This lab demonstrates **how to process, count, and sort word occurrences** in a dataset using **PySpark RDD transformations and actions**. Let’s break it down step by step! 😊  
+
+---
+
+## 🔍 **Step 1: Read and Preprocess the Text File**  
+
+✅ **Load the text file** into an RDD using `sc.textFile()`.  
+✅ **Split the lines** into individual words using `flatMap()`.  
+✅ **Create key-value pairs** (`(word, 1)`) using `map()`.  
+✅ **Aggregate occurrences** of each word using `reduceByKey()`.  
+
+📜 **Example Code:**  
+```python
+# Read the file from HDFS
+rdd_lines = sc.textFile("constitution.txt")
+
+# Tokenize words
+rdd_words = rdd_lines.flatMap(lambda line: line.split())
+
+# Convert words into key-value pairs
+rdd_tup = rdd_words.map(lambda word: (word, 1))
+
+# Aggregate word counts
+rdd_final = rdd_tup.reduceByKey(lambda x, y: x + y)
+
+# Display top word counts
+print(rdd_final.take(7))
+```
+📌 **Expected Output:**  
+```
+[('We', 2), ('the', 662), ('People', 2), ('of', 493), ('United', 85), ('States,', 55), ('in', 137)]
+```
+🚀 **This confirms `reduceByKey()` efficiently aggregates word occurrences!**  
+
+---
+
+## 🔄 **Step 2: Sorting Words by Frequency**  
+
+✅ **Swap key-value pairs** (`(count, word)`) for sorting purposes.  
+✅ **Use `sortByKey(False)` to order words by highest frequency first**.  
+✅ **Retrieve the top 7 most frequently used words**.  
+
+📜 **Example Code:**  
+```python
+# Swap (word, count) → (count, word)
+rdd_swap = rdd_final.map(lambda tup: (tup[1], tup[0]))
+
+# Sort words by count in descending order
+rdd_sorted = rdd_swap.sortByKey(ascending=False)
+
+# Display top words
+print(rdd_sorted.take(7))
+```
+📌 **Expected Output:**  
+```
+[(662, 'the'), (493, 'of'), (293, 'shall'), (256, 'and'), (183, 'to'), (178, 'be'), (157, 'or')]
+```
+💡 **This step ranks the most frequent words from the Constitution efficiently!**  
+
+---
+
+## 🏎️ **Step 3: One-Liner Implementation**  
+
+💡 If you prefer a **single-line command**, you can simplify the process:  
+```python
+print(sc.textFile("constitution.txt").flatMap(lambda line: line.split()).map(lambda word: (word, 1)).reduceByKey(lambda x, y: x + y).map(lambda tup: (tup[1], tup[0])).sortByKey(ascending=False).take(7))
+```
+📌 **Expected Output:**  
+```
+[(662, 'the'), (493, 'of'), (293, 'shall'), (256, 'and'), (183, 'to'), (178, 'be'), (157, 'or')]
+```
+🚀 **This one-liner performs the entire workflow efficiently!**  
+
+---
+
+### 🎯 **Key Takeaways:**  
+✅ **RDD actions like `reduceByKey()` efficiently count word occurrences**.  
+✅ **Swapping key-value pairs allows sorting by frequency (`sortByKey(False)`)**.  
+✅ **One-liner implementations streamline complex operations**.  
+
+---
+
+# 🚀 **PySpark: Verbosity & Data Pipeline as USPs**  
+
+PySpark is known for its **verbosity**, meaning it provides detailed logs and error messages to aid debugging. Additionally, its **data pipeline capabilities** allow for efficient processing of distributed datasets. These features make PySpark a **preferred choice** for **big data transformations**. 😊  
+
+---
+
+## 🏗️ **Standalone vs. Jupyter Notebook in PySpark**  
+
+✅ **Standalone applications** require creating a **separate file** and running it.  
+✅ **Jupyter Notebook is not standalone**—it is designed for **interactive development and testing**.  
+✅ **Jupyter is ideal for exploratory analysis**, but **not typically used in production**.  
+
+💡 **Think of Jupyter like a sandbox**—you test and refine your code before deploying it in production using **standalone applications**! 🚀  
+
+---
+
+# 🔥 **Running PySpark via `spark-submit`**
+### 🛠 **Setting Up a Standalone PySpark Script**
+✅ **Python Path Check:**  
+```sh
+which python  
+/usr/bin/python  
+```
+✅ **Create a Python file (`wordcount.py`)**  
+✅ **Ensure Spark is used instead of the Python shell (`spark-submit`)**  
+
+📜 **Running the script:**  
+```sh
+spark-submit wordcount.py  
+```
+
+### ❗ **Common Errors & Fixes**
+🚀 **Issue:** `"Jupyter not found"`  
+✅ **Fix:** Run →  
+```sh
+source /home/talentum/shared/unset_jupyter.sh  
+```
+🚀 **Issue:** `"name 'sc' is not defined"`  
+✅ **Fix:** Add the following after the shebang (`#!`):  
+```python
+# Entrypoint for Spark (2.x+)
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.appName("Spark SQL basic example").enableHiveSupport().getOrCreate()
+sc = spark.sparkContext
+```
+🚀 **Issue:** Running with YARN  
+✅ **Fix:** Specify the `.master("yarn")`  
+```python
+spark = SparkSession.builder.appName("Spark SQL basic example").enableHiveSupport().master("yarn").getOrCreate()
+```
+
+📜 **Final Execution:**  
+```sh
+spark-submit wordcount.py
+echo $?
+0  # Execution successful!
+```
+
+![image](https://github.com/user-attachments/assets/75daa605-d8dd-4729-97f8-4da2d286f1bd)
+
+---
+
+### 🎯 **Key Takeaways**
+✅ **PySpark is verbose, providing helpful logs for debugging.**  
+✅ **Standalone applications require `spark-submit`, unlike Jupyter.**  
+✅ **RDD processing optimizes text parsing & word frequency analysis.**  
+✅ **Sorting allows quick identification of commonly used words.**  
+✅ **Setting up `SparkSession` resolves environment issues.**
+
+---
+
+# 🚀 **PySpark SQL & DataFrames**  
+
+## 🔹 **Introduction to PySpark DataFrames**  
+PySparkSQL is a **library for structured data processing** that provides insights into **data structure and computation**.  
+
+✅ **DataFrame is an immutable distributed collection of data with named columns**.  
+✅ Designed for **structured (RDBMS) and semi-structured (JSON) data processing**.  
+✅ **Supports SQL queries (`SELECT * FROM table`)** and **expression methods (`df.select()`)**.  
+✅ DataFrame API is available in **Python, R, Scala, and Java**.  
+
+💡 **Think of PySpark DataFrames as an enhanced version of Pandas DataFrames but optimized for big data and distributed computing!** 🚀  
+
+---
+
+## 🏗️ **SparkSession: Entry Point for DataFrame API**  
+
+✅ **SparkContext is the main entry point for creating RDDs**, but for DataFrames, you use **SparkSession**.  
+✅ **SparkSession provides a unified entry point** to manage DataFrames and execute SQL queries.  
+✅ Available in **PySpark shell as `spark`**.  
+
+📜 **Example:**  
+```python
+from pyspark.sql import SparkSession
+
+# Create a Spark session
+spark = SparkSession.builder.appName("PySpark SQL Example").getOrCreate()
+```
+🚀 **This allows direct interaction with Spark's SQL API and DataFrame operations!**  
+
+---
+
+## 🔄 **Creating DataFrames in PySpark**  
+
+PySpark supports **two primary ways** to create DataFrames:  
+
+1️⃣ **From existing RDDs** using `createDataFrame()`  
+```python
+rdd = spark.sparkContext.parallelize([(1, "Alice"), (2, "Bob")])
+df = spark.createDataFrame(rdd, ["ID", "Name"])
+df.show()
+```  
+
+2️⃣ **From data sources (CSV, JSON, TXT)** using `spark.read`  
+```python
+df_csv = spark.read.csv("data.csv", header=True, inferSchema=True)
+df_csv.show()
+```  
+
+✅ **Schema helps optimize queries** by providing metadata (column names, data types, missing values).  
+✅ **RDDs do not have schemas, but DataFrames contain both schema and data** for structured processing.  
+
+💡 **Think of schema as a blueprint for your data**—it ensures consistency and enhances query performance!  
+
+---
+
+### 🎯 **Key Takeaways**  
+✅ PySparkSQL processes **structured & semi-structured data** efficiently.  
+✅ **SparkSession is the entry point** for DataFrames and SQL queries.  
+✅ **DataFrames support SQL-like queries (`SELECT * FROM table`) and API methods (`df.select()`).**  
+✅ **Schemas improve data handling**, unlike RDDs which lack structured metadata.  
+
+---
+
+# 🚀 **Creating DataFrames in PySpark**  
+
+DataFrames in PySpark are **structured and optimized** for efficient data processing, unlike RDDs which lack schema definitions. Here’s how you can create **DataFrames from RDDs and external files**. 😊  
+
+---
+
+## 🔹 **Create a DataFrame from an RDD**  
+
+✅ **Convert an RDD into a DataFrame** using `createDataFrame()`.  
+✅ **Provide schema (column names) to structure the data**.  
+
+📜 **Example Code:**  
+```python
+iphones_RDD = sc.parallelize([
+    ("XS", 2018, 5.65, 2.79, 6.24),
+    ("XR", 2018, 5.94, 2.98, 6.84),
+    ("X10", 2017, 5.65, 2.79, 6.13),
+    ("8Plus", 2017, 6.23, 3.07, 7.12)
+])
+
+# Define schema
+names = ['Model', 'Year', 'Height', 'Width', 'Weight']
+
+# Convert RDD to DataFrame
+iphones_df = spark.createDataFrame(iphones_RDD, schema=names)
+
+# Verify DataFrame type
+print(type(iphones_df))
+```
+📌 **Expected Output:**  
+```
+<class 'pyspark.sql.dataframe.DataFrame'>
+```
+🚀 **This ensures structured data processing with named columns!**  
+
+---
+
+## 🏗️ **Create a DataFrame from CSV/JSON/TXT**  
+
+✅ **Use `spark.read` to load structured files** (CSV, JSON, TXT).  
+✅ **Specify `header=True` to use the first row as column names**.  
+✅ **Use `inferSchema=True` to automatically detect column types**.  
+
+📜 **Example Code:**  
+```python
+# Load CSV file
+df_csv = spark.read.csv("people.csv", header=True, inferSchema=True)
+
+# Load JSON file
+df_json = spark.read.json("people.json", header=True, inferSchema=True)
+
+# Load TXT file
+df_txt = spark.read.text("people.txt")
+```
+💡 **Key Parameters:**  
+✅ **`header=True`** → Uses the first row as headers.  
+✅ **`inferSchema=True`** → Detects column data types automatically.  
+
+---
+
+### 🎯 **Key Takeaways**  
+✅ **DataFrames provide structured processing**, unlike RDDs.  
+✅ **Schema improves readability and query optimization**.  
+✅ **Use `spark.read` to load CSV, JSON, and TXT files efficiently**.  
+✅ **Apply `header=True, inferSchema=True` to auto-define column names & types**.  
+
+---
+
+# 🏗️ **PySpark Lab: Creating & Managing DataFrames**  
+
+This lab explores **creating DataFrames in PySpark** from an **RDD and a CSV file**, checking schema structure, and verifying data types. Let's break it down step by step! 😊  
+
+---
+
+## 🔹 **Create a DataFrame from an RDD**  
+
+✅ **Convert an RDD into a DataFrame** using `createDataFrame()`.  
+✅ **Define a schema (`Name`, `Age`) to structure the DataFrame**.  
+
+📜 **Example Code:**  
+```python
+# Create a list of tuples
+sample_list = [('Mona', 20), ('Jennifer', 34), ('John', 20), ('Jim', 26)]
+
+# Create an RDD from the list
+rdd = sc.parallelize(sample_list)
+
+# Convert RDD into a DataFrame with a schema
+names_df = spark.createDataFrame(rdd, schema=['Name', 'Age'])
+
+# Check the DataFrame type
+print("The type of names_df is", type(names_df))
+```
+📌 **Expected Output:**  
+```
+The type of names_df is <class 'pyspark.sql.dataframe.DataFrame'>
+```
+💡 **This confirms a structured DataFrame with named columns!** 🚀  
+
+---
+
+## 🏗️ **Create a DataFrame from a CSV File**  
+
+✅ **Load structured data from a file using `spark.read.csv()`**.  
+✅ **Apply schema detection with `header=True, inferSchema=True`**.  
+✅ **Check schema details using `.schema`**.  
+
+📜 **Example Code:**  
+```python
+file_path = "file:///home/talentum/shared/6_Spark/data/1_AbstractingDatawithDataFrames/Dataset/people.csv"
+
+# Load DataFrame from CSV file
+people_df = spark.read.csv(file_path, header=True, inferSchema=True)
+
+# Check the DataFrame type
+print("The type of people_df is", type(people_df))
+
+# Display a sample of the DataFrame
+people_df.show()
+
+# Print the schema of the DataFrame
+print(people_df.schema)
+```
+📌 **Expected Output (Schema Format):**  
+```
+StructType(List(
+    StructField(_c0,IntegerType,true),
+    StructField(person_id,IntegerType,true),
+    StructField(name,StringType,true),
+    StructField(sex,StringType,true),
+    StructField(date of birth,StringType,true)
+))
+```
+💡 **PySpark DataFrames require an associated schema, ensuring optimized queries & structured data processing!**  
+
+---
+
+### 🎯 **Key Takeaways:**  
+✅ **DataFrames can be created from RDDs using `createDataFrame()`**.  
+✅ **`spark.read.csv()` loads structured files efficiently**.  
+✅ **`header=True` uses the first row for column names**.  
+✅ **`inferSchema=True` automatically detects data types**.  
+✅ **A DataFrame **must have a schema**, unlike raw RDDs.  
+
+---
+
+# 🚀 **PySpark DataFrame Operators: Transformations & Actions**  
+
+PySpark **DataFrame operations** can be divided into two categories:  
+✅ **Transformations** → Modify or filter DataFrames without executing immediately.  
+✅ **Actions** → Execute and return results to the driver program.  
+
+---
+
+## 🔹 **Common DataFrame Transformations**  
+- `select()` → Subset specific columns.  
+- `filter()` → Filter rows based on conditions.  
+- `groupBy()` → Group data based on a column.  
+- `orderBy()` → Sort DataFrame rows.  
+- `dropDuplicates()` → Remove duplicate records.  
+- `withColumnRenamed()` → Rename columns for better readability.  
+
+## 🔹 **Common DataFrame Actions**  
+- `printSchema()` → Display DataFrame schema.  
+- `head()` → Retrieve the first row.  
+- `show()` → Display the first 20 rows (default).  
+- `count()` → Return total number of rows.  
+- `columns` → List DataFrame column names.  
+- `describe()` → Summarize DataFrame statistics.  
+
+---
+
+## 🏗️ **select() & show() Operations**  
+
+✅ **`select()` extracts specific columns**.  
+✅ **`show()` prints the first 20 rows (default) in tabular format**.  
+
+📜 **Example Usage:**  
+```python
+df_id_age = test.select("Age")  
+df_id_age.show(3)
+```
+📌 **Expected Output:**  
+```
++---+
+|Age|
++---+
+| 17|
+| 17|
+| 17|
++---+
+only showing top 3 rows
+```
+💡 **This allows efficient column selection while maintaining structured output!**  
+
+---
+
+## 🔍 **filter() & show() Operations**  
+
+✅ **`filter()` removes rows based on a condition**.  
+✅ **`show()` displays the filtered results**.  
+
+📜 **Example Usage:**  
+```python
+new_df_age21 = new_df.filter(new_df.Age > 21)  
+new_df_age21.show(3)
+```
+📌 **Expected Output:**  
+```
++-------+------+---+
+|User_ID|Gender|Age|
++-------+------+---+
+|1000002|    M| 55|
+|1000003|    M| 26|
+|1000004|    M| 46|
++-------+------+---+
+only showing top 3 rows
+```
+🚀 **This efficiently filters data while keeping the structure intact!**  
+
+---
+
+## 🔄 **groupBy() & count() Operations**  
+
+✅ **`groupBy()` groups DataFrame rows based on a column**.  
+✅ **`count()` returns the total count per group**.  
+
+📜 **Example Usage:**  
+```python
+test_df_age_group = test_df.groupby("Age")  
+test_df_age_group.count().show(3)
+```
+📌 **Expected Output:**  
+```
++---+------+
+|Age| count|
++---+------+
+| 26|219587|
+| 17|     4|
+| 55| 21504|
++---+------+
+only showing top 3 rows
+```
+💡 **This is an action, not a transformation—it triggers computation immediately!**  
+
+---
+
+### 🎯 **Key Takeaways:**  
+✅ **Transformations modify the DataFrame but don’t execute immediately**.  
+✅ **Actions compute results and return them to the driver program**.  
+✅ **`select()`, `filter()`, `groupBy()`, and `show()` allow efficient data exploration**.  
+✅ **Grouping and counting enables better analysis of categorical data**.  
+
+---
+
+# 🚀 **PySpark DataFrame Transformations & Actions**  
+
+DataFrames in PySpark support **various operations** that help in data transformation and analysis. Let's break down the **key transformations and actions** with clear explanations and examples! 😊  
+
+---
+
+## 🔄 **DataFrame Transformations**  
+Transformations modify a DataFrame but **do not execute immediately**.  
+They are applied **lazily** and require an action to trigger computation.
+
+### 🔹 **`orderBy()` Transformation**
+✅ **Sorts the DataFrame based on one or more columns**.  
+
+📜 **Example Usage:**  
+```python
+test_df_age_group.count().orderBy("Age").show(3)
+```
+📌 **Expected Output:**  
+```
++---+-----+
+|Age|count|
++---+-----+
+|  0|15098|
+| 17|    4|
+| 18|99660|
++---+-----+
+only showing top 3 rows
+```
+💡 **`orderBy()` ensures rows are sorted efficiently** for better readability and analysis!  
+
+---
+
+### 🔹 **`dropDuplicates()` Transformation**  
+✅ **Removes duplicate rows from a DataFrame**.  
+
+📜 **Example Usage:**  
+```python
+test_df_no_dup = test_df.select("User_ID", "Gender", "Age").dropDuplicates()
+print(test_df_no_dup.count())
+```
+📌 **Expected Output:**  
+```
+5892
+```
+🚀 **Ideal for cleaning datasets while retaining only unique records!**  
+
+---
+
+### 🔹 **`withColumnRenamed()` Transformation**  
+✅ **Renames a specific column in the DataFrame**.  
+
+📜 **Example Usage:**  
+```python
+test_df_sex = test_df.withColumnRenamed("Gender", "Sex")
+test_df_sex.show(3)
+```
+📌 **Expected Output:**  
+```
++-------+---+---+
+|User_ID|Sex|Age|
++-------+---+---+
+|1000001|  F| 17|
+|1000001|  F| 17|
+|1000001|  F| 17|
++-------+---+---+
+```
+💡 **Useful when renaming column names for better clarity in analysis!**  
+
+---
+
+## ⚡ **DataFrame Actions**  
+Actions **trigger computation** and return results to the driver program.
+
+### 🔹 **`printSchema()` Action**  
+✅ **Displays column types in the DataFrame schema**.  
+
+📜 **Example Usage:**  
+```python
+test_df.printSchema()
+```
+📌 **Expected Output:**  
+```
+|-- User_ID: integer (nullable = true)
+|-- Product_ID: string (nullable = true)
+|-- Gender: string (nullable = true)
+|-- Age: string (nullable = true)
+|-- Occupation: integer (nullable = true)
+|-- Purchase: integer (nullable = true)
+```
+🚀 **Helps verify data structure before performing transformations!**  
+
+---
+
+### 🔹 **`columns` Action**  
+✅ **Lists all column names in the DataFrame**.  
+
+📜 **Example Usage:**  
+```python
+print(test_df.columns)
+```
+📌 **Expected Output:**  
+```
+['User_ID', 'Gender', 'Age']
+```
+💡 **Useful for checking available fields in the DataFrame!**  
+
+---
+
+### 🔹 **`describe()` Action**  
+✅ **Computes summary statistics for numerical columns**.  
+✅ **Can help detect outliers in the dataset**.  
+
+📜 **Example Usage:**  
+```python
+test_df.describe().show()
+```
+📌 **Expected Output:**  
+```
++-------+------------------+------+------------------+
+|summary| User_ID | Gender | Age |
++-------+------------------+------+------------------+
+| count | 550068 | 550068 | 550068 |
+| mean  | 1003028.8424013031 | null | 30.38 |
+| stddev| 1727.5915855307312 | null | 11.86 |
+| min   | 1000001 | F | 0 |
+| max   | 1006040 | M | 55 |
++-------+------------------+------+------------------+
+```
+🚀 **Perfect for identifying missing values, patterns, and outliers in numerical data!**  
+
+---
+
+### 🎯 **Key Takeaways**  
+✅ **Transformations modify the DataFrame but do not execute immediately**.  
+✅ **Actions trigger computations and return results** to the driver.  
+✅ **Sorting, filtering, grouping, and renaming enhance structured data processing**.  
+✅ **Summary statistics help detect outliers and data inconsistencies**.  
