@@ -2081,3 +2081,515 @@ test_df.describe().show()
 ✅ **Actions trigger computations and return results** to the driver.  
 ✅ **Sorting, filtering, grouping, and renaming enhance structured data processing**.  
 ✅ **Summary statistics help detect outliers and data inconsistencies**.  
+
+---
+
+Lab 1:
+
+Inspecting data in PySpark DataFrame
+
+    Inspecting data is very crucial before performing analysis such as plotting, modeling, training etc., In this simple exercise, you'll inspect the data in the people_df DataFrame that you have created in the previous exercise using basic DataFrame operators.
+
+    Remember, you already have SparkSession spark and people_df DataFrame available in your workspace.
+
+Instructions
+
+    Print the first 10 observations in the people_df DataFrame.
+    Count the number of rows in the people_df DataFrame.
+    How many columns does people_df DataFrame have and what are their names?
+
+file_path = "file:///home/talentum/test-jupyter/P2/M3/sm2/2_OperatingonDataFramesinPySpark/Dataset/people.csv"
+
+# Create an DataFrame from file_path
+people_df = spark.read.csv(file_path, header=True, inferSchema=True)
+
+# Print the first 10 observations 
+people_df.show(10)
+
+# Count the number of rows 
+print("There are {} rows in the people_df DataFrame.".format(people_df.count()))
+
+# Count the number of columns and their names
+print("There are {} columns in the people_df DataFrame and their names are {}".format(len(people_df.columns), people_df.columns))
+
++---+---------+----------------+------+-------------+
+|_c0|person_id|            name|   sex|date of birth|
++---+---------+----------------+------+-------------+
+|  0|      100|  Penelope Lewis|female|   1990-08-31|
+|  1|      101|   David Anthony|  male|   1971-10-14|
+|  2|      102|       Ida Shipp|female|   1962-05-24|
+|  3|      103|    Joanna Moore|female|   2017-03-10|
+|  4|      104|  Lisandra Ortiz|female|   2020-08-05|
+|  5|      105|   David Simmons|  male|   1999-12-30|
+|  6|      106|   Edward Hudson|  male|   1983-05-09|
+|  7|      107|    Albert Jones|  male|   1990-09-13|
+|  8|      108|Leonard Cavender|  male|   1958-08-08|
+|  9|      109|  Everett Vadala|  male|   2005-05-24|
++---+---------+----------------+------+-------------+
+only showing top 10 rows
+
+There are 100000 rows in the people_df DataFrame.
+There are 5 columns in the people_df DataFrame and their names are ['_c0', 'person_id', 'name', 'sex', 'date of birth']
+
+---
+
+Lab 2:
+
+PySpark DataFrame subsetting and cleaning
+
+    After data inspection, it is often necessary to clean the data which mainly involves subsetting, renaming the columns, removing duplicated rows etc., PySpark DataFrame API provides several operators to do this. In this exercise, your job is to subset 'name', 'sex' and 'date of birth' columns from people_df DataFrame, remove any duplicate rows from that dataset and count the number of rows before and after duplicates removal step.
+
+    Remember, you already have SparkSession spark and people_df DataFrames available in your workspace.
+
+Instructions
+
+    Select 'name', 'sex' and 'date of birth' columns from people_df and create people_df_sub DataFrame.
+    Print the first 10 observations in the people_df DataFrame.
+    Remove duplicate entries from people_df_sub DataFrame and create people_df_sub_nodup DataFrame.
+    How many rows are there before and after duplicates are removed?
+
+file_path = "file:///home/talentum/test-jupyter/P2/M3/sm2/2_OperatingonDataFramesinPySpark/Dataset/people.csv"
+
+# Create an DataFrame from file_path
+people_df = spark.read.csv(file_path, header=True, inferSchema=True)
+
+# Select name, sex and date of birth columns
+people_df_sub = people_df.select('name', 'sex', 'date of birth')
+
+# Print the first 10 observations from people_df_sub
+# people_df_sub.show(10)
+
+# Remove duplicate entries from people_df_sub
+people_df_sub_nodup = people_df_sub.dropDuplicates()
+
+# Count the number of rows
+# print("There were {} rows before removing duplicates, and {} rows after removing duplicates".format(people_df_sub.count(), people_df_sub_nodup.count()))
+
+# Find duplicate entries
+df1 = people_df_sub.groupBy('name', 'sex', 'date of birth').count()
+df1.printSchema()
+df1.show(7)
+# duplicates = people_df_sub.groupBy('name', 'sex', 'date of birth').count().filter('count > 1')
+duplicates = people_df_sub.groupBy('name', 'sex', 'date of birth').count().where('count > 1')
+# Show duplicate rows
+duplicates.show(10)
+
+root
+ |-- name: string (nullable = true)
+ |-- sex: string (nullable = true)
+ |-- date of birth: string (nullable = true)
+ |-- count: long (nullable = false)
+
++----------------+------+-------------+-----+
+|            name|   sex|date of birth|count|
++----------------+------+-------------+-----+
+|     Robert Fort|  male|   1975-02-15|    1|
+|   Robert Wright|  male|   1974-10-11|    1|
+|    Ollie Watson|female|  20175-02-28|    1|
+|     Todd Noland|  male|   2010-11-30|    1|
+|Brandon Lawrence|  male|   1972-09-15|    1|
+|    Bobbie Clark|female|   1974-01-07|    1|
+|   Clifton Negri|  male|   1971-10-28|    1|
++----------------+------+-------------+-----+
+only showing top 7 rows
+
++-------------+------+-------------+-----+
+|         name|   sex|date of birth|count|
++-------------+------+-------------+-----+
+|Kathryn Davis|female|  20175-02-28|    2|
+| Robert Smith|  male|  20175-02-28|    2|
++-------------+------+-------------+-----+
+
+duplicates = people_df_sub.groupBy(people_df_sub.name, people_df_sub.sex, people_df_sub['date of birth']).count()
+#df2 = duplicates.filter(duplicates.count > 1)
+#df2.printSchema()
+
+# Alternate method to show duplicates
+people_df_sub.exceptAll(people_df_sub_nodup).show()
+
++-------------+------+-------------+
+|         name|   sex|date of birth|
++-------------+------+-------------+
+|Kathryn Davis|female|  20175-02-28|
+| Robert Smith|  male|  20175-02-28|
++-------------+------+-------------+
+
+---
+
+Lab 3:
+
+Filtering your DataFrame
+
+    In the previous exercise, you have subset the data using select() operator which is mainly used to subset the DataFrame column-wise. What if you want to subset the DataFrame based on a condition (for example, select all rows where the sex is Female). In this exercise, you will filter the rows in the people_df DataFrame in which 'sex' is female and male and create two different datasets. Finally, you'll count the number of rows in each of those datasets.
+
+    Remember, you already have SparkSession spark and people_df DataFrame available in your workspace.
+
+Instructions
+
+    Filter the people_df DataFrame to select all rows where sex is female into people_df_female DataFrame.
+    Filter the people_df DataFrame to select all rows where sex is male into people_df_male DataFrame.
+    Count the number of rows in people_df_female and people_df_male DataFrames.
+
+file_path = "file:///home/talentum/test-jupyter/P2/M3/sm2/2_OperatingonDataFramesinPySpark/Dataset/people.csv"
+
+# Create an DataFrame from file_path
+people_df = spark.read.csv(file_path, header=True, inferSchema=True)
+
+# Filter people_df to select females 
+people_df_female = people_df.filter(people_df.sex == "female")
+
+# Filter people_df to select males
+people_df_male = people_df.filter(people_df.sex == "male")
+
+# Count the number of rows 
+print("There are {} rows in the people_df_female DataFrame and {} rows in the people_df_male DataFrame".format(people_df_female.count(), people_df_male.count()))
+
+There are 49014 rows in the people_df_female DataFrame and 49066 rows in the people_df_male DataFrame
+
+---
+
+# Interacting with 
+DataFramesusing 
+PySpark SQL
+
+## DataFrame API vsSQL queries
+In PySparkYou caninteract with SparkSQL throughDataFrameAPI andSQL queries
+TheDataFrameAPI providesaprogrammaticdomain-specihclanguage(DSL) for data
+DataFrame transformations and actions are easier to construct programmatically
+SQL queriescan beconciseandeasiertounderstandand portable
+TheoperationsonDataFramescanalsobedoneusingSQL queries
+
+## Executing SQLQueries
+The SparkSession sql() methodexecutesSQL query
+sql() method takesaSQL statementasanargumentand returns theresult as DataFrame
+df.createOrReplaceTempView("table1") # This table will be stored in MetaStore.
+df2 = spark.sql("SELECT field1, field2 FROM table1")
+
+df2.collect()
+[Row(f1=1, f2='row1'), Row(f1=2, f2='row2'), Row(f1=3, f2='row3')]
+
+Hive metastore must be run for this.
+
+---
+
+## SQL query to extractdata
+
+test_df.createOrReplaceTempView("test_table")
+
+query = '''SELECT Product_ID FROM test_table'''
+test_product_df = spark.sql(query) 
+test_product_df.show(5)
++----------+
+|Product_ID|
++----------+
+| P00069042|
+| P00248942|
+| P00087842|
+| P00085442|
+| P00285442|
++----------+
+
+---
+
+## Summarizing and grouping data using SQLqueries
+
+test_df.createOrReplaceTempView("test_table")
+query = '''SELECT Age, max(Purchase) FROM test_table GROUP BY Age'''
+spark.sql(query).show(5)
+
++-----+-------------+
+| Age|max(Purchase)|
++-----+-------------+
+|18-25|
+|26-35|
+| 0-17|
+|46-50|
+|51-55|
+23958|
+23961|
+23955|
+23960|
+23960|
++-----+-------------+
+only showing top 5 rows
+
+---
+
+## Filtering columns usingSQL queries
+test_df.createOrReplaceTempView("test_table")
+query = '''SELECT Age, Purchase, Gender FROM table1 WHERE Purchase > 20000 AND Gender == "F"'''
+spark.sql(query).show(5)
++-----+--------+------+
+| Age|Purchase|Gender|
++-----+--------+------+
+|36-45| 23792| F|
+|26-35| 21002| F|
+|26-35| 23595| F|
+|26-35| 23341| F|
+|46-50| 20771| F|
++-----+--------+------+
+only showing top 5 rows
+
+---
+
+Lab 1:
+
+Running SQL Queries Programmatically
+
+    DataFrames can easily be manipulated using SQL queries in PySpark. The sql() function on a SparkSession enables applications to run SQL queries programmatically and returns the result as another DataFrame. In this exercise, you'll create a temporary table of the people_df DataFrame that you created previously, then construct a query to select the names of the people from the temporary table and assign the result to a new DataFrame.
+
+    Remember, you already have SparkSession spark and people_df DataFrame available in your workspace.
+
+Instructions
+
+    Create a temporary table people that's a pointer to the people_df DataFrame.
+    Construct a query to select the names of the people from the temporary table people.
+    Assign the result of Spark's query to a new DataFrame - people_df_names.
+    Print the top 10 names of the people from people_df_names DataFrame.
+
+file_path = "file:///home/talentum/test-jupyter/P2/M3/SM3/3_InteractingwithDataFramesusingPySparkSQL/Dataset/people.csv"
+
+# Create an DataFrame from file_path
+people_df = spark.read.csv(file_path, header=True, inferSchema=True)
+
+# Create a temporary table "people"
+people_df.createOrReplaceTempView("people")
+
+# Construct a query to select the names of the people from the temporary table "people"
+query = '''SELECT name FROM people'''
+
+# Assign the result of Spark's query to people_df_names
+people_df_names = spark.sql(query)
+
+# Print the top 10 names of the people
+people_df_names.show()
+
++-----------------+
+|             name|
++-----------------+
+|   Penelope Lewis|
+|    David Anthony|
+|        Ida Shipp|
+|     Joanna Moore|
+|   Lisandra Ortiz|
+|    David Simmons|
+|    Edward Hudson|
+|     Albert Jones|
+| Leonard Cavender|
+|   Everett Vadala|
+| Freddie Claridge|
+|Annabelle Rosseau|
+|    Eulah Emanuel|
+|       Shaun Love|
+|Alejandro Brennan|
+|Robert Mcreynolds|
+|   Carla Spickard|
+|Florence Eberhart|
+|     Tina Gaskins|
+| Florence Mulhern|
++-----------------+
+only showing top 20 rows
+
+---
+
+Lab 2:
+
+SQL queries for filtering Table
+
+    In the previous exercise, you have run a simple SQL query on a DataFrame. There are more sophisticated queries you can construct to obtain the result that you want and use it for downstream analysis such as data visualization and Machine Learning. In this exercise, we will use the temporary table people that you created previously and filter out the rows where the "sex" is male and female and create two DataFrames.
+
+    Remember, you already have SparkSession spark and people temporary table available in your workspace.
+
+Instructions
+
+    Filter the people table to select all rows where sex is female into people_female_df DataFrame.
+    Filter the people table to select all rows where sex is male into people_male_df DataFrame.
+    Count the number of rows in both people_female and people_male DataFrames.
+
+file_path = "file:///home/talentum/test-jupyter/P2/M3/SM3/3_InteractingwithDataFramesusingPySparkSQL/Dataset/people.csv"
+
+# Create an DataFrame from file_path
+people_df = spark.read.csv(file_path, header=True, inferSchema=True)
+
+# Create a temporary table "people"
+people_df.createOrReplaceTempView("people")
+
+# Filter the people table to select female sex 
+people_female_df = spark.sql('SELECT * FROM people WHERE sex=="female"')
+
+# Filter the people table DataFrame to select male sex
+people_male_df = spark.sql('SELECT * FROM people WHERE sex=="male"')
+
+# Count the number of rows in both DataFrames
+print("There are {} rows in the people_female_df and {} rows in the people_male_df DataFrames".format(people_female_df.count(), people_male_df.count()))
+
+There are 49014 rows in the people_female_df and 49066 rows in the people_male_df DataFrames
+
+---
+
+# Intro to data 
+cleaning with 
+Apache Spark
+
+## What is Data Cleaning?
+Data Cleaning: Preparing raw data for use in data processing pipelines. Possible tasks in data cleaning:
+Reformatting or replacing text
+Performing calculations
+Removing garbage or incomplete data
+
+---
+
+## Why perform data cleaning with Spark?
+Problems with typical data systems:
+Performance 
+Organizing data f l o w
+Advantages of Spark:
+Scalable: Execute the workload in lazy evaluate order
+Powerful framework for data handling
+
+---
+
+## Data cleaning example
+
+Raw data:
+name age (years) city
+Smith, John 37 Dallas
+Wilson, A. 59 Chicago
+null 215
+
+Cleaned Data:
+last name first name age (months) state
+Smith John 444 TX
+Wilson A. 708 IL
+
+---
+
+## Spark Schemas
+
+Define the format of a DataFrame
+May contain various data types: 
+Strings, dates, integers, arrays
+Can filter garbage data during import
+Improves read performance
+Schema filters the data
+lazy evaluation organizes the data
+
+---
+
+## Example Spark Schema
+
+Spark Schema will always be of structType
+
+All spark data types will come from pyspark.sql.types package
+
+Every struct will represent a column
+
+Import schema
+import pyspark.sql.types 
+peopleSchema = StructType([
+# Define the name field 
+StructField('name', StringType(), True), 
+# Add the age field
+StructField('age', IntegerType(), True), 
+# Add the city field
+StructField('city', StringType(), True)
+])
+
+Read CSV file containing data
+people_df = spark.read.format('csv').load(name='rawdata.csv', schema=peopleSchema)
+
+We are specifying to use the peopleSchema.
+
+The best practice is to create your own schema.
+
+---
+
+# Immutability and 
+Lazy Processing
+
+## Variable review
+Python variables:
+Mutable
+Flexibility
+Potential for issues with concurrency
+Likely adds complexity
+
+## Immutability
+Immutable variables are:
+A component of functional programming
+Defined once
+Unable to be directly modified
+Re-created if reassigned
+Able to be shared ef f i ciently
+
+---
+
+## Lazy Processing
+Isn't this slow?
+Transformations
+Actions
+Allows efficient planning
+voter_df = voter_df.withColumn('fullyear', 
+voter_df.year + 2000)
+voter_df = voter_df.drop(voter_df.year)
+voter_df.count()
+
+---
+
+## Understanding 
+Parquet
+
+## Difficulties with CSVfiles
+No defined schema
+Nested data requires special handling 
+Encoding format limited
+
+---
+
+## Spark and CSVfiles
+Slow to parse: Because of row oriented nature
+Files cannot be filtered (no "predicate pushdown")
+Any intermediate use requires redefining schema
+
+---
+
+## The Parquet Format
+A columnar data format
+Supported in Spark and other data processing frameworks
+Supports predicate pushdown
+Automatically stores schema information
+
+---
+
+Working with Parquet
+Reading Parquet files
+df = spark.read.format('parquet').load('filename.parquet')
+df = spark.read.parquet('filename.parquet')
+Writing Parquet files
+df.write.format('parquet').save('filename.parquet')
+df.write.parquet('filename.parquet')
+
+---
+
+## Parquet and SQL
+Parquet as backing stores for SparkSQL operations
+flight_df = spark.read.parquet('flights.parquet')
+flight_df.createOrReplaceTempView('flights')
+short_flights_df = spark.sql('SELECT * FROM flights WHERE flightduration < 100')
+
+---
+
+------------------------LAB-----------------------------
+
+---
+
+Writing Parquet files
+df.write.format('parquet').save('filename.parquet')
+df.write.parquet('filename.parquet')
+
+Using this format, use people.csv, create schema
+load the data into dataframe
+2. using this api, you are going to store that particular data on local file system insid your home, name of the folder will be people_csv > df1.write.format('csv').save('people_csv')
+df2 = load the data from this particular location
+store the data in another folder
+design schema for df2 with 3 columns: id name and age and then show it and then store it in the file system in another location
