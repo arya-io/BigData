@@ -2780,206 +2780,1077 @@ people_df = spark.read.format('csv').load("rawdata.csv", schema=peopleSchema)
 
 ---
 
-------------------------LAB----------------------------
+### 🧹 Lab 1: Data Cleaning Review  
+
+#### Question: Which of the following is **NOT** a benefit of Spark?  
+✅ Answer the question from the options below:  
+- **A) Spark offers high performance.** 🚀  
+- **B) Spark can only handle thousands of records.** ❌ _(Incorrect Statement)_  
+- **C) Spark allows orderly data flows.** 🔄  
+- **D) Spark can use strictly defined schemas while ingesting data.** 📜  
+
+📝 **Explanation:**  
+Spark is designed for **big data** processing and can handle **millions to billions of records**, not just thousands. It is optimized for **high performance**, supports **orderly data flows**, and allows **strict schemas** for structured data ingestion. Thus, the incorrect statement is **option B**.  
 
 ---
 
-# Immutability and 
-Lazy Processing
+### 📜 Lab 2: Defining a Schema  
 
-## Variable review
-Python variables:
-Mutable
-Flexibility
-Potential for issues with concurrency
-Likely adds complexity
+**Why define a schema?**  
+✔️ **Improves data quality** ✅  
+✔️ **Enhances import performance** 🚀  
+✔️ **Maintains structured data processing** 📊  
 
-## Immutability
-Immutable variables are:
-A component of functional programming
-Defined once
-Unable to be directly modified
-Re-created if reassigned
-Able to be shared ef f i ciently
+💡 **In this lab, we define a schema for reading a dataset with three columns:**  
+- **Name** 🏷 _(StringType)_  
+- **Age** 🔢 _(IntegerType)_  
+- **City** 🌆 _(StringType)_  
+
+#### 🛠 Steps:  
+1️⃣ **Import required classes** from `pyspark.sql.types`.  
+2️⃣ **Define a schema** using `StructType`.  
+3️⃣ **Specify StructField** for each column with appropriate datatypes.  
+4️⃣ **Read the CSV file** into a Spark DataFrame using the schema.  
+5️⃣ **Display the data** using `.show()`.
+
+```python
+# Import necessary classes
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+
+# Define schema using StructType
+people_schema = StructType([
+  StructField('name', StringType(), False),
+  StructField('age', IntegerType(), False),
+  StructField('city', StringType(), False)
+])
+
+# Read CSV with defined schema
+file_path = "file:///home/talentum/test-jupyter/P2/M3/sm2/2_OperatingonDataFramesinPySpark/Dataset/people.csv"
+people_df = spark.read.format('csv').load(file_path, schema=people_schema)
+
+# Show DataFrame contents
+people_df.show()
+```
 
 ---
 
-## Immutability Example
-Define a new data frame:
+### 🏗 Expanding Schema Definition  
+
+🔹 When dealing with **complex datasets**, we often require **additional columns**.  
+Let's expand our schema to include:  
+- `id` 🆔 _(IntegerType)_  
+- `person_id` 🆔 _(IntegerType)_  
+- `name` 🏷 _(StringType)_  
+- `sex` ⚧ _(StringType)_  
+- `date of birth` 🎂 _(StringType)_  
+
+#### 🔧 Revised Code:
+```python
+# Import necessary classes
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+
+# Define expanded schema
+people_schema = StructType([
+  StructField('id', IntegerType(), False),
+  StructField('person_id', IntegerType(), False),
+  StructField('name', StringType(), False),
+  StructField('sex', StringType(), False),
+  StructField('date of birth', StringType(), False)
+])
+
+# Read CSV with expanded schema
+file_path = "file:///home/talentum/test-jupyter/P2/M3/sm2/2_OperatingonDataFramesinPySpark/Dataset/people.csv"
+people_df = spark.read.format('csv').load(file_path, schema=people_schema)
+
+# Show top 10 rows
+people_df.show(10)
+```
+
+---
+
+✅ **Key Takeaways:**  
+🔹 **Schemas help enforce data integrity** ✅  
+🔹 **Defining data types ensures optimized querying** 💡  
+🔹 **Expanding schemas allows structured data representation** 🏗    
+
+---
+### 🔄 **Immutability & Lazy Processing in PySpark**  
+
+---
+
+### 🛠 **Variable Review**  
+**Python Variables:**  
+✔ **Mutable** – Can be changed after creation ✅  
+✔ **Flexible** – Easy to modify dynamically 🔄  
+❌ **Concurrency Issues** – Multiple threads modifying a variable can lead to unexpected behavior 🚦  
+❌ **Added Complexity** – Keeping track of changes increases difficulty 🧩  
+
+Python variables are **mutable**, meaning they can change anytime. However, this can cause **issues in multi-threaded environments**, especially when different tasks modify the same variable at the same time.  
+
+---
+
+### 🔒 **Immutability: Why Does It Matter?**  
+
+✔ **Key Features of Immutable Variables:**  
+🔹 Used in **Functional Programming** ⚙️  
+🔹 **Defined Once** – Cannot change after creation ✅  
+🔹 **Direct Modification is NOT Allowed** 🚫  
+🔹 **Re-created if reassigned** 🔄  
+🔹 **Efficiently Shared Among Processes** 🚀  
+
+📌 **Why use immutability?**  
+- **Predictability:** Since values don't change, debugging becomes easier.  
+- **Concurrency Safety:** Eliminates race conditions when multiple threads access data.  
+- **Better Performance:** Less memory overhead when working with big data.  
+
+---
+
+### 📌 **Immutability Example in PySpark**  
+
+💡 **Immutable DataFrame: Why?**  
+PySpark DataFrames follow **immutability principles**, meaning **modifications create new DataFrames** instead of changing the original one.  
+
+🔹 **Example:**  
+Defining a DataFrame using **CSV input** 👇  
+
+```python
 voter_df = spark.read.csv('voterdata.csv')
-Making changes:
-voter_df = voter_df.withColumn('fullyear', 
-voter_df.year + 2000)
+```
+
+🔹 **Modifying the DataFrame:**  
+Since DataFrames are **immutable**, modifications create a new instance rather than modifying the existing one.  
+
+```python
+# Creating a new column based on existing data
+voter_df = voter_df.withColumn('fullyear', voter_df.year + 2000)
+
+# Dropping an old column (modification creates a new DF)
 voter_df = voter_df.drop(voter_df.year)
+```
+
+✅ Each modification creates a **new instance** of `voter_df` instead of altering the original one.  
 
 ---
 
-## Lazy Processing
-Isn't this slow?
-Transformations
-Actions
-Allows efficient planning
-voter_df = voter_df.withColumn('fullyear', 
-voter_df.year + 2000)
+### 🏎️ **Lazy Processing in PySpark**  
+💡 **Why doesn't PySpark execute transformations immediately?**  
+✔ **Efficiency Planning** – Delays execution until absolutely necessary ⏳  
+✔ **Minimizes Redundant Computation** – Prevents unnecessary processing ⚡  
+✔ **Optimized Performance** – Uses DAG (Directed Acyclic Graph) to plan execution 🎯  
+
+❓ **Example: Is Lazy Processing Slow?**  
+
+PySpark follows a **lazy evaluation** model:  
+- **Transformations** (e.g., `withColumn`, `drop`) are **not executed immediately** ❌  
+- **Actions** (e.g., `.show()`, `.count()`) **trigger execution** ✅  
+
+🔹 **Example Code Execution**  
+```python
+# Adding a new column (Transformation)
+voter_df = voter_df.withColumn('fullyear', voter_df.year + 2000)
+
+# Dropping a column (Transformation)
 voter_df = voter_df.drop(voter_df.year)
+
+# Counting records (Action - Triggers execution)
 voter_df.count()
+```
+🎯 **Why does `count()` trigger execution?**  
+- `count()` forces Spark to **execute all previous transformations** and compute the final result.  
+- Until an **action** is called, transformations **stay in an execution plan (DAG)** without running.  
 
 ---
 
-----------------------------LAB------------------------------
+### ✨ **Key Takeaways**  
+🔹 **Immutability ensures data consistency & concurrency safety** 🔄  
+🔹 **PySpark DataFrames follow an immutable model** 📊  
+🔹 **Lazy processing delays execution until necessary** ⏳  
+🔹 **Actions trigger actual computation** 🚀  
 
 ---
 
-## Understanding Parquet
+### 🔄 **Lab 1: Immutability Review**  
 
-## Difficulties with CSVfiles
-No defined schema
-Nested data requires special handling 
-Encoding format limited
+#### ❓ **Why does Spark use immutable DataFrames?**  
+✅ **Answer the question from the options below:**  
+- **A) To add complexity to your Spark tasks.** ❌ _(Incorrect – Complexity is a byproduct, not a goal)_  
+- **B) To efficiently handle data throughout the cluster.** ✅ _(Correct – Immutability ensures consistency in distributed systems)_  
+- **C) To easily modify variable values as needed.** ❌ _(Incorrect – Spark DataFrames are immutable, meaning modifications create new versions)_  
+- **D) To conserve storage space.** ❌ _(Incorrect – Storage efficiency is a different aspect, but immutability primarily ensures consistency)_  
 
----
+📌 **Explanation:**  
+Spark operates **in a distributed environment**, where tasks execute across multiple worker nodes. **Immutable DataFrames** ensure that no process can unexpectedly alter shared data. This **prevents inconsistencies** and makes **parallel execution safer and more efficient**.  
 
-## Spark and CSVfiles
-Slow to parse: Because of row oriented nature
-Files cannot be filtered (no "predicate pushdown")
-Any intermediate use requires redefining schema
-
----
-
-## The Parquet Format
-A columnar data format
-Supported in Spark and other data processing frameworks
-Supports predicate pushdown
-Automatically stores schema information
+💡 **Key Takeaway:**  
+Using immutable DataFrames helps Spark **efficiently process data across clusters**, ensuring stability, **fault tolerance**, and **concurrency safety**.
 
 ---
 
-Working with Parquet
-Reading Parquet files
+### 🚀 **Lab 2: Using Lazy Processing**  
+
+🔹 **What is Lazy Processing?**  
+✔ **Transformations** _(e.g., `withColumn`, `drop`) do **NOT** execute immediately_ ❌  
+✔ **Actions** _(e.g., `.show()`, `.count()`) trigger execution_ ✅  
+✔ **Prevents unnecessary computation** by building an optimized execution plan 🎯  
+
+📌 **Why does Spark delay execution?**  
+Spark **waits** before running transformations so it can optimize the execution flow using **Directed Acyclic Graph (DAG)**. Once an **action** is performed (like `.show()`), Spark executes all pending operations **efficiently**.  
+
+💡 **Let's see an example using airport data:**  
+
+```python
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("CSV Example").getOrCreate()
+
+# Load the CSV file into a DataFrame
+aa_dfw_df = spark.read.format('csv').options(header=True).load(
+    'file:///home/talentum/test-jupyter/P3/M1/SM2/2_Immutabilityandlazyprocessing/Dataset/AA_DFW_2018_Departures_Short.csv.gz'
+)
+
+# Apply transformation (lowercase Destination Airport column)
+aa_dfw_df = aa_dfw_df.withColumn('airport', F.lower(F.col('Destination Airport')))
+
+# Drop the 'Destination Airport' column
+aa_dfw_df = aa_dfw_df.drop('Destination Airport')
+
+# Show the DataFrame (Triggers execution)
+aa_dfw_df.show()
+```
+
+🔹 **Timing Breakdown:**  
+- **Step 1 (Load DataFrame)** ✅ _(Spark reads the data but doesn’t process transformations yet)_  
+- **Step 2 (Apply `.withColumn()` and `.drop()`)** 🔄 _(These are lazy transformations, Spark doesn’t execute them)_  
+- **Step 3 (`show()`)** 🚀 _(Spark processes all transformations before displaying the data)_  
+
+✅ **Key Observation:**  
+**Transformations are quick because Spark delays execution.** However, the actual processing happens **only** when an action (like `.show()` or `.count()`) forces computation.  
+
+---
+
+### ✨ **Final Takeaways:**  
+🔹 **Immutable DataFrames ensure consistency in distributed processing** 🔄  
+🔹 **Lazy processing helps Spark optimize transformations efficiently** 🚀  
+🔹 **Actions trigger actual execution of transformations** ⏳  
+
+---
+
+### 📦 **Understanding Parquet in Big Data**  
+
+---
+
+### 🚨 **Difficulties with CSV Files**  
+
+✔ **No Defined Schema** – CSV files don’t store data types 📜  
+✔ **Nested Data Handling** – Complex structures require extra steps 🏗  
+✔ **Limited Encoding Formats** – Doesn’t support efficient compression 🔄  
+
+📌 **Why is this a problem?**  
+- Without **schemas**, every time you process data, you need to manually specify types  
+- Handling **nested structures** in JSON-like formats requires **additional processing**  
+- **Row-based storage** means **slow query performance** on large datasets  
+
+---
+
+### 🐌 **Spark & CSV Files: Why Are They Slow?**  
+
+✔ **Row-Oriented Storage** 🏛 – Spark reads entire rows instead of just relevant columns  
+✔ **No Predicate Pushdown** ❌ – Spark can’t filter data efficiently before loading  
+✔ **Schema Redefinition Required** 🔄 – Must specify column types every time  
+
+📌 **Why does this matter?**  
+CSV files **don’t store metadata** about the schema, which means every time you load a file, Spark needs to **infer the schema again**, leading to inefficiencies in processing **large-scale data**.
+
+---
+
+### 🏆 **Parquet Format: The Solution**  
+
+✅ **Columnar Data Format** 📊 – Stores data **column-wise**, making queries much faster  
+✅ **Schema Storage** 📜 – Automatically retains metadata for efficient processing  
+✅ **Predicate Pushdown** 🎯 – Allows **filtering data before loading**, improving speed  
+✅ **Supported Across Frameworks** 🔗 – Used in Spark, Hive, Presto, and other big data tools  
+
+📌 **How does predicate pushdown help?**  
+Instead of scanning an entire dataset, **Parquet allows filtering at the storage level**, reducing **I/O operations** and **speeding up queries**.  
+
+---
+
+### 🔧 **Working with Parquet in Spark**  
+
+📌 **Reading Parquet Files:**  
+```python
 df = spark.read.format('parquet').load('filename.parquet')
 df = spark.read.parquet('filename.parquet')
-Writing Parquet files
+```
+📌 **Writing Parquet Files:**  
+```python
 df.write.format('parquet').save('filename.parquet')
-No. of files is equal to no. of partitions
 df.write.parquet('filename.parquet')
+```
+💡 **Key Fact:** The number of output files equals the number of partitions! 🔄  
 
 ---
 
-## Parquet and SQL
-Parquet as backing stores for SparkSQL operations
+### 🔗 **Parquet & SQL Integration**  
+
+📌 **Using Parquet as a backing store in Spark SQL:**  
+```python
 flight_df = spark.read.parquet('flights.parquet')
 flight_df.createOrReplaceTempView('flights')
-For this thing to work, Hive Metastore must be in running state.
+```
+⚠ **Important:** Hive Metastore **must be running** for SQL operations 🚀  
+📌 **Querying Parquet data with SQL:**  
+```python
 short_flights_df = spark.sql('SELECT * FROM flights WHERE flightduration < 100')
+```
+✅ **Why use Parquet for SQL queries?**  
+✔ Faster queries due to **columnar storage**  
+✔ Supports **predicate pushdown**  
+✔ Works **efficiently with Spark SQL**  
 
 ---
 
-------------------------LAB-----------------------------
+### 🎯 **Key Takeaways**  
+✔ **CSV files are inefficient for big data** 📜  
+✔ **Parquet is optimized for storage & query performance** 🚀  
+✔ **Predicate pushdown speeds up filtering** 🎯  
+✔ **Parquet works seamlessly with Spark SQL** 💡
 
-Lab 1:
+---
 
-Saving a DataFrame in Parquet format
+### 📦 **Lab 1: Saving a DataFrame in Parquet Format**  
 
-    When working with Spark, you'll often start with CSV, JSON, or other data sources. This provides a lot of flexibility for the types of data to load, but it is not an optimal format for Spark. The Parquet format is a columnar data store, allowing Spark to use predicate pushdown. This means Spark will only process the data necessary to complete the operations you define versus reading the entire dataset. This gives Spark more flexibility in accessing the data and often drastically improves performance on large datasets.
+🔹 **Why Save Data as Parquet?**  
+✔ **Optimized for Big Data** 🚀  
+✔ **Columnar Storage** 📊 – Faster retrieval compared to CSV  
+✔ **Supports Predicate Pushdown** 🎯 – Processes only required data  
+✔ **Stores Schema Information** 🔎 – No need to redefine schema  
 
-    In this exercise, we're going to practice creating a new Parquet file and then process some data from it.
+📌 **Exercise Breakdown:**  
+1️⃣ **View row counts of df1 & df2** 🏷️  
+2️⃣ **Combine df1 & df2 using `union()`** 🔗  
+3️⃣ **Rename column `_c3` to `flight_duration`** ✏️  
+4️⃣ **Save DataFrame to Parquet format** 💾  
+5️⃣ **Load & verify saved Parquet file** ✅  
 
-    The spark object and the df1 and df2 DataFrames have been setup for you.
+#### 🛠 Code Implementation  
+```python
+# Load CSV files
+df1 = spark.read.format('csv').load('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/Dataset/AA_DFW_2017_Departures_Short.csv.gz')
+df2 = spark.read.format('csv').load('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/Dataset/AA_DFW_2018_Departures_Short.csv.gz')
 
-Instructions
+# View row counts
+print(f"df1 Count: {df1.count()}")
+print(f"df2 Count: {df2.count()}")
 
-    View the row count of df1 and df2.
-    Combine df1 and df2 in a new DataFrame named df3 with the union method.
-    Save df3 to a parquet file named AA_DFW_ALL.parquet.
-    Read the AA_DFW_ALL.parquet file and show the count.
-
-df1 = spark.read.format('csv').load('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/Dataset/AA_DFW_2017_Departures_Short.csv.gz') # AA_DFW_2017_Departures_Short.csv
-df2 = spark.read.format('csv').load('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/Dataset/AA_DFW_2018_Departures_Short.csv.gz') # AA_DFW_2018_Departures_Short.csv
-
-# View the row count of df1 and df2
-print("df1 Count: %d" % df1.count())
-print("df2 Count: %d" % df2.count())
+# Print schema details
 df1.printSchema()
 df2.printSchema()
 
-# Combine the DataFrames into one
+# Combine DataFrames
 df3 = df1.union(df2)
-df3.printSchema()
-df3 = df3.withColumnRenamed('_c3', 'flight_duration')
-df3.printSchema()
 
-# Save the df3 DataFrame in Parquet format
+# Rename column '_c3' to 'flight_duration'
+df3 = df3.withColumnRenamed('_c3', 'flight_duration')
+
+# Save as Parquet
 df3.write.parquet('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/AA_DFW_ALL.parquet', mode='overwrite')
 
-# Read the Parquet file into a new DataFrame and run a count
-print(spark.read.parquet('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/AA_DFW_ALL.parquet').count())
-df4 = spark.read.format('parquet').load('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/AA_DFW_ALL.parquet')
+# Load Parquet file & verify row count
+df4 = spark.read.parquet('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/AA_DFW_ALL.parquet')
+print(f"Total row count in Parquet file: {df4.count()}")
+
 df4.printSchema()
+```
 
-df1 Count: 139359
-df2 Count: 119911
-root
- |-- _c0: string (nullable = true)
- |-- _c1: string (nullable = true)
- |-- _c2: string (nullable = true)
- |-- _c3: string (nullable = true)
+💡 **Key Observations:**  
+✔ Parquet automatically **preserves schema** 📜  
+✔ **Row count matches** the total from `df1 + df2` 🔄  
+✔ Optimized for **efficient querying** 💡  
 
-root
- |-- _c0: string (nullable = true)
- |-- _c1: string (nullable = true)
- |-- _c2: string (nullable = true)
- |-- _c3: string (nullable = true)
+---
 
-root
- |-- _c0: string (nullable = true)
- |-- _c1: string (nullable = true)
- |-- _c2: string (nullable = true)
- |-- _c3: string (nullable = true)
+### 🔍 **Lab 2: Querying Parquet with SQL**  
 
-root
- |-- _c0: string (nullable = true)
- |-- _c1: string (nullable = true)
- |-- _c2: string (nullable = true)
- |-- flight_duration: string (nullable = true)
+🔹 **Why Use SQL with Parquet?**  
+✔ **Efficient Data Processing** ⚡  
+✔ **Direct Query Support** with SparkSQL 🏛️  
+✔ **Predicate Pushdown Speeds Up Queries** 🎯  
 
-259270
-root
- |-- _c0: string (nullable = true)
- |-- _c1: string (nullable = true)
- |-- _c2: string (nullable = true)
- |-- flight_duration: string (nullable = true)
-
- ---
-
- Lab 2:
-
- # Read the Parquet file into flights_df
+#### 🛠 Code Implementation  
+```python
+# Load Parquet file into DataFrame
 flights_df = spark.read.parquet('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/AA_DFW_ALL.parquet')
+
+# Convert 'flight_duration' column to Double type
 flights_df = flights_df.withColumn("flight_duration", flights_df.flight_duration.cast('double'))
 
-# Register the temp table
+# Register as temporary SQL table
 flights_df.createOrReplaceTempView('flights')
 
-# Run a SQL query of the average flight duration
-avg_duration = spark.sql('SELECT avg(flight_duration) from flights').collect()[0]
-print('The average flight time is: %f' % avg_duration)
+# Query: Calculate average flight duration
+avg_duration = spark.sql('SELECT avg(flight_duration) FROM flights').collect()[0]
+print(f"The average flight time is: {avg_duration[0]:.2f} minutes")
+```
 
-The average flight time is: 151.688658
-
----
-
----
-
-Writing Parquet files
-df.write.format('parquet').save('filename.parquet')
-df.write.parquet('filename.parquet')
-
-Using this format, use people.csv, create schema
-load the data into dataframe
-2. using this api, you are going to store that particular data on local file system insid your home, name of the folder will be people_csv > df1.write.format('csv').save('people_csv')
-df2 = load the data from this particular location
-store the data in another folder
-design schema for df2 with 3 columns: id name and age and then show it and then store it in the file system in another location
+✅ **Key Takeaways:**  
+🔹 **Parquet & SparkSQL integrate seamlessly** 🏛️  
+🔹 **Schema management simplifies querying** 📜  
+🔹 **Optimized execution via predicate pushdown** 🚀  
 
 ---
 
+### 📦 **Writing Parquet Files in PySpark**  
+
+📌 **Why Use Parquet?**  
+✔ **Columnar storage format** – Faster querying 🏎  
+✔ **Schema retention** – No need to redefine every time 📜  
+✔ **Efficient compression** – Reduces storage space 🎯  
+
+---
+
+### 🔧 **Step-by-Step Implementation**  
+
+#### **1️⃣ Define Schema & Load Data from `people.csv`**
+```python
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("Parquet Example").getOrCreate()
+
+# Define schema for people.csv
+people_schema = StructType([
+    StructField("id", IntegerType(), False),
+    StructField("name", StringType(), False),
+    StructField("age", IntegerType(), False)
+])
+
+# Load the CSV file into a DataFrame
+file_path = "file:///home/your_username/people.csv"
+df1 = spark.read.format('csv').options(header=True).schema(people_schema).load(file_path)
+
+# Show the loaded data
+df1.show()
+```
+
+---
+
+#### **2️⃣ Save Data to CSV in Local File System (`people_csv`)**
+```python
+df1.write.format('csv').save('file:///home/your_username/people_csv')
+```
+
+💡 **Key Notes:**  
+✔ Data is **saved in CSV format** 🏷  
+✔ Stored under the **folder `people_csv`** in the local filesystem  
+
+---
+
+#### **3️⃣ Load Data from `people_csv` & Store in Another Location**  
+```python
+df2 = spark.read.format('csv').options(header=True).schema(people_schema).load('file:///home/your_username/people_csv')
+
+# Show loaded data
+df2.show()
+```
+
+💡 **Key Notes:**  
+✔ **Data is loaded from `people_csv`** 🏗  
+✔ **Schema is retained** for accuracy 🎯  
+
+---
+
+#### **4️⃣ Define Schema for `df2` & Save to Another Folder**  
+```python
+# Define new schema (id, name, age)
+new_schema = StructType([
+    StructField("id", IntegerType(), False),
+    StructField("name", StringType(), False),
+    StructField("age", IntegerType(), False)
+])
+
+# Apply schema to df2
+df2 = spark.createDataFrame(df2.rdd, schema=new_schema)
+
+# Show transformed data
+df2.show()
+
+# Save to another location
+df2.write.parquet('file:///home/your_username/people_parquet')
+```
+
+💡 **Key Notes:**  
+✔ **Schema redesigned with `id, name, age`** ✅  
+✔ **Data stored in a separate Parquet folder `people_parquet`** 📦  
+
+---
+
+### 🎯 **Key Takeaways:**  
+✔ **Parquet preserves schema & optimizes query performance** 🚀  
+✔ **Loading CSV, transforming schema, and saving in different formats improves flexibility** 🔄  
+✔ **Predicate pushdown accelerates queries in Parquet** 🎯  
+
+---
+
+### 🏗 **DataFrame Column Operations in PySpark**  
+
+---
+
+### 🔄 **DataFrame Refresher**  
+
+✔ **DataFrames** consist of **rows & columns** 📊  
+✔ They are **immutable** (meaning modifications create new instances) 🔄  
+✔ Various **transformations** help modify data efficiently  
+
+📌 **Example Queries:**  
+🔹 **Return rows where name starts with "M"**  
+```python
+voter_df.filter(voter_df.name.like('M%'))
+```
+🔹 **Select only 'name' and 'position' columns**  
+```python
+voters = voter_df.select('name', 'position')
+```
+
+---
+
+### 🔥 **Common DataFrame Transformations**  
+
+✔ **Filter / Where** – Select rows based on conditions 🎯  
+```python
+voter_df.filter(voter_df.date > '1/1/2019')  # OR voter_df.where(...)
+```
+✔ **Select** – Extract specific columns 📜  
+```python
+voter_df.select(voter_df.name)
+```
+✔ **withColumn** – Create or modify a column 🏷  
+```python
+voter_df.withColumn('year', voter_df.date.year)
+```
+✔ **Drop** – Remove unnecessary columns ❌  
+```python
+voter_df.drop('unused_column')
+```
+
+---
+
+### 🎯 **Filtering Data**  
+
+✔ **Remove null values**  
+```python
+voter_df.filter(voter_df['name'].isNotNull())
+```
+✔ **Remove odd entries (e.g., unrealistic years)**  
+```python
+voter_df.filter(voter_df.date.year > 1800)
+```
+✔ **Filter based on substrings**  
+```python
+voter_df.where(voter_df['_c0'].contains('VOTE'))
+```
+✔ **Negate conditions using `~`** _(Example: Remove nulls from `_c1`)_  
+```python
+voter_df.where(~ voter_df._c1.isNull())  # Negation
+```
+
+---
+
+### 🔠 **Column String Transformations**  
+
+✔ **Use `pyspark.sql.functions` for transformations**  
+```python
+import pyspark.sql.functions as F
+```
+✔ **Apply transformations on specific columns**  
+```python
+voter_df.withColumn('upper', F.upper('name'))  # Convert to uppercase
+```
+✔ **Split full names into first & last name**  
+```python
+voter_df.withColumn('splits', F.split('name', ' '))
+```
+📌 **Output:**  
+This creates an **array-type column** where:  
+- **First element → First name**  
+- **Second element → Last name**  
+
+✔ **Cast column to another type (`IntegerType`)**  
+```python
+from pyspark.sql.types import IntegerType
+voter_df.withColumn('year', voter_df['_c4'].cast(IntegerType()))
+```
+
+---
+
+### 📦 **ArrayType() Column Functions**  
+
+✔ **Get the length of an array column**  
+```python
+voter_df.withColumn("array_length", F.size(voter_df.splits))
+```
+✔ **Retrieve a specific item from an array column**  
+```python
+voter_df.withColumn("first_name", voter_df.splits.getItem(0))  # First element
+```
+
+---
+
+### 🚀 **Key Takeaways**  
+✔ **Transformations modify DataFrames efficiently** 🔄  
+✔ **Filtering helps clean and refine data** 🏗  
+✔ **String operations enhance column values** ✨  
+✔ **ArrayType functions enable list-based transformations** 🎯  
+
+---
+
+### 🔍 **Lab 1: Filtering Column Content in PySpark**  
+
+💡 **Cleaning Data: Why It’s Important?**  
+✔ Ensures accurate reporting 📊  
+✔ Helps validate voter names ✅  
+✔ Removes outliers or formatting issues 🔄  
+
+---
+
+#### 🛠 **Step 1: Show Distinct VOTER_NAME Entries**  
+```python
+import pyspark.sql.functions as F
+
+# Load CSV file into DataFrame
+voter_df = spark.read.format('csv').options(header=True).load(
+    'file:///home/talentum/test-jupyter/P3/M1/SM1/1_DataFramecolumnoperations/Dataset/DallasCouncilVoters.csv.gz'
+)
+
+# Show distinct names
+voter_df.select('VOTER_NAME').distinct().show(40, truncate=False)
+```
+✔ `truncate=False` ensures full names are displayed ✅  
+
+---
+
+#### 🛠 **Step 2: Remove Entries That Don't Fit Format**  
+✔ **Filter names between 1-20 characters**  
+```python
+voter_df = voter_df.filter('length(VOTER_NAME) > 0 and length(VOTER_NAME) < 20')
+```
+✔ **Filter out names containing `_` (underscore)**  
+```python
+voter_df = voter_df.filter(~ F.col('VOTER_NAME').contains('_'))
+```
+
+---
+
+#### 🛠 **Step 3: Show Distinct Names Again After Cleaning**  
+```python
+voter_df.select('VOTER_NAME').distinct().show(40, truncate=False)
+```
+✅ **Key Observations:**  
+- **Removes null values & odd characters** 🎯  
+- **Keeps only valid voter names** 📜  
+
+---
+
+### 🧩 **Lab 2: Filtering Question 1**  
+
+🔹 **Question:**  
+❌ **Which option would NOT work for filtering null entries?**  
+✅ **Answer:** **B) `users_df.where(users_df.ID == 18502)`**  
+
+📌 **Explanation:**  
+- `ID == 18502` **does NOT filter nulls** ❌  
+- **All other options properly exclude null entries** ✅  
+
+---
+
+### 🔢 **Lab 3: Filtering Question 2**  
+
+🔹 **Goal:** Select `Name` and `State` for any **ID greater than 3000**  
+
+✅ **Correct Answer:**  
+```python
+users_df.filter('ID > 3000').select("Name", "State")
+```
+💡 **Key Takeaway:** Order matters!  
+✔ First, filter rows **where ID > 3000**  
+✔ Then, select **Name & State columns**  
+
+---
+
+### ✂ **Lab 4: Splitting Names into First & Last Name**  
+
+🔹 **Goal:**  
+✔ **Create first_name & last_name**  
+✔ **Split `VOTER_NAME` column**  
+
+---
+
+#### 🛠 **Step 1: Add Split Column**  
+```python
+voter_df = voter_df.withColumn('splits', F.split(voter_df.VOTER_NAME, '\s+'))
+```
+✔ Splits name into **a list of words** 📜  
+
+#### 🛠 **Step 2: Extract First Name**  
+```python
+voter_df = voter_df.withColumn('first_name', voter_df.splits.getItem(0))
+```
+✔ Takes the **first word** of `VOTER_NAME` ✅  
+
+#### 🛠 **Step 3: Extract Last Name**  
+```python
+voter_df = voter_df.withColumn('last_name', voter_df.splits.getItem(F.size('splits') - 1))
+```
+✔ Takes the **last word** of `VOTER_NAME` ✅  
+
+---
+
+#### 🛠 **Step 4: Remove Split Column & Show Clean Data**  
+```python
+voter_df = voter_df.drop('splits')
+voter_df.show()
+```
+
+🔹 **Final Output Example:**  
+| DATE      | TITLE         | VOTER_NAME          | first_name | last_name |
+|-----------|--------------|---------------------|------------|------------|
+| 02/08/17  | Mayor        | Michael Rawlings   | Michael    | Rawlings   |
+| 02/08/17  | Councilmember| Adam Medrano       | Adam       | Medrano    |
+| 02/08/17  | Councilmember| Carolyn Arnold     | Carolyn    | Arnold     |
+
+---
+
+### 🚀 **Key Takeaways:**  
+✔ **Filtering improves data quality** 📊  
+✔ **Column transformations enhance usability** 🏗  
+✔ **Splitting text simplifies analysis** 🎯  
+
+---
+
+### 🔄 **Conditional DataFrame Column Operations in PySpark**  
+
+---
+
+### 🎯 **Conditional Clauses**  
+
+✔ **What are conditional clauses?**  
+🔹 They are **inline equivalents** of `if-then-else` statements 🏗  
+🔹 Used in **PySpark transformations** 🎯  
+🔹 Methods: `.when()` and `.otherwise()`  
+
+📌 **Basic Syntax:**  
+```python
+F.when(<condition>, <result>)  # Like "if condition then result"
+F.otherwise(<default_value>)  # Like "else result"
+```
+
+---
+
+### 📝 **Conditional Example**  
+
+💡 **Classify age groups in a DataFrame**  
+
+```python
+df.select(df.Name, df.Age, F.when(df.Age >= 18, "Adult"))
+```
+✔ This returns `"Adult"` for anyone **18 or older**  
+
+🛠 **Example Output:**  
+| Name   | Age | Classification |
+|--------|----|---------------|
+| Alice  | 14 | _Null_         |
+| Bob    | 18 | Adult         |
+| Candice| 38 | Adult         |
+
+---
+
+### 🔀 **Multiple `.when()` Conditions**  
+
+✔ **Extend classification using multiple `.when()` statements**  
+```python
+df.select(df.Name, df.Age,
+    F.when(df.Age >= 18, "Adult")
+    .when(df.Age < 18, "Minor"))
+```
+
+📌 **Example Output:**  
+| Name   | Age | Classification |
+|--------|----|---------------|
+| Alice  | 14 | Minor         |
+| Bob    | 18 | Adult         |
+| Candice| 38 | Adult         |
+
+💡 **Key Point:** Multiple `.when()` statements allow us to specify **different conditions** for different groups.
+
+---
+
+### 🛠 **Using `.otherwise()` for Default Cases**  
+
+✔ **Acts like an `else` condition**  
+```python
+df.select(df.Name, df.Age,
+    F.when(df.Age >= 18, "Adult")
+    .otherwise("Minor"))
+```
+
+📌 **Example Output:**  
+| Name   | Age | Classification |
+|--------|----|---------------|
+| Alice  | 14 | Minor         |
+| Bob    | 18 | Adult         |
+| Candice| 38 | Adult         |
+
+💡 **Key Difference:** `.otherwise()` handles **all remaining cases** that don’t match `.when()` conditions.
+
+---
+
+### ✨ **Key Takeaways**  
+✔ **Conditional clauses make inline logical decisions** 🔄  
+✔ `.when()` **handles explicit conditions** 🎯  
+✔ `.otherwise()` **acts as the default case** ✅  
+✔ **Multiple `.when()` statements allow complex filtering** 🏗  
+
+---
+
+### 🏗 **Lab 1: Using `.when()` for Conditional Column Modification**  
+
+---
+
+💡 **Why Use Conditional Logic?**  
+✔ Dynamically update specific values in a DataFrame  
+✔ Enables targeted modifications rather than updating entire columns  
+✔ Keeps DataFrames efficient & scalable  
+
+---
+
+### 🔹 **Step 1: Add `random_val` to Councilmembers**  
+
+```python
+import pyspark.sql.functions as F
+
+# Load the CSV file
+voter_df = spark.read.format('csv').options(header=True).load(
+    'file:///home/talentum/test-jupyter/P3/M2/SM2/2_ConditionalDataFramecolumnoperations/Dataset/DallasCouncilVoters.csv.gz'
+)
+
+# Add random_val to Councilmembers
+voter_df = voter_df.withColumn(
+    'random_val', F.when(voter_df.TITLE == "Councilmember", F.rand())
+)
+
+# Show modified rows
+voter_df.show()
+```
+
+📌 **Key Observations:**  
+✔ Only **Councilmembers** receive a random number ✅  
+✔ Other roles remain **NULL** 🚫  
+
+---
+
+### 🏆 **Lab 2: Adding Multiple Conditional Values**  
+
+🔹 **Requirements:**  
+✔ **Councilmembers** get a random number 🎲  
+✔ **Mayors** receive a fixed value of `2`  
+✔ **Other roles get `0`**  
+
+#### 🛠 **Step-by-Step Implementation**  
+
+```python
+voter_df = voter_df.withColumn(
+    'random_val', F.when(voter_df.TITLE == 'Councilmember', F.rand())
+    .when(voter_df.TITLE == "Mayor", 2)
+    .otherwise(0)
+)
+
+# Show modified rows
+voter_df.show(10)
+
+# Filter voters with random_val greater than 0
+voter_df.filter(F.col('random_val') > 0).show()
+```
+
+---
+
+### 🔍 **Key Insights:**  
+✔ **`.when()` assigns specific values based on conditions** 🔄  
+✔ **`.otherwise()` provides a default fallback value** ✅  
+✔ **Efficient filtering using `.filter()`** 🎯  
+
+---
+
+### 🚀 **Final Takeaways:**  
+✔ Conditional logic improves **DataFrame flexibility** 📊  
+✔ `.when()` lets us **define multiple conditions** 🎯  
+✔ **Great for cleaning & transforming real-world datasets** 🔄  
+
+---
+
+### 🛠 **User-Defined Functions (UDFs) in PySpark**  
+
+✔ **What are UDFs?**  
+🔹 Custom **Python functions** applied to Spark DataFrames 🎯  
+🔹 Wrapped using `pyspark.sql.functions.udf` 📦  
+🔹 **Stored as variables** & used like normal Spark functions 🚀  
+
+📌 **Basic UDF Structure:**  
+```python
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
+```
+
+---
+
+### 🔄 **Reverse String UDF Example**  
+
+✔ **Step 1: Define a Python function to reverse strings**  
+```python
+def reverseString(mystr): 
+    return mystr[::-1]
+```
+
+✔ **Step 2: Wrap function into a UDF & store it**  
+```python
+udfReverseString = udf(reverseString, StringType())
+```
+
+✔ **Step 3: Apply UDF to a DataFrame column**  
+```python
+user_df = user_df.withColumn('ReverseName', udfReverseString(user_df.Name))
+```
+
+✅ **Result:**  
+| Name   | ReverseName |
+|--------|------------|
+| Alice  | ecilA      |
+| Bob    | boB        |
+| Candice| ecidnaC    |
+
+---
+
+### 🎲 **Argument-Less UDF Example**  
+
+💡 **Goal:** Assign a **random class** without passing arguments  
+
+✔ **Step 1: Define a function that returns a random class**  
+```python
+import random
+
+def sortingCap():
+    return random.choice(['G', 'H', 'R', 'S']) 
+```
+
+✔ **Step 2: Convert function into UDF**  
+```python
+udfSortingCap = udf(sortingCap, StringType())
+```
+
+✔ **Step 3: Apply UDF without arguments**  
+```python
+user_df = user_df.withColumn('Class', udfSortingCap())
+```
+
+✅ **Result:**  
+| Name   | Age | Class |
+|--------|----|------|
+| Alice  | 14 | H   |
+| Bob    | 18 | S   |
+| Candice| 6  | G   |
+
+---
+
+### 🚀 **Key Takeaways**  
+✔ **UDFs allow custom operations** on Spark DataFrames  
+✔ **They can modify column values dynamically**  
+✔ **Argument-less UDFs generate random values** 🎲  
+✔ **Wrapped using `udf(function, return_type)`** 📜  
+
+---
+
+### 🏗 **Lab 1: Understanding User-Defined Functions (UDFs)**  
+
+🔹 **Question:**  
+❌ **Which value is NOT valid for the second argument of a UDF?**  
+
+✅ **Correct Answer:** `D) udf()`
+
+📌 **Explanation:**  
+The second argument in a UDF defines the **return type** of the function.  
+✔ **Valid options:** `ArrayType(IntegerType())`, `IntegerType()`, `LongType()`, `StringType()` 🎯  
+❌ `udf()` is **NOT** a valid return type—it is used to wrap a Python function into a Spark UDF, not to define the output type.  
+
+---
+
+### 🛠 **Lab 2: Cleaning & Transforming Voter Data with a UDF**  
+
+📌 **Steps to Clean the Data:**  
+✔ **Filter & Count Null Values** 📜  
+✔ **Replace Null Entries with Default Name (`John Doe`)** 🏷  
+✔ **Split Full Name into `first_name` & `last_name`** ✂  
+✔ **Define a Custom UDF to Extract First and Middle Names** 🏆  
+
+---
+
+#### **1️⃣ Removing Null Entries**
+```python
+df = voter_df.filter(voter_df.VOTER_NAME.isNull())
+print(df.count())  # Show count of null entries
+
+# Fill Nulls with "John Doe"
+voter_df = voter_df.na.fill({'VOTER_NAME': 'John Doe'})
+```
+
+✔ **Replaces missing names with "John Doe"** 🚀  
+
+---
+
+#### **2️⃣ Splitting Names into First & Last**
+```python
+voter_df = voter_df.withColumn('splits', F.split(voter_df.VOTER_NAME, '\s+'))
+voter_df = voter_df.withColumn('first_name', voter_df.splits.getItem(0))
+voter_df = voter_df.withColumn('last_name', voter_df.splits.getItem(F.size('splits') - 1))
+```
+✔ Extracts first & last names dynamically 📜  
+
+---
+
+#### **3️⃣ Custom UDF for First & Middle Names**
+```python
+def getFirstAndMiddle(names):
+    return ' '.join(names)
+
+udfFirstAndMiddle = F.udf(getFirstAndMiddle, StringType())
+
+# Apply UDF
+voter_df = voter_df.withColumn('first_and_middle_name', udfFirstAndMiddle(voter_df.splits))
+```
+
+✔ **Creates a column capturing both first & middle names** ✅  
+
+---
+
+#### **4️⃣ Display Cleaned Data**
+```python
+voter_df.show()
+```
+✅ **Final Output Example:**  
+| Name                 | First Name | Last Name | First & Middle |
+|----------------------|-----------|-----------|----------------|
+| Jennifer S. Gates   | Jennifer  | Gates     | Jennifer S. Gates |
+| Philip T. Kingston | Philip    | Kingston  | Philip T. Kingston |
+| Michael S. Rawlings | Michael  | Rawlings  | Michael S. Rawlings |
+| Carolyn King Arnold | Carolyn  | Arnold    | Carolyn King Arnold |
+
+---
+
+### 🎯 **Key Takeaways**  
+✔ **UDFs allow custom operations** on Spark DataFrames 🎲  
+✔ **They dynamically process text & extract structured data** 🔄  
+✔ **Replacing nulls ensures consistent formatting** 🛠  
+✔ **Splitting text simplifies data analysis** ✂  
+
+---
