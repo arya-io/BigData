@@ -446,17 +446,177 @@ Kafka guarantees **distributed, scalable, and fault-tolerant** messaging—enabl
 
 ---
 
+# Implementation of Kafka
+
+Launch Zookeeper
+bash run-kafka_zookeeper_server.sh -s start
+
+Launch server
+bash run-kafka_server.sh -s start
+
+You should see Kafka running through jps and QuorumPeerMain
+talentum@talentum-virtual-machine:~$ jps
+1796 RunJar
+2472 SparkSubmit
+873 SecondaryNameNode
+9099 Kafka
+1196 NodeManager
+463 NameNode
+9456 Jps
+3986 SparkSubmit
+1043 ResourceManager
+2324 SparkSubmit
+2708 Main
+8791 QuorumPeerMain
+635 DataNode
+
+kafka-topics.sh
+Shows entire documentation
+
+Create a topic
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic first_topic --create
+
+If error occurs in Kafka, it does not show error, but the documentation.
+
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic first_topic --create --partitions 3
+Still shows documentation
+Partition cannot exists without replication factor
+
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic first_topic --create --partitions 3 --replication-factor 2
+partition is 3 but replication is 2 so 6 partitions will be created
+After running this command, got a warning: Error while executing topic command : Replication factor: 2 larger than available brokers: 1.
+
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic first_topic --create --partitions 3 --replication-factor 1
+Created topic first_topic.
+
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --list
+List the topics
+2181 --list
+first_topic
 
 
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic first_topic --describe
+Describe the topics
+2181 --topic first_topic --describe
+Topic:first_topic	PartitionCount:3	ReplicationFactor:1	Configs:
+	Topic: first_topic	Partition: 0	Leader: 0	Replicas: 0Isr: 0
+	Topic: first_topic	Partition: 1	Leader: 0	Replicas: 0Isr: 0
+	Topic: first_topic	Partition: 2	Leader: 0	Replicas: 0Isr: 0
 
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic second_topic --delete
+Delete the topic
 
+---
 
+# Console Producer
 
+kafka-console-producer.sh
 
+kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic first_topic
+>Hello Priyanka
+>It's a good day..!!
+>How are you?
+>I am good here.
+>^C
 
+These messages went into topic.
 
+This is an example of asynchronous communication
 
+kafka-console-producer.sh --broker-t 127.0.0.1:9092 --topic first_topic --producer-property acks=all
+>Hello
+>Today is Thursday
+>We are going on a trip next Wednesday
+>^C
+This has set the acknowledgment mode
 
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic first_topic
+Nothing happens
 
+---
 
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic first_topic
+Read messages here
 
+kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic first_topic
+Write messages here
+
+Communication has been established
+
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic first_topic --from-beginning
+How are you?
+Today is Thursday
+Good day
+Hello Priyanka
+I am good here.
+We are going on a trip next Wednesday
+hello
+It's a good day..!!
+Hello
+hi Priyanka
+jj
+
+Shows messages right from the beginning
+
+Messages are displayed in random order. Why?
+
+---
+
+How to launch consumer group? -- IMPLEMENTATION
+
+We have a topic - first topic
+In that we have three partitions
+and it forms a cluster
+
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic first_topic --group my-first-application
+This is our consumer 1
+
+kafka-console-producer.sh --broker-t 127.0.0.1:9092 --topic first_topic
+Now producer is running
+M1 is message is passed
+Consumer gets this message
+Now M2
+
+Messages go in round robin fashion
+Now M3 message is produced
+
+All these three messages went to three partitions
+
+To decrease the load on the group, we will launch another consumer in the same group
+
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic first_topic --group my-first-application
+This is our consumer 2 and it has been launched through above command
+
+Now more messages are produced and they are consumed by another consumer
+
+Now we are launching another consumer. This will be our consumer 3 belonging to the same consumer group
+
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic first_topic --group my-first-application
+
+Messages are produced till M8
+M8 went to third consumer
+M9 went to second consumer
+M10 went to first consumer
+
+Now we launched consumer 4
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic first_topic --group my-first-application
+
+M11 went to fourth consumer
+M12 went to third consumer
+M13 went to first consumer
+M13 went to fourth consumer
+M15 to third
+M16 to first
+
+We crashed the fourth consumer. 
+M17 to third
+M18 to second
+M19 to first
+
+Every consumer is commiting the offset
+Producer is a software program whose responsibility is the create the messages
+and Consumers reads the messages
+
+Whenever a consumer is crashed, another consumer takes its place.
+
+---
