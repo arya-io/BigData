@@ -2804,6 +2804,16 @@ Able to be shared ef f i ciently
 
 ---
 
+## Immutability Example
+Define a new data frame:
+voter_df = spark.read.csv('voterdata.csv')
+Making changes:
+voter_df = voter_df.withColumn('fullyear', 
+voter_df.year + 2000)
+voter_df = voter_df.drop(voter_df.year)
+
+---
+
 ## Lazy Processing
 Isn't this slow?
 Transformations
@@ -2816,8 +2826,11 @@ voter_df.count()
 
 ---
 
-## Understanding 
-Parquet
+----------------------------LAB------------------------------
+
+---
+
+## Understanding Parquet
 
 ## Difficulties with CSVfiles
 No defined schema
@@ -2847,6 +2860,7 @@ df = spark.read.format('parquet').load('filename.parquet')
 df = spark.read.parquet('filename.parquet')
 Writing Parquet files
 df.write.format('parquet').save('filename.parquet')
+No. of files is equal to no. of partitions
 df.write.parquet('filename.parquet')
 
 ---
@@ -2855,11 +2869,104 @@ df.write.parquet('filename.parquet')
 Parquet as backing stores for SparkSQL operations
 flight_df = spark.read.parquet('flights.parquet')
 flight_df.createOrReplaceTempView('flights')
+For this thing to work, Hive Metastore must be in running state.
 short_flights_df = spark.sql('SELECT * FROM flights WHERE flightduration < 100')
 
 ---
 
 ------------------------LAB-----------------------------
+
+Lab 1:
+
+Saving a DataFrame in Parquet format
+
+    When working with Spark, you'll often start with CSV, JSON, or other data sources. This provides a lot of flexibility for the types of data to load, but it is not an optimal format for Spark. The Parquet format is a columnar data store, allowing Spark to use predicate pushdown. This means Spark will only process the data necessary to complete the operations you define versus reading the entire dataset. This gives Spark more flexibility in accessing the data and often drastically improves performance on large datasets.
+
+    In this exercise, we're going to practice creating a new Parquet file and then process some data from it.
+
+    The spark object and the df1 and df2 DataFrames have been setup for you.
+
+Instructions
+
+    View the row count of df1 and df2.
+    Combine df1 and df2 in a new DataFrame named df3 with the union method.
+    Save df3 to a parquet file named AA_DFW_ALL.parquet.
+    Read the AA_DFW_ALL.parquet file and show the count.
+
+df1 = spark.read.format('csv').load('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/Dataset/AA_DFW_2017_Departures_Short.csv.gz') # AA_DFW_2017_Departures_Short.csv
+df2 = spark.read.format('csv').load('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/Dataset/AA_DFW_2018_Departures_Short.csv.gz') # AA_DFW_2018_Departures_Short.csv
+
+# View the row count of df1 and df2
+print("df1 Count: %d" % df1.count())
+print("df2 Count: %d" % df2.count())
+df1.printSchema()
+df2.printSchema()
+
+# Combine the DataFrames into one
+df3 = df1.union(df2)
+df3.printSchema()
+df3 = df3.withColumnRenamed('_c3', 'flight_duration')
+df3.printSchema()
+
+# Save the df3 DataFrame in Parquet format
+df3.write.parquet('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/AA_DFW_ALL.parquet', mode='overwrite')
+
+# Read the Parquet file into a new DataFrame and run a count
+print(spark.read.parquet('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/AA_DFW_ALL.parquet').count())
+df4 = spark.read.format('parquet').load('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/AA_DFW_ALL.parquet')
+df4.printSchema()
+
+df1 Count: 139359
+df2 Count: 119911
+root
+ |-- _c0: string (nullable = true)
+ |-- _c1: string (nullable = true)
+ |-- _c2: string (nullable = true)
+ |-- _c3: string (nullable = true)
+
+root
+ |-- _c0: string (nullable = true)
+ |-- _c1: string (nullable = true)
+ |-- _c2: string (nullable = true)
+ |-- _c3: string (nullable = true)
+
+root
+ |-- _c0: string (nullable = true)
+ |-- _c1: string (nullable = true)
+ |-- _c2: string (nullable = true)
+ |-- _c3: string (nullable = true)
+
+root
+ |-- _c0: string (nullable = true)
+ |-- _c1: string (nullable = true)
+ |-- _c2: string (nullable = true)
+ |-- flight_duration: string (nullable = true)
+
+259270
+root
+ |-- _c0: string (nullable = true)
+ |-- _c1: string (nullable = true)
+ |-- _c2: string (nullable = true)
+ |-- flight_duration: string (nullable = true)
+
+ ---
+
+ Lab 2:
+
+ # Read the Parquet file into flights_df
+flights_df = spark.read.parquet('file:///home/talentum/test-jupyter/P3/M1/SM3/3_UnderstandingParquet/AA_DFW_ALL.parquet')
+flights_df = flights_df.withColumn("flight_duration", flights_df.flight_duration.cast('double'))
+
+# Register the temp table
+flights_df.createOrReplaceTempView('flights')
+
+# Run a SQL query of the average flight duration
+avg_duration = spark.sql('SELECT avg(flight_duration) from flights').collect()[0]
+print('The average flight time is: %f' % avg_duration)
+
+The average flight time is: 151.688658
+
+---
 
 ---
 
@@ -2873,3 +2980,6 @@ load the data into dataframe
 df2 = load the data from this particular location
 store the data in another folder
 design schema for df2 with 3 columns: id name and age and then show it and then store it in the file system in another location
+
+---
+
