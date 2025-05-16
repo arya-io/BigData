@@ -3854,3 +3854,115 @@ voter_df.show()
 ✔ **Splitting text simplifies data analysis** ✂  
 
 ---
+
+# 🚀 Apache Spark Structured Streaming
+
+## 🔹 Understanding Streaming vs. Batch Data
+When working with **batch data**, we process a finite dataset that is already collected. However, **streaming data** is continuously generated, meaning we never have a complete dataset at any given moment. Apache Spark provides an **API for streaming data**, allowing us to analyze it in real time, much like batch data.
+
+**Apache Spark Structured Streaming** is built on top of **Spark-SQL**, leveraging its powerful optimizations for efficient streaming processing. The **Spark Streaming engine** handles real-time data ingestion, transformation, and storage.
+
+![image](https://github.com/user-attachments/assets/5c92d975-4ee5-4f46-8abd-65be1cf8c52d)
+
+---
+
+## 🔹 Components of Spark Structured Streaming
+Spark Streaming consists of **three major components**:
+
+1️⃣ **Input Sources** 📥: These generate real-time data, commonly from:
+   - Apache Kafka (for event streaming)
+   - Apache Flume (for collecting logs)
+   - HDFS/S3 (for file-based data)
+
+2️⃣ **Streaming Engine** ⚙️: Spark processes incoming data streams from various sources using structured transformations.
+
+3️⃣ **Sinks (Storage Systems)** 📦: Processed data is stored in locations such as:
+   - HDFS (distributed storage)
+   - Relational databases (MySQL, PostgreSQL)
+   - NoSQL stores (MongoDB, Cassandra)
+
+### 📌 Spark Streaming Data as an Unbounded Table
+Think of **streaming data** as an **infinite table**, where new rows are continuously appended rather than replacing existing data.
+
+![image](https://github.com/user-attachments/assets/2639711e-c9b5-4bee-9a4c-90176863b3ee)
+
+---
+
+## ⏳ Micro-Batch Processing & Triggers
+Spark Streaming **processes data in micro-batches**, meaning it collects small chunks of data at defined intervals (triggers). 
+
+🛠 Example:
+🔸 If a trigger is set to **1 second**, Spark will create a **new batch every second**, processing and storing it accordingly.
+
+---
+
+## 🔹 Output Modes - Storing Processed Data
+Once Spark processes streaming data, it needs to **store results** somewhere persistently. Here’s how different **output modes** work:
+
+✅ **Append Mode** ➡ Outputs **only new rows** since the last trigger.  
+✅ **Update Mode** ➡ Outputs **only updated rows** since the last trigger. _(If no aggregation is used, this behaves like Append Mode.)_  
+✅ **Complete Mode** ➡ Outputs **all rows** that have been processed so far.  
+
+---
+
+## 🔗 Useful References
+📄 [Spark Structured Streaming Guide](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)  
+📄 [Python Kafka Consumer Guide](https://www.svix.com/guides/kafka/python-kafka-consumer/)  
+📄 [GitHub: Spark Streaming Examples](https://github.com/NeerajBhadani/spark-streaming/blob/master/README.md)  
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
