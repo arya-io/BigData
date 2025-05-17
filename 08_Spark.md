@@ -3912,6 +3912,141 @@ Once Spark processes streaming data, it needs to **store results** somewhere per
 
 ---
 
+### 🚀 **Spark Deployment Modes**  
+
+
+Apache Spark supports multiple **deployment modes**, allowing flexibility in how applications are executed on distributed clusters. The most common modes are **YARN Client** and **YARN Cluster**, each with distinct characteristics.  
+
+---
+
+![image](https://github.com/user-attachments/assets/75ae42eb-46e7-4496-8b54-34665661f5fa)
+
+### 🔹 **YARN Client Mode**  
+✔ The **driver program runs on the client machine** 📜  
+✔ Application Master **runs in a YARN container** 🔄  
+✔ **Preferred when interactive debugging** is needed 🛠  
+
+💡 **Key Takeaway:**  
+This mode is useful when you want direct visibility into logs and interactive sessions, but the driver **depends on the client machine's availability**.
+
+---
+
+### 🔹 **YARN Cluster Mode**  
+✔ The **driver program runs inside a YARN container** 📦  
+✔ Better **fault tolerance** since driver does not rely on the client ✅  
+✔ Allows **resource-managed execution** 🔄  
+
+💡 **Key Takeaway:**  
+This mode is **ideal for long-running Spark jobs**, where resilience and optimized resource usage are crucial.
+
+---
+
+### ⚖️ **Comparison Summary**  
+
+| Deployment Mode   | Driver Location   | Fault Tolerance | Debugging Ease | Ideal Use Case |
+|------------------|------------------|---------------|-----------------|----------------|
+| **YARN Client**  | Client Machine   | ❌ Low        | ✅ Easy         | Interactive Sessions |
+| **YARN Cluster** | YARN Container   | ✅ High       | ❌ Harder       | Batch Processing |
+
+---
+
+### 🔥 **Final Thoughts**  
+- **Use YARN Client** for real-time **debugging & interactive use**.  
+- **Use YARN Cluster** for **production deployments** requiring high **fault tolerance**.  
+
+---
+
+### 🚀 **YARN Application Submission in Spark**  
+
+Apache Spark provides two **YARN deployment modes**:  
+
+✔ **YARN Client Mode (`yarn-client`)**  
+✔ **YARN Cluster Mode (`yarn-cluster`)**  
+
+---
+
+### 🔹 **YARN Client Mode (`yarn-client`)**  
+✔ The **driver runs on the client machine**, while executors run on YARN 🏗  
+✔ **Best for:**  
+- **Developing applications** 🛠  
+- **Testing applications** 🔄  
+- **Using interactive environments** like **REPLs & Apache Zeppelin** 🎯  
+
+💡 **Key Takeaway:**  
+Ideal for **interactive debugging** and exploratory tasks, but **driver failure affects the job**.  
+
+---
+
+### 🔹 **YARN Cluster Mode (`yarn-cluster`)**  
+✔ **Driver runs inside a YARN container**, independent of the client machine 📦  
+✔ **Best for:**  
+- **Running production applications** 📊  
+- **Batch processing workloads** 🚀  
+
+💡 **Key Takeaway:**  
+Preferred for **stable deployments**, ensuring **better fault tolerance & scalability**.  
+
+---
+
+### ⚖ **Comparison Summary**  
+
+| Deployment Mode   | Driver Location   | Fault Tolerance | Debugging Ease | Best Use Case |
+|------------------|------------------|---------------|---------------|----------------|
+| **YARN Client**  | Client Machine   | ❌ Low        | ✅ Easy       | Interactive & Testing |
+| **YARN Cluster** | YARN Container   | ✅ High       | ❌ Harder     | Production Workloads |
+
+---
+
+🔥 **Final Thought:**  
+✔ Use **`yarn-client`** for **development & debugging**  
+✔ Use **`yarn-cluster`** for **production deployments**  
+
+---
+
+### 🚀 **YARN Client Submission Process in Spark**  
+
+When running Spark in **YARN Client mode**, the **driver** runs on the **client machine**, and **executors** are managed by YARN across the cluster.  
+
+---
+
+![image](https://github.com/user-attachments/assets/4c0f8e30-2b14-4e36-8925-0489ddada10f)
+
+### 🔹 **Submission Steps**  
+
+✔ **Step 1: Start YARN Resource Manager & Node Manager**  
+```bash
+start-yarn.sh
+```
+✔ **Step 2: Submit Spark Application**  
+```bash
+spark-submit --master yarn --deploy-mode client \
+  --class <your-main-class> \
+  --conf spark.driver.memory=4g \
+  --conf spark.executor.memory=4g \
+  --conf spark.executor.cores=2 \
+  <your-spark-application>.jar
+```
+📌 **In Client Mode:**  
+- The **driver runs on the client machine** 🏗  
+- The **executors run inside YARN containers** 📦  
+
+✔ **Step 3: Monitor Running Application**  
+```bash
+yarn application -list
+```
+✔ **Step 4: Check Logs & Status**  
+```bash
+yarn logs -applicationId <your-application-id>
+```
+
+---
+
+### 🔥 **Key Takeaways**  
+✔ **Client mode is useful for debugging & interactive sessions** 📜  
+✔ **The driver process depends on the client machine’s availability** 🔄  
+✔ **Executors run on YARN-managed nodes** 🚀  
+✔ **Best suited for development, testing, and REPL environments** 🏗  
+
 
 
 
