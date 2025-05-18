@@ -120,4 +120,4 @@ That's what you can see here.
 This, is not a DAG. 
 Why? 
 Because there is a cycle. 
-That's what you can see with T4 depends on T1 and T1 depends on T
+
